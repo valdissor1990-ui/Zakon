@@ -111,3 +111,18 @@ CREATE TRIGGER IF NOT EXISTS documents_fts_title_update AFTER UPDATE OF title ON
     SELECT a.id, NEW.title, a.number, COALESCE(a.title, ''), a.body
     FROM articles a WHERE a.document_id = NEW.id;
 END;
+
+
+-- One document may be checked against several independent state-operated sources.
+CREATE TABLE IF NOT EXISTS document_source_checks (
+    id INTEGER PRIMARY KEY,
+    document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    source_id INTEGER NOT NULL REFERENCES sources(id),
+    check_status TEXT NOT NULL CHECK (check_status IN ('match','mismatch','unavailable','manual_review')),
+    retrieved_at TEXT NOT NULL,
+    source_document_id TEXT,
+    source_sha256 TEXT NOT NULL,
+    comparison_notes TEXT,
+    UNIQUE(document_id, source_id)
+);
+CREATE INDEX IF NOT EXISTS idx_source_checks_document ON document_source_checks(document_id);
