@@ -1,22 +1,12 @@
 name: Android debug build
-
 on:
   push:
-    paths:
-      - "app/**"
-      - "*.gradle.kts"
-      - "gradle.properties"
-      - ".github/workflows/android-build.yml"
+    paths: ["app/**", "*.gradle.kts", "gradle.properties", ".github/workflows/android-build.yml"]
   pull_request:
-    paths:
-      - "app/**"
-      - "*.gradle.kts"
-      - "gradle.properties"
+    paths: ["app/**", "*.gradle.kts", "gradle.properties"]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,10 +18,11 @@ jobs:
           java-version: "17"
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
       - name: Build debug APK
         run: gradle assembleDebug
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: zakon-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
