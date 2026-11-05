@@ -1,0 +1,53 @@
+package ru.zakon.app
+
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+
+data class LegalDocument(val id: String, val title: String, val documentType: String, val number: String, val legalStatus: String, val verificationStatus: String)
+data class LegalArticle(val id: String, val documentId: String, val number: String, val title: String?, val body: String)
+data class SearchHit(val articleId: String, val documentTitle: String, val articleNumber: String, val articleTitle: String?, val preview: String)
+
+class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 1) {
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL("""CREATE TABLE documents (
+            id TEXT PRIMARY KEY, title TEXT NOT NULL, document_type TEXT NOT NULL DEFAULT '',
+            number TEXT NOT NULL DEFAULT '', legal_status TEXT NOT NULL DEFAULT 'не проверен',
+            verification_status TEXT NOT NULL DEFAULT 'unverified')""")
+        db.execSQL("""CREATE TABLE articles (
+            id TEXT PRIMARY KEY, document_id TEXT NOT NULL, ordinal INTEGER NOT NULL DEFAULT 0,
+            number TEXT NOT NULL, title TEXT, body TEXT NOT NULL,
+            FOREIGN KEY(document_id) REFERENCES documents(id) ON DELETE CASCADE)""")
+        db.execSQL("CREATE INDEX idx_articles_doc ON articles(document_id, ordinal)")
+    }
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // Versioned schema migrations are applied with content format upgrades.
+    }
+    fun getDocuments(): List<LegalDocument> = readableDatabase.rawQuery(
+        "SELECT id,title,document_type,number,legal_status,verification_status FROM documents ORDER BY title", null
+    ).use { c -> buildList {
+        while (c.moveToNext()) add(LegalDocument(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5)))
+    } }
+    fun getDocument(id: String): LegalDocument? = readableDatabase.rawQuery(
+        "SELECT id,title,document_type,number,legal_status,verification_status FROM documents WHERE id=?", arrayOf(id)
+    ).use { c -> if (!c.moveToFirst()) null else LegalDocument(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5)) }
+    fun getArticles(documentId: String): List<LegalArticle> = readableDatabase.rawQuery(
+        "SELECT id,document_id,number,title,body FROM articles WHERE document_id=? ORDER BY ordinal", arrayOf(documentId)
+    ).use { c -> buildList {
+        while (c.moveToNext()) add(LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
+    } }
+    fun getArticle(id: String): LegalArticle? = readableDatabase.rawQuery(
+        "SELECT id,document_id,number,title,body FROM articles WHERE id=?", arrayOf(id)
+    ).use { c -> if (!c.moveToFirst()) null else LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)) }
+    fun search(query: String): List<SearchHit> {
+        val pattern = "%$query%"
+        return readableDatabase.rawQuery("""
+            SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+            FROM articles a JOIN documents d ON d.id=a.document_id
+            WHERE a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?
+            ORDER BY d.title,a.ordinal LIMIT 100
+        """.trimIndent(), arrayOf(pattern,pattern,pattern,pattern)).use { c -> buildList {
+            while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
+        } }
+    }
+}
