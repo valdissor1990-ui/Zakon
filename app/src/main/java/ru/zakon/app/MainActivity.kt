@@ -17,11 +17,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+private val LegalNavy = Color(0xFF17283F)
+private val LegalGold = Color(0xFFC49A52)
+private val LegalPaper = Color(0xFFF5F3EE)
+private val LegalLine = Color(0xFFE5E1D8)
+private val LegalMuted = Color(0xFF6D7784)
+private val LegalColors = lightColorScheme(primary = LegalNavy, secondary = LegalGold, background = LegalPaper, surface = Color(0xFFFFFEFC), onPrimary = Color.White, onSecondary = LegalNavy, onBackground = LegalNavy, onSurface = LegalNavy, outline = LegalLine, onSurfaceVariant = LegalMuted)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { ZakonApp(LegalStore(this)) }
+        setContent { MaterialTheme(colorScheme = LegalColors) { ZakonApp(LegalStore(this)) } }
     }
 }
 
@@ -37,8 +46,10 @@ private fun ZakonApp(store: LegalStore) {
     BackHandler(enabled = !root) { back() }
 
     Scaffold(
+        containerColor = LegalPaper,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = LegalNavy, titleContentColor = Color.White),
                 title = { Text(when {
                     route == "home" -> "ЗаконЪ"
                     route == "search" -> "Поиск"
@@ -52,7 +63,7 @@ private fun ZakonApp(store: LegalStore) {
             )
         },
         bottomBar = {
-            if (root) NavigationBar {
+            if (root) NavigationBar(containerColor = Color(0xFFFFFEFC), contentColor = LegalNavy) {
                 NavigationBarItem(route == "home", { stack.clear(); stack.add("home") }, icon = { Text("§") }, label = { Text("Законы") })
                 NavigationBarItem(route == "search", { stack.clear(); stack.add("search") }, icon = { Text("⌕") }, label = { Text("Поиск") })
                 NavigationBarItem(route == "settings", { stack.clear(); stack.add("settings") }, icon = { Text("⚙") }, label = { Text("Ещё") })
@@ -76,19 +87,31 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
     var loading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) { docs = withContext(Dispatchers.IO) { store.getDocuments() }; loading = false }
     Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-        Text("Законодательство Российской Федерации", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        Text("Офлайн-справочник с указанием редакций и источников.")
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = LegalNavy)
+        ) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("ПРАВО РОССИИ", color = LegalGold, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                Text("Законодательство\nв одном месте", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text("Офлайн-справочник с проверенными редакциями и удобным поиском.", color = Color(0xFFD7DEE7), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        Spacer(Modifier.height(18.dp))
+        Text("Библиотека законодательства", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = LegalNavy)
+        Spacer(Modifier.height(6.dp))
+        Text("Кодексы и федеральные законы", color = LegalMuted, style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(16.dp))
         when {
             loading -> Text("Загрузка каталога…")
             docs.isEmpty() -> EmptyContent()
             else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(docs, key = { it.id }) { doc ->
-                    Card(Modifier.fillMaxWidth().clickable { onOpen(doc.id) }) {
+                    Card(Modifier.fillMaxWidth().clickable { onOpen(doc.id) }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFEFC)), border = androidx.compose.foundation.BorderStroke(1.dp, LegalLine), elevation = CardDefaults.cardElevation(0.dp)) {
                         Column(Modifier.padding(16.dp)) {
-                            Text(doc.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
-                            Text(listOf(doc.documentType, doc.number, doc.legalStatus).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                            Text(doc.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = LegalNavy)
+                            Text(listOf(doc.documentType, doc.number, doc.legalStatus).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = LegalMuted)
                         }
                     }
                 }
@@ -154,13 +177,13 @@ private fun DocumentScreen(store: LegalStore, id: String, padding: PaddingValues
 private fun ArticleScreen(store: LegalStore, id: String, padding: PaddingValues) {
     var article by remember { mutableStateOf<LegalArticle?>(null) }
     LaunchedEffect(id) { article = withContext(Dispatchers.IO) { store.getArticle(id) } }
-    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp)) {
+    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).background(LegalPaper).padding(horizontal = 20.dp, vertical = 22.dp)) {
         if (article == null) Text("Статья не найдена в установленной базе.")
         else {
-            Text("Статья " + article!!.number, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            article!!.title?.let { Spacer(Modifier.height(6.dp)); Text(it, style = MaterialTheme.typography.titleMedium) }
+            Text("Статья " + article!!.number, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
+            article!!.title?.let { Spacer(Modifier.height(6.dp)); Text(it, style = MaterialTheme.typography.titleMedium, color = LegalNavy) }
             Spacer(Modifier.height(16.dp))
-            Text(article!!.body, style = MaterialTheme.typography.bodyLarge)
+            Text(article!!.body, style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 27.sp, fontSize = 17.sp), color = Color(0xFF293443))
             Spacer(Modifier.height(20.dp))
             HorizontalDivider()
             Text("Сведения об источнике и редакции будут показаны после загрузки проверенного выпуска базы.", style = MaterialTheme.typography.bodySmall)
