@@ -40,16 +40,24 @@ def build(records_path: Path, output_dir: Path) -> None:
         db_path.unlink()
     db = sqlite3.connect(db_path)
     db.execute("PRAGMA foreign_keys=ON")
+    db.execute("PRAGMA defer_foreign_keys=ON")
     db.executescript(SCHEMA.read_text(encoding="utf-8"))
 
     source_ids = {}
     for source in source_rows:
         key = source["key"]
+        if key in source_ids:
+            raise ValueError(f"Duplicate source key: {key}")
         if key not in registry_sources:
             raise ValueError(f"Source key is not in approved registry: {key}")
         require_hash(source.get("sha256"), f"source {key} sha256")
         if not source.get("retrieved_at") or not source.get("official_url"):
             raise ValueError(f"Source {key} is missing retrieval time or URL")
+        expected_hosts = {urlparse(registry_sources[key]["url"]).netloc.lower()}
+        if registry_sources[key].get("access_url"):
+            expected_hosts.add(urlparse(registry_sources[key]["access_url"]).netloc.lower())
+        if urlparse(source["official_url"]).netloc.lower() not in expected_hosts:
+            raise ValueError(f"Source {key}: captured URL host is not in the approved registry")
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
                source_document_id,sha256,notes) VALUES(?,?,?,?,?,?,?,?)""",
@@ -127,7 +135,10 @@ def build(records_path: Path, output_dir: Path) -> None:
         (release["version"], release["created_at"], release["effective_as_of"], sha256(raw), "draft")
     )
     db.commit()
-    db.execute("PRAGMA integrity_check")
+    integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
+    if integrity != "ok":
+        db.close()
+        raise ValueError(f"SQLite integrity check failed: {integrity}")
     db.close()
 
     manifest = {
