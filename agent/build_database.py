@@ -42,6 +42,7 @@ def build(records_path: Path, output_dir: Path) -> None:
     db.execute("PRAGMA foreign_keys=ON")
     db.execute("PRAGMA defer_foreign_keys=ON")
     db.executescript(SCHEMA.read_text(encoding="utf-8"))
+    db.execute("PRAGMA user_version=1")
 
     source_ids = {}
     for source in source_rows:
