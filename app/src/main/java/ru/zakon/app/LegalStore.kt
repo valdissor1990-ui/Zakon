@@ -22,6 +22,23 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
             FOREIGN KEY(document_id) REFERENCES documents(id) ON DELETE CASCADE)""")
         db.execSQL("CREATE INDEX idx_articles_doc ON articles(document_id, ordinal)")
         db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id, document_title, article_number, article_title, body, tokenize=unicode61)")
+        db.execSQL("""CREATE TRIGGER articles_fts_insert AFTER INSERT ON articles BEGIN
+            INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
+            SELECT NEW.id,d.title,NEW.number,COALESCE(NEW.title,''),NEW.body FROM documents d WHERE d.id=NEW.document_id;
+        END""")
+        db.execSQL("""CREATE TRIGGER articles_fts_delete AFTER DELETE ON articles BEGIN
+            DELETE FROM articles_fts WHERE article_id=OLD.id;
+        END""")
+        db.execSQL("""CREATE TRIGGER articles_fts_update AFTER UPDATE ON articles BEGIN
+            DELETE FROM articles_fts WHERE article_id=OLD.id;
+            INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
+            SELECT NEW.id,d.title,NEW.number,COALESCE(NEW.title,''),NEW.body FROM documents d WHERE d.id=NEW.document_id;
+        END""")
+        db.execSQL("""CREATE TRIGGER documents_fts_title_update AFTER UPDATE OF title ON documents BEGIN
+            DELETE FROM articles_fts WHERE article_id IN (SELECT id FROM articles WHERE document_id=NEW.id);
+            INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
+            SELECT a.id,NEW.title,a.number,COALESCE(a.title,''),a.body FROM articles a WHERE a.document_id=NEW.id;
+        END""")
     }
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Versioned schema migrations are applied with content format upgrades.
