@@ -1,0 +1,9 @@
+{
+  "release": {
+    "version": "0.1.0-draft",
+    "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "effective_as_of": "YYYY-MM-DD"
+  },
+  "sources": [],
+  "documents": []
+}
