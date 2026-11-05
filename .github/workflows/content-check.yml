@@ -1,21 +1,12 @@
 name: Content checks
-
 on:
   push:
-    paths:
-      - "content/**"
-      - "agent/**"
-      - ".github/workflows/content-check.yml"
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
   pull_request:
-    paths:
-      - "content/**"
-      - "agent/**"
-      - ".github/workflows/content-check.yml"
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -25,8 +16,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check Python syntax
-        run: python -m py_compile agent/validate_manifest.py
-      - name: Check SQL schema
+        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py
+      - name: Validate official source registry
+        run: python agent/validate_source_registry.py
+      - name: Check SQLite schema
         run: |
           python - <<'PY'
           import sqlite3
