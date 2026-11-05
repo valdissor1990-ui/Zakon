@@ -85,3 +85,29 @@ CREATE TABLE IF NOT EXISTS legal_status_history (
 CREATE INDEX IF NOT EXISTS idx_articles_document_ordinal ON articles(document_id, ordinal);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(legal_status, verification_status);
 CREATE INDEX IF NOT EXISTS idx_crossrefs_source ON cross_references(from_article_id);
+
+
+-- Keep the Android-compatible FTS4 index synchronized with source rows.
+CREATE TRIGGER IF NOT EXISTS articles_fts_insert AFTER INSERT ON articles BEGIN
+    INSERT INTO articles_fts(article_id, document_title, article_number, article_title, body)
+    SELECT NEW.id, d.title, NEW.number, COALESCE(NEW.title, ''), NEW.body
+    FROM documents d WHERE d.id = NEW.document_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS articles_fts_delete AFTER DELETE ON articles BEGIN
+    DELETE FROM articles_fts WHERE article_id = OLD.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS articles_fts_update AFTER UPDATE ON articles BEGIN
+    DELETE FROM articles_fts WHERE article_id = OLD.id;
+    INSERT INTO articles_fts(article_id, document_title, article_number, article_title, body)
+    SELECT NEW.id, d.title, NEW.number, COALESCE(NEW.title, ''), NEW.body
+    FROM documents d WHERE d.id = NEW.document_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS documents_fts_title_update AFTER UPDATE OF title ON documents BEGIN
+    DELETE FROM articles_fts WHERE article_id IN (SELECT id FROM articles WHERE document_id = NEW.id);
+    INSERT INTO articles_fts(article_id, document_title, article_number, article_title, body)
+    SELECT a.id, NEW.title, a.number, COALESCE(a.title, ''), a.body
+    FROM articles a WHERE a.document_id = NEW.id;
+END;
