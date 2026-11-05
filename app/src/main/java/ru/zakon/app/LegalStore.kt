@@ -3,12 +3,14 @@ package ru.zakon.app
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.database.sqlite.SQLiteException
 
 data class LegalDocument(val id: String, val title: String, val documentType: String, val number: String, val legalStatus: String, val verificationStatus: String)
 data class LegalArticle(val id: String, val documentId: String, val number: String, val title: String?, val body: String)
 data class SearchHit(val articleId: String, val documentTitle: String, val articleNumber: String, val articleTitle: String?, val preview: String)
 
 class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 1) {
+    override fun onConfigure(db: SQLiteDatabase) { super.onConfigure(db); db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE documents (
             id TEXT PRIMARY KEY, title TEXT NOT NULL, document_type TEXT NOT NULL DEFAULT '',
@@ -19,6 +21,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
             number TEXT NOT NULL, title TEXT, body TEXT NOT NULL,
             FOREIGN KEY(document_id) REFERENCES documents(id) ON DELETE CASCADE)""")
         db.execSQL("CREATE INDEX idx_articles_doc ON articles(document_id, ordinal)")
+        db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id, document_title, article_number, article_title, body, tokenize=unicode61)")
     }
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Versioned schema migrations are applied with content format upgrades.
@@ -40,14 +43,28 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
         "SELECT id,document_id,number,title,body FROM articles WHERE id=?", arrayOf(id)
     ).use { c -> if (!c.moveToFirst()) null else LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)) }
     fun search(query: String): List<SearchHit> {
-        val pattern = "%$query%"
-        return readableDatabase.rawQuery("""
-            SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
-            FROM articles a JOIN documents d ON d.id=a.document_id
-            WHERE a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?
-            ORDER BY d.title,a.ordinal LIMIT 100
-        """.trimIndent(), arrayOf(pattern,pattern,pattern,pattern)).use { c -> buildList {
-            while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
-        } }
+        val db = readableDatabase
+        try {
+            return db.rawQuery("""
+                SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+                FROM articles_fts f
+                JOIN articles a ON a.id=f.article_id
+                JOIN documents d ON d.id=a.document_id
+                WHERE articles_fts MATCH ?
+                ORDER BY d.title,a.ordinal LIMIT 100
+            """.trimIndent(), arrayOf(query)).use { c -> buildList {
+                while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
+            } }
+        } catch (_: SQLiteException) {
+            val pattern = "%$query%"
+            return db.rawQuery("""
+                SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+                FROM articles a JOIN documents d ON d.id=a.document_id
+                WHERE a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?
+                ORDER BY d.title,a.ordinal LIMIT 100
+            """.trimIndent(), arrayOf(pattern,pattern,pattern,pattern)).use { c -> buildList {
+                while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
+            } }
+        }
     }
 }
