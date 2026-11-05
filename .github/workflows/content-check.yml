@@ -1,0 +1,37 @@
+name: Content checks
+
+on:
+  push:
+    paths:
+      - "content/**"
+      - "agent/**"
+      - ".github/workflows/content-check.yml"
+  pull_request:
+    paths:
+      - "content/**"
+      - "agent/**"
+      - ".github/workflows/content-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Python syntax
+        run: python -m py_compile agent/validate_manifest.py
+      - name: Check SQL schema
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db = sqlite3.connect(":memory:")
+          db.executescript(Path("content/schema/schema.sql").read_text(encoding="utf-8"))
+          print("SQLite schema is valid")
+          PY
