@@ -16,13 +16,11 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Accept Android SDK licenses and install packages
-        shell: bash
-        run: |
-          set +o pipefail
-          yes | sdkmanager --licenses
-          set -o pipefail
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Install Android SDK platform and build tools
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
