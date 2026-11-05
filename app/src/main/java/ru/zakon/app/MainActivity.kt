@@ -143,8 +143,7 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
 в единой офлайн-библиотеке", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                         Text("Тексты законов • редакции • поиск", color = Color(0xFFD7DEE7), style = MaterialTheme.typography.bodySmall)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { onOpenFirstDocument(docs, onOpen) }, border = BorderStroke(1.dp, LegalGold), colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold)) { Text("Открыть библиотеку") }
-                            OutlinedButton(onClick = onConstructor, border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)) { Text("Конструктор") }
+                            OutlinedButton(onClick = onConstructor, border = BorderStroke(1.dp, LegalGold), colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold)) { Text("Конструктор документов") }
                         }
                     }
                 }
@@ -163,12 +162,7 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(sections) { section ->
-                        LibraryTile(section) {
-                            // Categories are presented as shortcuts; the installed database remains the source of truth.
-                            onOpenFirstDocument(docs, onOpen)
-                        }
-                    }
+                    items(sections) { section -> LibraryTile(section) }
                 }
             }
             item {
@@ -191,14 +185,10 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
     }
 }
 
-private fun onOpenFirstDocument(docs: List<LegalDocument>, onOpen: (String) -> Unit) {
-    docs.firstOrNull()?.let { onOpen(it.id) }
-}
-
 @Composable
-private fun LibraryTile(section: LibrarySection, onClick: () -> Unit) {
+private fun LibraryTile(section: LibrarySection) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(132.dp).clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().height(132.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = LegalSurface),
         border = BorderStroke(1.dp, LegalGold.copy(alpha = 0.72f)),
