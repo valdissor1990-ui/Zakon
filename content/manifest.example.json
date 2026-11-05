@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "content_version": "0.0.0-draft",
+  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "effective_as_of": "YYYY-MM-DD",
+  "database": {
+    "file": "zakon-content.sqlite",
+    "sha256": "TO_BE_GENERATED"
+  },
+  "validation": {
+    "status": "draft",
+    "official_sources_checked": 0,
+    "unresolved_references": null
+  }
+}
