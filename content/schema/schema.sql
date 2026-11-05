@@ -126,3 +126,5 @@ CREATE TABLE IF NOT EXISTS document_source_checks (
     UNIQUE(document_id, source_id)
 );
 CREATE INDEX IF NOT EXISTS idx_source_checks_document ON document_source_checks(document_id);
+
+PRAGMA user_version = 1;
