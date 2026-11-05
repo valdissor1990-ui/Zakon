@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS articles (
     UNIQUE(document_id, number, effective_from)
 );
 
-CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(
+CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts4(
     article_id UNINDEXED,
     document_title,
     article_number,
