@@ -40,8 +40,8 @@ def build(records_path: Path, output_dir: Path) -> None:
         db_path.unlink()
     db = sqlite3.connect(db_path)
     db.execute("PRAGMA foreign_keys=ON")
-    db.execute("PRAGMA defer_foreign_keys=ON")
     db.executescript(SCHEMA.read_text(encoding="utf-8"))
+    db.execute("PRAGMA defer_foreign_keys=ON")
     db.execute("PRAGMA user_version=1")
 
     source_ids = {}
