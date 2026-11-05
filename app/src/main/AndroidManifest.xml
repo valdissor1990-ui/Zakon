@@ -3,6 +3,8 @@
     <application
         android:allowBackup="false"
         android:label="ЗаконЪ"
+        android:icon="@drawable/ic_launcher"
+        android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
