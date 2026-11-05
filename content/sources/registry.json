@@ -1,0 +1,40 @@
+{
+  "registry_version": 1,
+  "policy": "Each legal text candidate must be checked against three state-operated sources where the act is available. A mismatch blocks publication and requires manual review.",
+  "sources": [
+    {
+      "id": "pravo_official_publication",
+      "name": "Официальный интернет-портал правовой информации — официальное опубликование",
+      "url": "https://publication.pravo.gov.ru/",
+      "publisher": "Государственная система правовой информации",
+      "role": "primary_publication",
+      "authority": "official_publication",
+      "use_for": ["publication_date", "official_text", "amendment_acts", "entry_into_force_metadata"]
+    },
+    {
+      "id": "pravo_law_bank",
+      "name": "Интегрированный банк «Законодательство России»",
+      "url": "https://pravo.gov.ru/",
+      "publisher": "Государственная система правовой информации",
+      "role": "official_consolidated_text",
+      "authority": "official_text_for_covered_act_types",
+      "use_for": ["consolidated_text", "document_metadata", "current_revision"]
+    },
+    {
+      "id": "minjust_npa",
+      "name": "Портал Минюста России «Нормативные правовые акты в Российской Федерации»",
+      "url": "https://pravo-minjust.ru/",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "role": "independent_state_cross_check",
+      "authority": "state_reference_database",
+      "use_for": ["document_metadata", "systematized_text_cross_check", "registration_metadata"]
+    }
+  ],
+  "publication_rule": {
+    "minimum_distinct_sources": 3,
+    "minimum_state_operated_sources": 3,
+    "mismatch_action": "block_release",
+    "missing_source_action": "manual_review",
+    "never_generate_missing_legal_text": true
+  }
+}
