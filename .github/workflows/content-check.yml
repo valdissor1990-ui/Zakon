@@ -16,9 +16,11 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check Python syntax
-        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py
-      - name: Validate official source registry
-        run: python agent/validate_source_registry.py
+        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py agent/build_database.py
+      - name: Check content tooling
+        run: |
+          python agent/validate_source_registry.py
+          python agent/build_database.py --help
       - name: Check SQLite schema
         run: |
           python - <<'PY'
