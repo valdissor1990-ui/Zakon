@@ -173,7 +173,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 Button(
                     onClick = {
                         error = null
-                        if (pin.length < 6) { error = "Минимум 6 символов"; return@Button }
+                        if (pin.length < 8) { error = "Минимум 8 символов"; return@Button }
                         if (!storage.hasPassword()) {
                             if (pin != pinConfirm) { error = "Пароли не совпадают"; return@Button }
                             storage.setPassword(pin); completeUnlock()
