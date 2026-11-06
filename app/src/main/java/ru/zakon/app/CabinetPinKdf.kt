@@ -2,6 +2,7 @@ package ru.zakon.app
 
 import java.security.SecureRandom
 import java.util.Arrays
+import java.util.Base64
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -50,8 +51,8 @@ object CabinetPinKdf {
     }
 
     fun toBase64(bytes: ByteArray): String =
-        android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+        Base64.getEncoder().encodeToString(bytes)
 
     fun fromBase64(text: String): ByteArray =
-        android.util.Base64.decode(text, android.util.Base64.NO_WRAP)
+        Base64.getDecoder().decode(text)
 }
