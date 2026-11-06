@@ -26,6 +26,17 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 
+internal object CabinetPinKdf {
+    const val CURRENT_ITERATIONS = 600_000
+    fun derive(pin: String, salt: ByteArray, iterations: Int = CURRENT_ITERATIONS): ByteArray {
+        require(iterations >= 1)
+        val spec = PBEKeySpec(pin.toCharArray(), salt, iterations, 256)
+        return try {
+            SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
+        } finally { spec.clearPassword() }
+    }
+}
+
 internal data class LocalCase(
     val id: String,
     val title: String,
@@ -57,12 +68,12 @@ internal class CabinetStorage(private val context: Context) {
 
     fun setPassword(pin: String) {
         val salt = ByteArray(16).also(random::nextBytes)
-        val verifier = derivePin(pin, salt, 600_000)
+        val verifier = derivePin(pin, salt, CabinetPinKdf.CURRENT_ITERATIONS)
         check(
             prefs.edit()
                 .putString("pin_salt", Base64.encodeToString(salt, Base64.NO_WRAP))
                 .putString("pin_verifier", Base64.encodeToString(verifier, Base64.NO_WRAP))
-                .putInt("pin_iterations", 600_000)
+                .putInt("pin_iterations", CabinetPinKdf.CURRENT_ITERATIONS)
                 .remove("pin_hash")
                 .commit()
         ) { "Не удалось сохранить пароль" }
@@ -99,7 +110,7 @@ internal class CabinetStorage(private val context: Context) {
             } catch (_: Exception) { false }
             if (!valid) { recordFailedAttempt(); return false }
             clearFailedAttempts()
-            if (iterations < 600_000) setPassword(pin)
+            if (iterations < CabinetPinKdf.CURRENT_ITERATIONS) setPassword(pin)
             return true
         }
 
@@ -301,14 +312,8 @@ internal class CabinetStorage(private val context: Context) {
         }
     }
 
-    private fun derivePin(pin: String, salt: ByteArray, iterations: Int = 600_000): ByteArray {
-        val spec = PBEKeySpec(pin.toCharArray(), salt, iterations, 256)
-        return try {
-            SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
-        } finally {
-            spec.clearPassword()
-        }
-    }
+    private fun derivePin(pin: String, salt: ByteArray, iterations: Int = CabinetPinKdf.CURRENT_ITERATIONS): ByteArray =
+        CabinetPinKdf.derive(pin, salt, iterations)
 
     private fun encryptionKey(): SecretKey {
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
