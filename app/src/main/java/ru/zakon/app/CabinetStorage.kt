@@ -77,6 +77,8 @@ internal class CabinetStorage(private val context: Context) {
                 .putString("pin_salt", Base64.encodeToString(salt, Base64.NO_WRAP))
                 .putString("pin_verifier", Base64.encodeToString(verifier, Base64.NO_WRAP))
                 .putInt("pin_iterations", CabinetPinKdf.CURRENT_ITERATIONS)
+                .remove("pin_failures")
+                .remove("pin_lock_until")
                 .remove("pin_hash")
                 .commit()
         ) { "Не удалось сохранить пароль" }
@@ -239,28 +241,33 @@ internal class CabinetStorage(private val context: Context) {
             ?.let { ".$it" } ?: ".bin"
         val temporary = File(temporaryDir, "$id$extension")
         temporary.parentFile?.mkdirs()
-        FileInputStream(encryptedFile).use { encryptedInput ->
-            val iv = ByteArray(12)
-            var offset = 0
-            while (offset < iv.size) {
-                val count = encryptedInput.read(iv, offset, iv.size - offset)
-                if (count < 0) throw IllegalStateException("Повреждённый файл вложения")
-                offset += count
-            }
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, if (parts[0] == "secure2") encryptionKey() else legacyEncryptionKey(), GCMParameterSpec(128, iv))
-            FileOutputStream(temporary).use { clearOutput ->
-                val buffer = ByteArray(64 * 1024)
-                while (true) {
-                    val count = encryptedInput.read(buffer)
-                    if (count < 0) break
-                    val clear = cipher.update(buffer, 0, count)
-                    if (clear != null && clear.isNotEmpty()) clearOutput.write(clear)
+        try {
+            FileInputStream(encryptedFile).use { encryptedInput ->
+                val iv = ByteArray(12)
+                var offset = 0
+                while (offset < iv.size) {
+                    val count = encryptedInput.read(iv, offset, iv.size - offset)
+                    if (count < 0) throw IllegalStateException("Повреждённый файл вложения")
+                    offset += count
                 }
-                val finalBytes = cipher.doFinal()
-                if (finalBytes.isNotEmpty()) clearOutput.write(finalBytes)
-                clearOutput.fd.sync()
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                cipher.init(Cipher.DECRYPT_MODE, if (parts[0] == "secure2") encryptionKey() else legacyEncryptionKey(), GCMParameterSpec(128, iv))
+                FileOutputStream(temporary).use { clearOutput ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val count = encryptedInput.read(buffer)
+                        if (count < 0) break
+                        val clear = cipher.update(buffer, 0, count)
+                        if (clear != null && clear.isNotEmpty()) clearOutput.write(clear)
+                    }
+                    val finalBytes = cipher.doFinal()
+                    if (finalBytes.isNotEmpty()) clearOutput.write(finalBytes)
+                    clearOutput.fd.sync()
+                }
             }
+        } catch (e: Exception) {
+            temporary.delete()
+            throw e
         }
         return FileProvider.getUriForFile(
             context,
