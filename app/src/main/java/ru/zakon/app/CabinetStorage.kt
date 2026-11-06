@@ -53,7 +53,8 @@ internal data class LocalCase(
 internal class CabinetStorage(private val context: Context) {
     private val prefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
     private val random = SecureRandom()
-    private val keyAlias = "ru.zakon.app.cabinet.aes.v1"
+    private val keyAlias = "ru.zakon.app.cabinet.aes.v2"
+    private val legacyKeyAlias = "ru.zakon.app.cabinet.aes.v1"
     private val attachmentDir = File(context.filesDir, "cabinet/attachments")
     private val temporaryDir = File(context.cacheDir, "cabinet-open")
 
@@ -62,6 +63,8 @@ internal class CabinetStorage(private val context: Context) {
     fun clearTemporaryFiles() {
         if (temporaryDir.exists()) temporaryDir.deleteRecursively()
     }
+
+    fun requiresSystemAuthentication(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
     fun hasPassword(): Boolean =
         prefs.contains("pin_salt") || prefs.contains("pin_hash")
@@ -139,7 +142,7 @@ internal class CabinetStorage(private val context: Context) {
         var changed = false
         val migrated = cases.map { item ->
             val secured = item.attachments.map { reference ->
-                if (reference.startsWith("secure:")) reference
+                if (reference.startsWith("secure:") || reference.startsWith("secure2:")) reference
                 else {
                     try {
                         changed = true
@@ -199,12 +202,12 @@ internal class CabinetStorage(private val context: Context) {
             name.toByteArray(Charsets.UTF_8),
             Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
         )
-        return "secure:$id:$mime:$safeName"
+        return "secure2:$id:$mime:$safeName"
     }
 
     fun attachmentLabel(reference: String): String {
         if (reference.startsWith("unavailable:")) return "Файл недоступен — исходная ссылка сохранена"
-        if (!reference.startsWith("secure:")) return Uri.parse(reference).lastPathSegment ?: "вложение"
+        if (!reference.startsWith("secure:") && !reference.startsWith("secure2:")) return Uri.parse(reference).lastPathSegment ?: "вложение"
         val parts = reference.split(":", limit = 4)
         if (parts.size != 4) return "Защищённое вложение"
         return try {
@@ -219,7 +222,7 @@ internal class CabinetStorage(private val context: Context) {
 
     /** Decrypts only to cache for opening; the permanent copy remains encrypted. */
     fun openAttachment(reference: String): Uri {
-        if (!reference.startsWith("secure:")) {
+        if (!reference.startsWith("secure:") && !reference.startsWith("secure2:")) {
             require(!reference.startsWith("unavailable:")) { "Старая ссылка на файл больше недоступна" }
             return Uri.parse(reference)
         }
@@ -244,7 +247,7 @@ internal class CabinetStorage(private val context: Context) {
                 offset += count
             }
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(128, iv))
+            cipher.init(Cipher.DECRYPT_MODE, if (parts[0] == "secure2") encryptionKey() else legacyEncryptionKey(), GCMParameterSpec(128, iv))
             FileOutputStream(temporary).use { clearOutput ->
                 val buffer = ByteArray(64 * 1024)
                 while (true) {
@@ -354,17 +357,33 @@ internal class CabinetStorage(private val context: Context) {
         return cipher.iv + cipher.doFinal(clear)
     }
 
-    private fun decryptBytes(payload: ByteArray): ByteArray {
+    private fun decryptBytes(payload: ByteArray): ByteArray = decryptBytesWithKey(payload, encryptionKey())
+
+    private fun decryptBytesWithKey(payload: ByteArray, key: SecretKey): ByteArray {
         require(payload.size > 12) { "Повреждённые зашифрованные данные" }
         val iv = payload.copyOfRange(0, 12)
         val ciphertext = payload.copyOfRange(12, payload.size)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(128, iv))
+        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
         return cipher.doFinal(ciphertext)
     }
 
+    private fun legacyEncryptionKey(): SecretKey {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        return (keyStore.getKey(legacyKeyAlias, null) as? SecretKey)
+            ?: throw IllegalStateException("Старый ключ шифрования не найден")
+    }
+
     private fun encryptText(value: String): ByteArray = encryptBytes(value.toByteArray(Charsets.UTF_8))
-    private fun decryptText(value: ByteArray): String = String(decryptBytes(value), Charsets.UTF_8)
+    private fun decryptText(value: ByteArray): String {
+        return try {
+            String(decryptBytes(value), Charsets.UTF_8)
+        } catch (_: Exception) {
+            val legacy = String(decryptBytesWithKey(value, legacyEncryptionKey()), Charsets.UTF_8)
+            encryptAndStoreCases(legacy)
+            legacy
+        }
+    }
 
     fun keyProtectionStatus(): String {
         return try {
