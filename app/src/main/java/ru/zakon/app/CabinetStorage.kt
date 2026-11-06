@@ -288,7 +288,8 @@ internal class CabinetStorage(private val context: Context) {
 
     private fun cleanupOrphanedAttachments(cases: List<LocalCase>) {
         if (!attachmentDir.isDirectory) return
-        val keep = cases.flatMap { it.attachments }.mapNotNull { ref ->
+        val keep = cases.flatMap { it.attachments }.mapNotNull { storedRef ->
+            val ref = if (storedRef.startsWith("unavailable:")) storedRef.removePrefix("unavailable:") else storedRef
             if (ref.startsWith("secure:") || ref.startsWith("secure2:")) ref.split(":", limit = 3).getOrNull(1) else null
         }.toSet()
         attachmentDir.listFiles()?.forEach { file ->
