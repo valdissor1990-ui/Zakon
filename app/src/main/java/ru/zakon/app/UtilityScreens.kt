@@ -1,6 +1,7 @@
 package ru.zakon.app
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,6 +37,7 @@ import org.json.JSONObject
 import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
+private val TextOnDark = Color(0xFFF5F7FA)
 
 private data class LocalCase(
     val id: String,
@@ -102,14 +104,24 @@ private class CabinetStorage(private val context: Context) {
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
-        } catch (_: Exception) { /* some providers deny persistable */ }
+        } catch (_: Exception) { }
     }
 }
 
-private fun canUseBiometric(context: Context): Boolean {
-    val bm = BiometricManager.from(context)
-    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
-        BiometricManager.BIOMETRIC_SUCCESS
+private fun Context.findFragmentActivity(): FragmentActivity? {
+    var ctx: Context? = this
+    while (ctx is ContextWrapper) {
+        if (ctx is FragmentActivity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
+
+private fun biometricStatus(context: Context): Int {
+    return BiometricManager.from(context).canAuthenticate(
+        BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+    )
 }
 
 private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onError: (String) -> Unit) {
@@ -141,7 +153,7 @@ private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onE
 @Composable
 internal fun CabinetScreen(padding: PaddingValues) {
     val context = LocalContext.current
-    val activity = context as? FragmentActivity
+    val activity = remember(context) { context.findFragmentActivity() }
     val storage = remember { CabinetStorage(context) }
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
@@ -153,17 +165,17 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var editNotes by remember { mutableStateOf("") }
     var editAttachments by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    val pickFile = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
+    val bioOk = remember(context) {
+        biometricStatus(context) == BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             storage.persistUri(uri)
             editAttachments = editAttachments + uri.toString()
         }
     }
-    val pickImage = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             storage.persistUri(uri)
             editAttachments = editAttachments + uri.toString()
@@ -177,11 +189,10 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Личный кабинет", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Все материалы кабинета хранятся только на вашем устройстве и доступны только вам. " +
-                        "Данные не отправляются на сервер.",
+                    "Все материалы кабинета хранятся только на вашем устройстве и доступны только вам. Данные не отправляются на сервер.",
                     color = LegalGold.copy(alpha = 0.95f),
                     textAlign = TextAlign.Center,
                     fontSize = 13.sp,
@@ -189,9 +200,9 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    if (storage.hasPassword()) "Введите пароль или используйте биометрию"
+                    if (storage.hasPassword()) "Введите пароль или войдите по биометрии"
                     else "Задайте пароль для защиты данных на устройстве",
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = TextOnDark.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp
                 )
@@ -250,16 +261,19 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 ) {
                     Text(if (storage.hasPassword()) "Войти по паролю" else "Создать пароль и войти", fontWeight = FontWeight.Bold)
                 }
-                if (storage.hasPassword() && activity != null && canUseBiometric(context)) {
+
+                // Always show biometric option after password exists
+                if (storage.hasPassword()) {
                     Spacer(Modifier.height(10.dp))
                     OutlinedButton(
                         onClick = {
                             error = null
-                            showBiometric(
-                                activity,
-                                onSuccess = { unlocked = true },
-                                onError = { error = it }
-                            )
+                            val act = activity
+                            when {
+                                act == null -> error = "Биометрия недоступна в этой среде"
+                                !bioOk -> error = "Настройте отпечаток или Face ID в настройках телефона"
+                                else -> showBiometric(act, onSuccess = { unlocked = true }, onError = { error = it })
+                            }
                         },
                         border = BorderStroke(1.dp, LegalGold),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
@@ -268,15 +282,24 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     ) {
                         Text("Войти по биометрии", fontWeight = FontWeight.SemiBold)
                     }
+                    if (!bioOk) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Биометрия на устройстве не настроена или недоступна",
+                            color = TextOnDark.copy(alpha = 0.55f),
+                            fontSize = 11.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         } else if (editing != null) {
             Column(Modifier.fillMaxSize()) {
-                Text("Дело / материал", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Дело / материал", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Файлы и фото остаются на устройстве. В приложении сохраняются только ссылки для открытия.",
-                    color = Color.White.copy(0.65f),
+                    "Файлы и фото остаются на устройстве. В приложении — только ссылки для открытия.",
+                    color = TextOnDark.copy(0.65f),
                     fontSize = 12.sp
                 )
                 Spacer(Modifier.height(10.dp))
@@ -304,12 +327,12 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     OutlinedButton(
                         onClick = { pickImage.launch("image/*") },
                         border = BorderStroke(1.dp, GlassBorder),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)
                     ) { Text("Фото") }
                     OutlinedButton(
                         onClick = { pickFile.launch(arrayOf("*/*")) },
                         border = BorderStroke(1.dp, GlassBorder),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)
                     ) { Text("Файл") }
                 }
                 LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -332,7 +355,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                         ) {
                             Text(
                                 uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" },
-                                color = Color.White,
+                                color = TextOnDark,
                                 fontSize = 13.sp,
                                 modifier = Modifier.weight(1f)
                             )
@@ -351,7 +374,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     OutlinedButton(
                         onClick = { editing = null },
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark),
                         modifier = Modifier.weight(1f)
                     ) { Text("Отмена") }
                     Button(
@@ -383,8 +406,8 @@ internal fun CabinetScreen(padding: PaddingValues) {
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Личный кабинет", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text("Локально на устройстве", color = Color.White.copy(alpha = 0.65f), fontSize = 12.sp)
+                    Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text("Локально на устройстве", color = TextOnDark.copy(alpha = 0.65f), fontSize = 12.sp)
                 }
                 TextButton(
                     onClick = {
@@ -401,7 +424,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         "Пока нет дел.\nСоздайте дело, добавьте заметки, фото и файлы с устройства.",
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = TextOnDark.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -427,22 +450,18 @@ internal fun CabinetScreen(padding: PaddingValues) {
                                 .padding(14.dp)
                         ) {
                             Column {
-                                Text(c.title, color = Color.White, fontWeight = FontWeight.SemiBold)
+                                Text(c.title, color = TextOnDark, fontWeight = FontWeight.SemiBold)
                                 if (c.notes.isNotBlank()) {
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         c.notes.take(120) + if (c.notes.length > 120) "…" else "",
-                                        color = Color.White.copy(alpha = 0.7f),
+                                        color = TextOnDark.copy(alpha = 0.7f),
                                         fontSize = 13.sp
                                     )
                                 }
                                 if (c.attachments.isNotEmpty()) {
                                     Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        "Вложений: ${c.attachments.size}",
-                                        color = LegalGold,
-                                        fontSize = 12.sp
-                                    )
+                                    Text("Вложений: ${c.attachments.size}", color = LegalGold, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -455,12 +474,12 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
 @Composable
 private fun cabinetFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = Color.White,
-    unfocusedTextColor = Color.White,
+    focusedTextColor = TextOnDark,
+    unfocusedTextColor = TextOnDark,
     focusedBorderColor = LegalGold,
     unfocusedBorderColor = Color.White.copy(alpha = 0.35f),
     focusedLabelColor = LegalGold,
-    unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+    unfocusedLabelColor = TextOnDark.copy(alpha = 0.6f),
     cursorColor = LegalGold
 )
 
@@ -470,20 +489,17 @@ internal fun AboutScreen(padding: PaddingValues) {
         Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text("О приложении", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        Text("О приложении", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         Text("ЗаконЪ · версия 0.1.0", color = LegalGold, fontWeight = FontWeight.SemiBold)
         SectionTitle("Назначение")
-        BodyText("Приложение «ЗаконЪ» — справочная офлайн-библиотека нормативных материалов Российской Федерации. Не является государственной информационной системой и не заменяет официальные источники опубликования.")
+        BodyText("Приложение «ЗаконЪ» — справочная офлайн-библиотека нормативных материалов Российской Федерации.")
         SectionTitle("Правовая оговорка")
         BodyText(
-            "Создатель приложения Исаев Владислав Андреевич не несёт ответственности за полноту, актуальность и точность размещённых материалов. " +
-                "Материалы собраны из открытых источников и носят исключительно справочный характер. " +
-                "Информация не является юридической консультацией. Для юридически значимых действий используйте официальные публикации (в том числе pravo.gov.ru) и при необходимости обращайтесь к специалистам."
+            "Создатель приложения Исаев Владислав Андреевич не несёт ответственности за полноту, актуальность и точность материалов. " +
+                "Материалы из открытых источников, носят справочный характер. Не являются юридической консультацией."
         )
-        SectionTitle("Персональные данные и локальное хранение")
-        BodyText("Данные личного кабинета (заметки, дела, ссылки на фото и файлы) хранятся только на устройстве пользователя и не передаются разработчику. Файлы и фото остаются в хранилище устройства; приложение сохраняет разрешения на их открытие. Биометрия обрабатывается системой Android и не передаётся разработчику.")
-        SectionTitle("Технологии и лицензии")
-        BodyText("Kotlin, Jetpack Compose, AndroidX Biometric — Apache License 2.0. Исходный код приложения — проект владельца.")
+        SectionTitle("Локальное хранение")
+        BodyText("Данные кабинета хранятся только на устройстве. Биометрия обрабатывается системой Android.")
         SectionTitle("Сотрудничество")
         BodyText("Valdissor@mail.ru")
         SectionTitle("Автор")
@@ -498,57 +514,19 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun BodyText(text: String) {
-    Text(text, color = Color.White.copy(alpha = 0.88f), fontSize = 14.sp, lineHeight = 20.sp)
+    Text(text, color = TextOnDark.copy(alpha = 0.88f), fontSize = 14.sp, lineHeight = 20.sp)
 }
 
 @Composable
 internal fun MoreScreen(padding: PaddingValues, onConstructor: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Инструменты", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Surface(
-            Modifier.fillMaxWidth().clickable(onClick = onConstructor),
-            color = Color.White.copy(alpha = 0.12f),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, GlassBorder)
-        ) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("§", color = LegalGold, fontSize = 22.sp)
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("Конструктор документов", color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("Локальный черновик", color = Color.White.copy(0.65f), fontSize = 12.sp)
-                }
-            }
-        }
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
+        Text("Инструменты", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
 
 @Composable
 internal fun ConstructorScreen(padding: PaddingValues) {
-    var documentName by remember { mutableStateOf("") }
-    var recipient by remember { mutableStateOf("") }
-    var body by remember { mutableStateOf("") }
-    var preview by remember { mutableStateOf(false) }
-    Column(
-        Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Конструктор документов", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        OutlinedTextField(documentName, { documentName = it }, Modifier.fillMaxWidth(), label = { Text("Название") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
-        OutlinedTextField(recipient, { recipient = it }, Modifier.fillMaxWidth(), label = { Text("Кому") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
-        OutlinedTextField(body, { body = it }, Modifier.fillMaxWidth().heightIn(min = 160.dp), label = { Text("Текст") }, minLines = 6, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
-        Button(onClick = { preview = !preview }, colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy)) {
-            Text(if (preview) "Скрыть просмотр" else "Просмотр")
-        }
-        if (preview) {
-            Surface(color = Color.White.copy(0.12f), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, GlassBorder)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(documentName.ifBlank { "Название" }, color = Color.White, fontWeight = FontWeight.Bold)
-                    Text(recipient.ifBlank { "Адресат" }, color = Color.White.copy(0.7f))
-                    HorizontalDivider(color = Color.White.copy(0.2f))
-                    Text(body.ifBlank { "Текст" }, color = Color.White.copy(0.9f))
-                }
-            }
-        }
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
+        Text("Конструктор документов", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
