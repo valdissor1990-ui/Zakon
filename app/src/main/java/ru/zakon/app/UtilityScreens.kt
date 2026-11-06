@@ -1,6 +1,12 @@
 package ru.zakon.app
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,22 +29,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
 
-// ─── Cabinet (local-only cases, password gate) ──────────────────────────────
-
 private data class LocalCase(
     val id: String,
     val title: String,
     val notes: String,
+    val attachments: List<String>,
     val updatedAt: Long
 )
 
-private class CabinetStorage(context: Context) {
+private class CabinetStorage(private val context: Context) {
     private val prefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
 
     fun hasPassword(): Boolean = prefs.contains("pin_hash")
@@ -55,15 +62,24 @@ private class CabinetStorage(context: Context) {
             buildList {
                 for (i in 0 until arr.length()) {
                     val o = arr.getJSONObject(i)
-                    add(LocalCase(
-                        o.getString("id"),
-                        o.getString("title"),
-                        o.optString("notes", ""),
-                        o.optLong("updatedAt", 0L)
-                    ))
+                    val att = o.optJSONArray("attachments")
+                    val list = buildList {
+                        if (att != null) for (j in 0 until att.length()) add(att.getString(j))
+                    }
+                    add(
+                        LocalCase(
+                            o.getString("id"),
+                            o.getString("title"),
+                            o.optString("notes", ""),
+                            list,
+                            o.optLong("updatedAt", 0L)
+                        )
+                    )
                 }
             }.sortedByDescending { it.updatedAt }
-        } catch (_: Exception) { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     fun saveCases(cases: List<LocalCase>) {
@@ -74,15 +90,58 @@ private class CabinetStorage(context: Context) {
                 put("title", c.title)
                 put("notes", c.notes)
                 put("updatedAt", c.updatedAt)
+                put("attachments", JSONArray(c.attachments))
             })
         }
         prefs.edit().putString("cases_json", arr.toString()).apply()
     }
+
+    fun persistUri(uri: Uri) {
+        try {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (_: Exception) { /* some providers deny persistable */ }
+    }
+}
+
+private fun canUseBiometric(context: Context): Boolean {
+    val bm = BiometricManager.from(context)
+    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
+        BiometricManager.BIOMETRIC_SUCCESS
+}
+
+private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    val executor = ContextCompat.getMainExecutor(activity)
+    val prompt = BiometricPrompt(
+        activity,
+        executor,
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                onSuccess()
+            }
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
+                    errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                ) {
+                    onError(errString.toString())
+                }
+            }
+        }
+    )
+    val info = BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Вход в личный кабинет")
+        .setSubtitle("Данные хранятся только на этом устройстве")
+        .setNegativeButtonText("Пароль")
+        .build()
+    prompt.authenticate(info)
 }
 
 @Composable
 internal fun CabinetScreen(padding: PaddingValues) {
     val context = LocalContext.current
+    val activity = context as? FragmentActivity
     val storage = remember { CabinetStorage(context) }
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
@@ -92,13 +151,26 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var editing by remember { mutableStateOf<LocalCase?>(null) }
     var editTitle by remember { mutableStateOf("") }
     var editNotes by remember { mutableStateOf("") }
+    var editAttachments by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(16.dp)
-    ) {
+    val pickFile = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            storage.persistUri(uri)
+            editAttachments = editAttachments + uri.toString()
+        }
+    }
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            storage.persistUri(uri)
+            editAttachments = editAttachments + uri.toString()
+        }
+    }
+
+    Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
         if (!unlocked) {
             Column(
                 Modifier.fillMaxSize(),
@@ -108,13 +180,22 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 Text("Личный кабинет", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    if (storage.hasPassword()) "Введите пароль для доступа"
+                    "Все материалы кабинета хранятся только на вашем устройстве и доступны только вам. " +
+                        "Данные не отправляются на сервер.",
+                    color = LegalGold.copy(alpha = 0.95f),
+                    textAlign = TextAlign.Center,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    if (storage.hasPassword()) "Введите пароль или используйте биометрию"
                     else "Задайте пароль для защиты данных на устройстве",
                     color = Color.White.copy(alpha = 0.75f),
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(16.dp))
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 12) pin = it },
@@ -167,77 +248,159 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
                 ) {
-                    Text(if (storage.hasPassword()) "Войти" else "Создать пароль и войти", fontWeight = FontWeight.Bold)
+                    Text(if (storage.hasPassword()) "Войти по паролю" else "Создать пароль и войти", fontWeight = FontWeight.Bold)
                 }
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "Биометрия будет доступна после первого входа по паролю (настройка в следующих версиях).\nВсе данные хранятся только на этом устройстве.",
-                    color = Color.White.copy(alpha = 0.55f),
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center
-                )
+                if (storage.hasPassword() && activity != null && canUseBiometric(context)) {
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = {
+                            error = null
+                            showBiometric(
+                                activity,
+                                onSuccess = { unlocked = true },
+                                onError = { error = it }
+                            )
+                        },
+                        border = BorderStroke(1.dp, LegalGold),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) {
+                        Text("Войти по биометрии", fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
         } else if (editing != null) {
-            Text("Дело / материал", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                value = editTitle,
-                onValueChange = { editTitle = it },
-                label = { Text("Название") },
-                colors = cabinetFieldColors(),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(10.dp))
-            OutlinedTextField(
-                value = editNotes,
-                onValueChange = { editNotes = it },
-                label = { Text("Заметки, материалы, ссылки") },
-                minLines = 8,
-                colors = cabinetFieldColors(),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth().weight(1f)
-            )
-            Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(
-                    onClick = { editing = null },
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                    modifier = Modifier.weight(1f)
-                ) { Text("Отмена") }
-                Button(
-                    onClick = {
-                        val id = editing!!.id
-                        val updated = LocalCase(id, editTitle.ifBlank { "Без названия" }, editNotes, System.currentTimeMillis())
-                        cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it }
-                        else listOf(updated) + cases
-                        storage.saveCases(cases)
-                        editing = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                    modifier = Modifier.weight(1f)
-                ) { Text("Сохранить") }
+            Column(Modifier.fillMaxSize()) {
+                Text("Дело / материал", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Файлы и фото остаются на устройстве. В приложении сохраняются только ссылки для открытия.",
+                    color = Color.White.copy(0.65f),
+                    fontSize = 12.sp
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = editTitle,
+                    onValueChange = { editTitle = it },
+                    label = { Text("Название") },
+                    colors = cabinetFieldColors(),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = editNotes,
+                    onValueChange = { editNotes = it },
+                    label = { Text("Заметки") },
+                    minLines = 5,
+                    colors = cabinetFieldColors(),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(10.dp))
+                Text("Вложения (${editAttachments.size})", color = LegalGold, fontWeight = FontWeight.SemiBold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
+                    OutlinedButton(
+                        onClick = { pickImage.launch("image/*") },
+                        border = BorderStroke(1.dp, GlassBorder),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) { Text("Фото") }
+                    OutlinedButton(
+                        onClick = { pickFile.launch(arrayOf("*/*")) },
+                        border = BorderStroke(1.dp, GlassBorder),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) { Text("Файл") }
+                }
+                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    items(editAttachments) { uriStr ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color.White.copy(0.1f), RoundedCornerShape(10.dp))
+                                .clickable {
+                                    try {
+                                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                                            setDataAndType(Uri.parse(uriStr), null)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, "Открыть"))
+                                    } catch (_: Exception) { }
+                                }
+                                .padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" },
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "✕",
+                                color = Color(0xFFFF8A80),
+                                modifier = Modifier.clickable {
+                                    editAttachments = editAttachments.filter { it != uriStr }
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedButton(
+                        onClick = { editing = null },
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Отмена") }
+                    Button(
+                        onClick = {
+                            val id = editing!!.id
+                            val updated = LocalCase(
+                                id,
+                                editTitle.ifBlank { "Без названия" },
+                                editNotes,
+                                editAttachments,
+                                System.currentTimeMillis()
+                            )
+                            cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it }
+                            else listOf(updated) + cases
+                            storage.saveCases(cases)
+                            editing = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Сохранить") }
+                }
             }
         } else {
+            Text(
+                "Материалы кабинета хранятся на устройстве и доступны только вам.",
+                color = LegalGold.copy(alpha = 0.9f),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("Личный кабинет", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text("Только на этом устройстве", color = Color.White.copy(alpha = 0.65f), fontSize = 12.sp)
+                    Text("Локально на устройстве", color = Color.White.copy(alpha = 0.65f), fontSize = 12.sp)
                 }
-                TextButton(onClick = {
-                    editing = LocalCase(UUID.randomUUID().toString(), "", "", 0L)
-                    editTitle = ""
-                    editNotes = ""
-                }, colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)) {
-                    Text("+ Дело")
-                }
+                TextButton(
+                    onClick = {
+                        editing = LocalCase(UUID.randomUUID().toString(), "", "", emptyList(), 0L)
+                        editTitle = ""
+                        editNotes = ""
+                        editAttachments = emptyList()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)
+                ) { Text("+ Дело") }
             }
             Spacer(Modifier.height(12.dp))
             if (cases.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        "Пока нет дел.\nСоздайте дело, чтобы вести заметки и материалы.\nФото и вложения — в следующих обновлениях.",
+                        "Пока нет дел.\nСоздайте дело, добавьте заметки, фото и файлы с устройства.",
                         color = Color.White.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
@@ -259,6 +422,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                                     editing = c
                                     editTitle = c.title
                                     editNotes = c.notes
+                                    editAttachments = c.attachments
                                 }
                                 .padding(14.dp)
                         ) {
@@ -270,6 +434,14 @@ internal fun CabinetScreen(padding: PaddingValues) {
                                         c.notes.take(120) + if (c.notes.length > 120) "…" else "",
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 13.sp
+                                    )
+                                }
+                                if (c.attachments.isNotEmpty()) {
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        "Вложений: ${c.attachments.size}",
+                                        color = LegalGold,
+                                        fontSize = 12.sp
                                     )
                                 }
                             }
@@ -292,63 +464,30 @@ private fun cabinetFieldColors() = OutlinedTextFieldDefaults.colors(
     cursorColor = LegalGold
 )
 
-// ─── About ──────────────────────────────────────────────────────────────────
-
 @Composable
 internal fun AboutScreen(padding: PaddingValues) {
     Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .verticalScroll(rememberScrollState())
-            .padding(18.dp),
+        Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text("О приложении", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         Text("ЗаконЪ · версия 0.1.0", color = LegalGold, fontWeight = FontWeight.SemiBold)
-
         SectionTitle("Назначение")
-        BodyText(
-            "Приложение «ЗаконЪ» — справочная офлайн-библиотека нормативных материалов Российской Федерации. " +
-            "Предназначено для удобного ознакомления с текстами кодексов, законов и отдельных статей. " +
-            "Приложение не является государственной информационной системой и не заменяет официальные источники опубликования."
-        )
-
+        BodyText("Приложение «ЗаконЪ» — справочная офлайн-библиотека нормативных материалов Российской Федерации. Не является государственной информационной системой и не заменяет официальные источники опубликования.")
         SectionTitle("Правовая оговорка")
         BodyText(
             "Создатель приложения Исаев Владислав Андреевич не несёт ответственности за полноту, актуальность и точность размещённых материалов. " +
-            "Материалы собраны из открытых источников и носят исключительно справочный характер. " +
-            "Информация не является юридической консультацией, официальным разъяснением и не может служить единственным основанием для принятия юридически значимых решений.\n\n" +
-            "Для совершения юридически значимых действий рекомендуется обращаться к актуальным официальным публикациям (в том числе на Официальном интернет-портале правовой информации pravo.gov.ru) и при необходимости к квалифицированным специалистам.\n\n" +
-            "Использование приложения осуществляется пользователем самостоятельно и на свой риск в пределах, допускаемых законодательством Российской Федерации."
+                "Материалы собраны из открытых источников и носят исключительно справочный характер. " +
+                "Информация не является юридической консультацией. Для юридически значимых действий используйте официальные публикации (в том числе pravo.gov.ru) и при необходимости обращайтесь к специалистам."
         )
-
         SectionTitle("Персональные данные и локальное хранение")
-        BodyText(
-            "Данные личного кабинета (заметки, дела, материалы) хранятся только на устройстве пользователя и не передаются разработчику. " +
-            "Разработчик не осуществляет сбор биометрических данных через настоящее приложение."
-        )
-
+        BodyText("Данные личного кабинета (заметки, дела, ссылки на фото и файлы) хранятся только на устройстве пользователя и не передаются разработчику. Файлы и фото остаются в хранилище устройства; приложение сохраняет разрешения на их открытие. Биометрия обрабатывается системой Android и не передаётся разработчику.")
         SectionTitle("Технологии и лицензии")
-        BodyText(
-            "Приложение собрано на платформе Android с использованием Kotlin и Jetpack Compose (AndroidX).\n" +
-            "• Kotlin — Apache License 2.0 (jetbrains.com)\n" +
-            "• Android Jetpack / Compose — Apache License 2.0 (developer.android.com)\n" +
-            "• Фоновые изображения и геральдические элементы — используются на условиях соответствующих лицензий источников (в том числе материалы, совместимые с свободным использованием при соблюдении условий правообладателей).\n\n" +
-            "Исходный код приложения разрабатывается владельцем проекта. Сторонние зависимости распространяются на условиях их собственных лицензий."
-        )
-
+        BodyText("Kotlin, Jetpack Compose, AndroidX Biometric — Apache License 2.0. Исходный код приложения — проект владельца.")
         SectionTitle("Сотрудничество")
-        BodyText("По вопросам сотрудничества: Valdissor@mail.ru")
-
+        BodyText("Valdissor@mail.ru")
         SectionTitle("Автор")
         BodyText("Исаев Владислав Андреевич")
-
-        Text(
-            "© Использование материалов приложения не освобождает от обязанности соблюдать законодательство РФ.",
-            color = Color.White.copy(alpha = 0.5f),
-            fontSize = 11.sp
-        )
     }
 }
 
@@ -395,11 +534,6 @@ internal fun ConstructorScreen(padding: PaddingValues) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Конструктор документов", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(
-            "Локальный редактор-заготовка. Не является юридической консультацией.",
-            color = Color.White.copy(0.65f),
-            fontSize = 13.sp
-        )
         OutlinedTextField(documentName, { documentName = it }, Modifier.fillMaxWidth(), label = { Text("Название") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
         OutlinedTextField(recipient, { recipient = it }, Modifier.fillMaxWidth(), label = { Text("Кому") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
         OutlinedTextField(body, { body = it }, Modifier.fillMaxWidth().heightIn(min = 160.dp), label = { Text("Текст") }, minLines = 6, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp))
