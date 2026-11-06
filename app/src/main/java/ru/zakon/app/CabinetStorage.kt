@@ -142,15 +142,15 @@ internal class CabinetStorage(private val context: Context) {
         var changed = false
         val migrated = cases.map { item ->
             val secured = item.attachments.map { reference ->
-                if (reference.startsWith("secure:") || reference.startsWith("secure2:")) reference
-                else {
-                    try {
-                        changed = true
-                        importAttachment(Uri.parse(reference))
-                    } catch (_: Exception) {
-                        // Keep the original reference if Android no longer grants access.
-                        changed = true
-                        "unavailable:$reference"
+                when {
+                    reference.startsWith("secure2:") || reference.startsWith("unavailable:") -> reference
+                    reference.startsWith("secure:") -> {
+                        try { changed = true; migrateLegacyAttachment(reference) }
+                        catch (_: Exception) { changed = true; "unavailable:$reference" }
+                    }
+                    else -> {
+                        try { changed = true; importAttachment(Uri.parse(reference)) }
+                        catch (_: Exception) { changed = true; "unavailable:$reference" }
                     }
                 }
             }
@@ -172,6 +172,7 @@ internal class CabinetStorage(private val context: Context) {
             })
         }
         encryptAndStoreCases(array.toString())
+        cleanupOrphanedAttachments(cases)
     }
 
     /** Imports a picked file into app-private storage as encrypted bytes. */
@@ -266,6 +267,74 @@ internal class CabinetStorage(private val context: Context) {
             "${context.packageName}.fileprovider",
             temporary
         )
+    }
+
+    private fun migrateLegacyAttachment(reference: String): String {
+        val parts = reference.split(":", limit = 4)
+        require(parts.size == 4 && parts[0] == "secure") { "Некорректная старая ссылка" }
+        val oldId = parts[1]
+        require(oldId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Некорректный старый идентификатор" }
+        val oldFile = File(attachmentDir, "$oldId.bin")
+        require(oldFile.isFile) { "Старое вложение не найдено" }
+        if (!temporaryDir.exists() && !temporaryDir.mkdirs()) throw IllegalStateException("Не удалось создать временную папку")
+        val clearTemp = File(temporaryDir, "migration-$oldId.tmp")
+        try {
+            decryptFileAuthenticated(oldFile, clearTemp, legacyEncryptionKey())
+            val newId = UUID.randomUUID().toString()
+            encryptFile(clearTemp, File(attachmentDir, "$newId.bin"), encryptionKey())
+            return "secure2:$newId:${parts[2]}:${parts[3]}"
+        } finally { clearTemp.delete() }
+    }
+
+    private fun cleanupOrphanedAttachments(cases: List<LocalCase>) {
+        if (!attachmentDir.isDirectory) return
+        val keep = cases.flatMap { it.attachments }.mapNotNull { ref ->
+            if (ref.startsWith("secure:") || ref.startsWith("secure2:")) ref.split(":", limit = 3).getOrNull(1) else null
+        }.toSet()
+        attachmentDir.listFiles()?.forEach { file ->
+            if (file.isFile && file.extension == "bin" && file.nameWithoutExtension !in keep) file.delete()
+        }
+    }
+
+    private fun encryptFile(source: File, destination: File, key: SecretKey) {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        try {
+            FileInputStream(source).use { input ->
+                FileOutputStream(destination).use { output ->
+                    output.write(cipher.iv)
+                    CipherOutputStream(output, cipher).use { encrypted -> input.copyTo(encrypted) }
+                }
+            }
+        } catch (e: Exception) { destination.delete(); throw e }
+    }
+
+    private fun decryptFileAuthenticated(source: File, destination: File, key: SecretKey) {
+        try {
+            FileInputStream(source).use { input ->
+                val iv = ByteArray(12)
+                var offset = 0
+                while (offset < iv.size) {
+                    val count = input.read(iv, offset, iv.size - offset)
+                    if (count < 0) throw IllegalStateException("Повреждённый файл вложения")
+                    offset += count
+                }
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+                FileOutputStream(destination).use { output ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        val clear = cipher.update(buffer, 0, count)
+                        if (clear != null && clear.isNotEmpty()) output.write(clear)
+                    }
+                    val finalBytes = cipher.doFinal()
+                    if (finalBytes.isNotEmpty()) output.write(finalBytes)
+                    output.fd.sync()
+                }
+            }
+        } catch (e: Exception) { destination.delete(); throw e }
     }
 
     private fun queryDisplayName(uri: Uri): String? {
