@@ -27,8 +27,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: "8.13"
-      - name: Build debug APK
-        run: gradle assembleDebug
+      - name: Run Android tests, lint and build
+        run: gradle testDebugUnitTest lintDebug assembleDebug
       - uses: actions/upload-artifact@v7
         with:
           name: zakon-debug-apk
