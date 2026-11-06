@@ -36,9 +36,10 @@ def build(records_path: Path, output_dir: Path) -> None:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = output_dir / "zakon-content.sqlite"
-    if db_path.exists():
-        db_path.unlink()
-    db = sqlite3.connect(db_path)
+    working_db_path = output_dir / ".zakon-content.sqlite.tmp"
+    if working_db_path.exists():
+        working_db_path.unlink()
+    db = sqlite3.connect(working_db_path)
     db.execute("PRAGMA foreign_keys=ON")
     db.executescript(SCHEMA.read_text(encoding="utf-8"))
     db.execute("PRAGMA defer_foreign_keys=ON")
@@ -161,11 +162,17 @@ def build(records_path: Path, output_dir: Path) -> None:
         "content_version": release["version"],
         "created_at": release["created_at"],
         "effective_as_of": release["effective_as_of"],
-        "database": {"file": db_path.name, "sha256": sha256(db_path.read_bytes())},
+        "database": {"file": db_path.name, "sha256": sha256(working_db_path.read_bytes())},
         "validation": {"status": "draft", "documents": len(documents),
                        "manual_approval_required": True}
     }
-    (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    manifest_tmp_path = output_dir / ".manifest.json.tmp"
+    manifest_tmp_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8"
+    )
+    working_db_path.replace(db_path)
+    manifest_tmp_path.replace(output_dir / "manifest.json")
     print(f"Draft database created: {db_path}")
     print("Publication is blocked until a separate manual review approves the release.")
 
