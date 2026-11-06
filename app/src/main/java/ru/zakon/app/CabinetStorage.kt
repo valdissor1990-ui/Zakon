@@ -334,6 +334,10 @@ internal class CabinetStorage(private val context: Context) {
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setRandomizedEncryptionRequired(true)
             .apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    setUserAuthenticationRequired(true)
+                    setUserAuthenticationValidityDurationSeconds(300)
+                }
                 if (preferStrongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     setIsStrongBoxBacked(true)
                 }
