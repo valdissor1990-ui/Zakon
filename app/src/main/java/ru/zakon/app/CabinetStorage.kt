@@ -471,7 +471,7 @@ internal class CabinetStorage(private val context: Context) {
             val key = encryptionKey()
             val factory = javax.crypto.SecretKeyFactory.getInstance("AES", "AndroidKeyStore")
             val info = factory.getKeySpec(key, KeyInfo::class.java) as KeyInfo
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 when (info.securityLevel) {
                     KeyProperties.SECURITY_LEVEL_STRONGBOX -> "StrongBox"
                     KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT -> "Аппаратный TEE"
