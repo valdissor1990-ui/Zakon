@@ -10,10 +10,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -46,8 +47,10 @@ class MainActivity : FragmentActivity() {
     }
 }
 
-private val GlassBorder = Color.White.copy(alpha = 0.38f)
-private val GlassDark = Color(0xFF0D1B2A).copy(alpha = 0.80f)
+private val GlassBorder = Color.White.copy(alpha = 0.40f)
+private val GlassDark = Color(0xFF0D1B2A).copy(alpha = 0.82f)
+private val TextOnDark = Color(0xFFF5F7FA)
+private val TextMutedOnDark = Color(0xFFC5CDD8)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,11 +63,14 @@ private fun ZakonApp(store: LegalStore) {
     val back: () -> Unit = { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    // Exact scroll restoration: firstVisibleItemIndex per list route
     val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
 
+    // Close drawer first
     BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
+    // On inner screens — go back in stack
     BackHandler(enabled = !root && drawerState.isClosed) { back() }
+    // On home — consume back, do NOT leave the app
+    BackHandler(enabled = root && drawerState.isClosed) { /* stay on home */ }
 
     Box(Modifier.fillMaxSize()) {
         Image(
@@ -77,9 +83,9 @@ private fun ZakonApp(store: LegalStore) {
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
                     listOf(
-                        Color.Black.copy(alpha = 0.42f),
-                        Color.Black.copy(alpha = 0.24f),
-                        Color.Black.copy(alpha = 0.58f)
+                        Color.Black.copy(alpha = 0.45f),
+                        Color.Black.copy(alpha = 0.28f),
+                        Color.Black.copy(alpha = 0.60f)
                     )
                 )
             )
@@ -90,14 +96,14 @@ private fun ZakonApp(store: LegalStore) {
             drawerContent = {
                 ModalDrawerSheet(
                     drawerContainerColor = GlassDark,
-                    drawerContentColor = Color.White,
+                    drawerContentColor = TextOnDark,
                     modifier = Modifier.width(280.dp)
                 ) {
                     Spacer(Modifier.height(28.dp))
                     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("§", color = LegalGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(6.dp))
-                        Text("ЗаконЪ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                        IconBadge("§", 48.dp)
+                        Spacer(Modifier.height(8.dp))
+                        Text("ЗаконЪ", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                         Text("Правовая библиотека", color = LegalGold, style = MaterialTheme.typography.labelMedium)
                     }
                     Spacer(Modifier.height(20.dp))
@@ -120,21 +126,21 @@ private fun ZakonApp(store: LegalStore) {
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Black.copy(alpha = 0.35f),
-                            titleContentColor = Color.White,
-                            navigationIconContentColor = Color.White,
-                            actionIconContentColor = Color.White
+                            containerColor = Color.Black.copy(alpha = 0.40f),
+                            titleContentColor = TextOnDark,
+                            navigationIconContentColor = TextOnDark,
+                            actionIconContentColor = TextOnDark
                         ),
-                        title = { Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+                        title = { Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextOnDark) },
                         navigationIcon = {
                             if (root) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = Color.White, fontSize = 22.sp)
+                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 22.sp)
                             } else {
-                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), color = Color.White, fontSize = 30.sp)
+                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 30.sp)
                             }
                         },
                         actions = {
-                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 16.dp), color = Color.White, fontSize = 20.sp)
+                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 20.sp)
                         }
                     )
                 }
@@ -156,6 +162,12 @@ private fun ZakonApp(store: LegalStore) {
                         val code = AllRfCodes.find { it.id == id }
                         if (code != null) LiabilityScreen(code, padding) else PlaceholderLight("Не найдено", padding)
                     }
+                    route.startsWith("code/") && route.contains("/articles") -> {
+                        val id = route.removePrefix("code/").removeSuffix("/articles")
+                        val docId = docIdForCodeId(id)
+                        if (docId != null) CodeArticlesScreen(store, docId, padding, scrollIndexMap, "articles_$id") { navigate("article/$it") }
+                        else PlaceholderLight("Нет статей", padding)
+                    }
                     route.startsWith("code/") && route.contains("/part/") -> {
                         val partId = route.substringAfterLast("/")
                         CodeArticlesScreen(store, partId, padding, scrollIndexMap, "part_$partId") { navigate("article/$it") }
@@ -163,11 +175,18 @@ private fun ZakonApp(store: LegalStore) {
                     route.startsWith("code/") -> {
                         val id = route.removePrefix("code/")
                         val code = AllRfCodes.find { it.id == id }
-                        if (code != null) CodeDetailScreen(
-                            store, code, padding,
-                            onPart = { navigate("code/$id/part/$it") },
-                            onLiability = { navigate("code/$id/liability") },
-                            onArticle = { navigate("article/$it") }
+                        if (code != null) CodeHubScreen(
+                            code = code,
+                            padding = padding,
+                            onContent = {
+                                when {
+                                    code.parts.isNotEmpty() -> navigate("code/$id/part/${code.parts.first().id}")
+                                    docIdForCodeId(id) != null -> navigate("code/$id/articles")
+                                    else -> { }
+                                }
+                            },
+                            onParts = { navigate("code/$id/part/$it") },
+                            onLiability = { navigate("code/$id/liability") }
                         ) else PlaceholderLight("Не найдено", padding)
                     }
                     route == "constitution" -> CodeArticlesScreen(store, "const", padding, scrollIndexMap, "constitution") { navigate("article/$it") }
@@ -190,6 +209,7 @@ private fun ZakonApp(store: LegalStore) {
 private fun titleFor(route: String): String = when {
     route == "codes" -> "Кодексы РФ"
     route.startsWith("code/") && route.endsWith("/liability") -> "Ответственность"
+    route.startsWith("code/") && route.endsWith("/articles") -> "Статьи"
     route.startsWith("code/") -> AllRfCodes.find { route.contains(it.id) }?.shortName ?: "Кодекс"
     route == "constitution" -> "Конституция РФ"
     route == "search" -> "Поиск"
@@ -200,6 +220,91 @@ private fun titleFor(route: String): String = when {
     route.startsWith("article/") -> "Статья"
     else -> "ЗаконЪ"
 }
+
+private fun docIdForCodeId(id: String): String? = when (id) {
+    "uk" -> "uk"
+    "koap" -> "koap"
+    "tk" -> "tk"
+    "upk" -> "upk"
+    "gpk" -> "gpk"
+    "sk" -> "sk"
+    "zhk" -> "zhk"
+    "gk" -> "gk1"
+    "nk" -> "nk1"
+    else -> null
+}
+
+// ─── Code hub: content + liability tiles ────────────────────────────────────
+
+@Composable
+private fun CodeHubScreen(
+    code: RfCode,
+    padding: PaddingValues,
+    onContent: () -> Unit,
+    onParts: (String) -> Unit,
+    onLiability: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(code.fullName, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
+        if (code.overview.isNotBlank()) {
+            Text(code.overview, color = TextMutedOnDark, fontSize = 14.sp, lineHeight = 21.sp)
+        }
+
+        // Always: content tile
+        HubTile(
+            symbol = code.symbol,
+            title = "Содержание · ${code.shortName}",
+            subtitle = if (code.parts.isNotEmpty()) "Части и статьи" else "Статьи кодекса"
+        ) { onContent() }
+
+        // Parts as separate tiles if multi-part
+        if (code.parts.isNotEmpty()) {
+            Text("Части", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            code.parts.forEach { part ->
+                HubTile(code.symbol, part.title, code.shortName) { onParts(part.id) }
+            }
+        }
+
+        // Liability tile when applicable (e.g. KoAP)
+        if (code.hasLiability) {
+            HubTile("⚖", code.liabilityTitle, "Штрафы и виды ответственности") { onLiability() }
+        }
+
+        Text("Справочный характер. Сверяйте с официальными источниками.", color = TextMutedOnDark.copy(alpha = 0.7f), fontSize = 11.sp)
+    }
+}
+
+@Composable
+private fun HubTile(symbol: String, title: String, subtitle: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .shadow(6.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color.White.copy(0.22f), Color.White.copy(0.08f))
+                )
+            )
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconBadge(symbol, 44.dp)
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, color = TextOnDark, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(subtitle, color = TextMutedOnDark, fontSize = 12.sp)
+        }
+        Text("›", color = LegalGold, fontSize = 22.sp)
+    }
+}
+
+// ─── Home / codes menu ──────────────────────────────────────────────────────
 
 @Composable
 private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit) {
@@ -236,15 +341,11 @@ private fun CodesMenuScreen(
     val initial = scrollIndexMap[key] ?: 0
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
     LaunchedEffect(gridState.isScrollInProgress) {
-        if (!gridState.isScrollInProgress) {
-            scrollIndexMap[key] = gridState.firstVisibleItemIndex
-        }
+        if (!gridState.isScrollInProgress) scrollIndexMap[key] = gridState.firstVisibleItemIndex
     }
-    DisposableEffect(Unit) {
-        onDispose { scrollIndexMap[key] = gridState.firstVisibleItemIndex }
-    }
+    DisposableEffect(Unit) { onDispose { scrollIndexMap[key] = gridState.firstVisibleItemIndex } }
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
-        Text("Основные кодексы Российской Федерации", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
+        Text("Основные кодексы Российской Федерации", color = TextMutedOnDark, fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = gridState,
@@ -256,58 +357,11 @@ private fun CodesMenuScreen(
                 GlassCard(
                     symbol = code.symbol,
                     title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
-                    modifier = Modifier.fillMaxWidth().height(104.dp),
+                    modifier = Modifier.fillMaxWidth().height(112.dp),
                     onClick = { onCodeClick(code.id) }
                 )
             }
         }
-    }
-}
-
-private fun docIdForCode(code: RfCode): String? = when (code.id) {
-    "uk" -> "uk"
-    "koap" -> "koap"
-    "tk" -> "tk"
-    "upk" -> "upk"
-    "gpk" -> "gpk"
-    "sk" -> "sk"
-    "zhk" -> "zhk"
-    else -> null
-}
-
-@Composable
-private fun CodeDetailScreen(
-    store: LegalStore,
-    code: RfCode,
-    padding: PaddingValues,
-    onPart: (String) -> Unit,
-    onLiability: () -> Unit,
-    onArticle: (String) -> Unit
-) {
-    val scroll = rememberScrollState()
-    var articles by remember { mutableStateOf<List<LegalArticle>>(emptyList()) }
-    val directDoc = docIdForCode(code)
-    LaunchedEffect(code.id) {
-        if (directDoc != null) articles = withContext(Dispatchers.IO) { store.getArticles(directDoc) }
-    }
-    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(code.fullName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
-        if (code.overview.isNotBlank()) Text(code.overview, color = Color.White.copy(alpha = 0.85f), fontSize = 14.sp, lineHeight = 21.sp)
-        if (code.parts.isNotEmpty()) {
-            Text("Части", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            code.parts.forEach { part -> GlassRow("§  ${part.title}") { onPart(part.id) } }
-        }
-        if (code.hasLiability) {
-            Text("Ответственность", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            GlassRow("⚖  ${code.liabilityTitle}") { onLiability() }
-        }
-        if (articles.isNotEmpty()) {
-            Text("Статьи", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            ArticleTiles(articles, onArticle)
-        } else if (directDoc == null && code.parts.isEmpty()) {
-            Text("Тексты статей для этого кодекса будут добавлены в базу.", color = Color.White.copy(0.55f), fontSize = 12.sp)
-        }
-        Text("Справочный характер. Сверяйте с официальными источниками.", color = Color.White.copy(alpha = 0.45f), fontSize = 11.sp)
     }
 }
 
@@ -325,13 +379,9 @@ private fun CodeArticlesScreen(
     val initial = scrollIndexMap[scrollKey] ?: 0
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
     LaunchedEffect(gridState.isScrollInProgress) {
-        if (!gridState.isScrollInProgress) {
-            scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex
-        }
+        if (!gridState.isScrollInProgress) scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex
     }
-    DisposableEffect(scrollKey) {
-        onDispose { scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex }
-    }
+    DisposableEffect(scrollKey) { onDispose { scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex } }
     LaunchedEffect(documentId) {
         withContext(Dispatchers.IO) {
             title = store.getDocument(documentId)?.title ?: documentId
@@ -339,8 +389,8 @@ private fun CodeArticlesScreen(
         }
     }
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
-        Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp))
-        if (articles.isEmpty()) Text("Статьи не найдены в локальной базе.", color = Color.White.copy(0.7f))
+        Text(title, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp))
+        if (articles.isEmpty()) Text("Статьи не найдены в локальной базе.", color = TextMutedOnDark)
         else LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = gridState,
@@ -354,28 +404,21 @@ private fun CodeArticlesScreen(
 }
 
 @Composable
-private fun ArticleTiles(articles: List<LegalArticle>, onArticle: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        articles.chunked(2).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { a -> ArticleTile(a, Modifier.weight(1f)) { onArticle(a.id) } }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
 private fun ArticleTile(article: LegalArticle, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val essence = article.title?.take(48) ?: article.body.replace("\n", " ").take(48)
     Box(
-        modifier.height(88.dp).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.12f))
-            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(10.dp)
+        modifier
+            .height(92.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.12f))
+            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(10.dp)
     ) {
         Column {
             Text("ст. ${article.number}", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             Spacer(Modifier.height(4.dp))
-            Text(essence, color = Color.White.copy(alpha = 0.88f), fontSize = 12.sp, lineHeight = 15.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Text(essence, color = TextOnDark, fontSize = 12.sp, lineHeight = 15.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -383,51 +426,92 @@ private fun ArticleTile(article: LegalArticle, modifier: Modifier = Modifier, on
 @Composable
 private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     val scroll = rememberScrollState()
-    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(code.shortName + " — " + code.liabilityTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+    Column(
+        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(code.shortName + " — " + code.liabilityTitle, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         code.liabilityItems.forEach { item ->
-            Column(Modifier.fillMaxWidth().background(Color.White.copy(0.10f), RoundedCornerShape(14.dp)).border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).padding(14.dp)) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .background(Color.White.copy(0.10f), RoundedCornerShape(14.dp))
+                    .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
+                    .padding(14.dp)
+            ) {
                 Text(item.title, color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Spacer(Modifier.height(6.dp))
-                Text(item.body, color = Color.White.copy(0.88f), fontSize = 14.sp, lineHeight = 21.sp)
+                Text(item.body, color = TextOnDark, fontSize = 14.sp, lineHeight = 21.sp)
             }
         }
+    }
+}
+
+// ─── Volumetric icon badge ──────────────────────────────────────────────────
+
+@Composable
+private fun IconBadge(symbol: String, size: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier
+            .size(size)
+            .shadow(4.dp, CircleShape)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    listOf(
+                        Color(0xFFFFE9A8),
+                        LegalGold,
+                        Color(0xFF8A6A1A)
+                    )
+                )
+            )
+            .border(1.5.dp, Color.White.copy(alpha = 0.45f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            symbol,
+            color = Color(0xFF1A1408),
+            fontWeight = FontWeight.Bold,
+            fontSize = (size.value * 0.42f).sp
+        )
     }
 }
 
 @Composable
 private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier.height(100.dp).clip(RoundedCornerShape(18.dp))
-            .background(Brush.verticalGradient(listOf(Color.White.copy(0.20f), Color.White.copy(0.08f))))
-            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp)).clickable(onClick = onClick).padding(10.dp),
+        modifier
+            .height(108.dp)
+            .shadow(8.dp, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color.White.copy(alpha = 0.24f), Color.White.copy(alpha = 0.08f))
+                )
+            )
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(symbol, color = LegalGold, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
-            Text(title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, lineHeight = 15.sp)
+            IconBadge(symbol, 40.dp)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                title,
+                color = TextOnDark,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 15.sp
+            )
         }
-    }
-}
-
-@Composable
-private fun GlassRow(text: String, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(0.12f))
-            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text, color = Color.White, fontSize = 15.sp, modifier = Modifier.weight(1f))
-        Text("›", color = LegalGold, fontSize = 20.sp)
     }
 }
 
 @Composable
 private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: () -> Unit) {
     val bg = if (selected) LegalGold.copy(alpha = 0.22f) else Color.Transparent
-    val textColor = if (selected) LegalGold else Color.White.copy(alpha = 0.9f)
+    val textColor = if (selected) LegalGold else TextOnDark
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
             .background(bg).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 13.dp),
@@ -441,11 +525,15 @@ private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: 
 
 @Composable
 private fun PlaceholderLight(title: String, padding: PaddingValues, subtitle: String = "") {
-    Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+    Column(
+        Modifier.fillMaxSize().padding(padding).padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(title, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
         if (subtitle.isNotBlank()) {
             Spacer(Modifier.height(8.dp))
-            Text(subtitle, color = Color.White.copy(0.7f), textAlign = TextAlign.Center)
+            Text(subtitle, color = TextMutedOnDark, textAlign = TextAlign.Center)
         }
     }
 }
