@@ -41,7 +41,7 @@ jobs:
               INSERT INTO documents(id,title,document_type,legal_status,source_id,
                                     verification_status,text_sha256)
               VALUES(?,?,?,?,?,?,?)
-          """, ("test-doc", "Тестовая конституция", "test", "действует",
+          """, ("test-doc", "Тестовый документ", "test", "действует",
                 source_id, "approved", "b" * 64))
 
           db.execute("""
