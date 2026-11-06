@@ -9,7 +9,7 @@ data class LegalDocument(val id: String, val title: String, val documentType: St
 data class LegalArticle(val id: String, val documentId: String, val number: String, val title: String?, val body: String)
 data class SearchHit(val articleId: String, val documentTitle: String, val articleNumber: String, val articleTitle: String?, val preview: String)
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 4) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 5) {
     override fun onConfigure(db: SQLiteDatabase) { super.onConfigure(db); db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE documents (
@@ -45,55 +45,39 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
         if (oldVersion < 2) {
             db.execSQL("DROP TABLE IF EXISTS articles_fts")
             db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id UNINDEXED, document_title, article_number, article_title, body, tokenize=unicode61)")
-            db.execSQL("""
-                INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
-                SELECT a.id,d.title,a.number,COALESCE(a.title,''),a.body
-                FROM articles a JOIN documents d ON d.id=a.document_id
-            """.trimIndent())
+            db.execSQL("""INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
+                SELECT a.id,d.title,a.number,COALESCE(a.title,''),a.body FROM articles a JOIN documents d ON d.id=a.document_id""".trimIndent())
         }
-        if (oldVersion < 4) {
-            SeedData.populate(db)
-        }
+        if (oldVersion < 5) SeedData.populate(db)
     }
     fun getDocuments(): List<LegalDocument> = readableDatabase.rawQuery(
         "SELECT id,title,document_type,number,legal_status,verification_status FROM documents ORDER BY title", null
-    ).use { c -> buildList {
-        while (c.moveToNext()) add(LegalDocument(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5)))
-    } }
+    ).use { c -> buildList { while (c.moveToNext()) add(LegalDocument(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5))) } }
     fun getDocument(id: String): LegalDocument? = readableDatabase.rawQuery(
         "SELECT id,title,document_type,number,legal_status,verification_status FROM documents WHERE id=?", arrayOf(id)
     ).use { c -> if (!c.moveToFirst()) null else LegalDocument(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5)) }
     fun getArticles(documentId: String): List<LegalArticle> = readableDatabase.rawQuery(
         "SELECT id,document_id,number,title,body FROM articles WHERE document_id=? ORDER BY ordinal", arrayOf(documentId)
-    ).use { c -> buildList {
-        while (c.moveToNext()) add(LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
-    } }
+    ).use { c -> buildList { while (c.moveToNext()) add(LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4))) } }
     fun getArticle(id: String): LegalArticle? = readableDatabase.rawQuery(
         "SELECT id,document_id,number,title,body FROM articles WHERE id=?", arrayOf(id)
     ).use { c -> if (!c.moveToFirst()) null else LegalArticle(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)) }
     fun search(query: String): List<SearchHit> {
         val db = readableDatabase
         try {
-            return db.rawQuery("""
-                SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
-                FROM articles_fts f
-                JOIN articles a ON a.id=f.article_id
-                JOIN documents d ON d.id=a.document_id
-                WHERE articles_fts MATCH ?
-                ORDER BY d.title,a.ordinal LIMIT 100
-            """.trimIndent(), arrayOf(query)).use { c -> buildList {
-                while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
-            } }
+            return db.rawQuery("""SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+                FROM articles_fts f JOIN articles a ON a.id=f.article_id JOIN documents d ON d.id=a.document_id
+                WHERE articles_fts MATCH ? ORDER BY d.title,a.ordinal LIMIT 100""".trimIndent(), arrayOf(query)).use { c ->
+                buildList { while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4))) }
+            }
         } catch (_: SQLiteException) {
             val pattern = "%$query%"
-            return db.rawQuery("""
-                SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+            return db.rawQuery("""SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
                 FROM articles a JOIN documents d ON d.id=a.document_id
                 WHERE a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?
-                ORDER BY d.title,a.ordinal LIMIT 100
-            """.trimIndent(), arrayOf(pattern,pattern,pattern,pattern)).use { c -> buildList {
-                while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4)))
-            } }
+                ORDER BY d.title,a.ordinal LIMIT 100""".trimIndent(), arrayOf(pattern,pattern,pattern,pattern)).use { c ->
+                buildList { while (c.moveToNext()) add(SearchHit(c.getString(0),c.getString(1),c.getString(2),c.getString(3),c.getString(4))) }
+            }
         }
     }
 }
