@@ -21,6 +21,8 @@ jobs:
         run: |
           python agent/validate_source_registry.py
           python agent/build_database.py --help
+      - name: Run content pipeline regression tests
+        run: python -m unittest discover -s agent -p "test_*.py"
       - name: Check SQLite schema and full-text triggers
         run: |
           python - <<'PY'
