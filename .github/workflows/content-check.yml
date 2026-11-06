@@ -21,12 +21,62 @@ jobs:
         run: |
           python agent/validate_source_registry.py
           python agent/build_database.py --help
-      - name: Check SQLite schema
+      - name: Check SQLite schema and full-text triggers
         run: |
           python - <<'PY'
           import sqlite3
           from pathlib import Path
+
           db = sqlite3.connect(":memory:")
+          db.execute("PRAGMA foreign_keys=ON")
           db.executescript(Path("content/schema/schema.sql").read_text(encoding="utf-8"))
-          print("SQLite schema is valid")
+
+          source_id = db.execute("""
+              INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,sha256)
+              VALUES(?,?,?,?,?,?) RETURNING id
+          """, ("Тестовый источник", "Государственный орган", "https://example.gov.ru/test",
+                "test", "2026-11-06T00:00:00Z", "a" * 64)).fetchone()[0]
+
+          db.execute("""
+              INSERT INTO documents(id,title,document_type,legal_status,source_id,
+                                    verification_status,text_sha256)
+              VALUES(?,?,?,?,?,?,?)
+          """, ("test-doc", "Тестовая конституция", "test", "действует",
+                source_id, "approved", "b" * 64))
+
+          db.execute("""
+              INSERT INTO articles(id,document_id,ordinal,number,title,body)
+              VALUES(?,?,?,?,?,?)
+          """, ("test-article", "test-doc", 1, "1", "Общие положения",
+                "Тестовая конституция России"))
+
+          found = db.execute(
+              "SELECT article_id FROM articles_fts WHERE articles_fts MATCH ?",
+              ("конституция",)
+          ).fetchall()
+          assert found == [("test-article",)], f"FTS insert trigger failed: {found}"
+
+          db.execute("UPDATE articles SET body=? WHERE id=?",
+                     ("Обновлённый правовой текст", "test-article"))
+          old_hits = db.execute(
+              "SELECT article_id FROM articles_fts WHERE articles_fts MATCH ?",
+              ("конституция",)
+          ).fetchall()
+          new_hits = db.execute(
+              "SELECT article_id FROM articles_fts WHERE articles_fts MATCH ?",
+              ("обновлённый",)
+          ).fetchall()
+          assert not old_hits and new_hits == [("test-article",)], "FTS update trigger failed"
+
+          db.execute("UPDATE documents SET title=? WHERE id=?",
+                     ("Новое название", "test-doc"))
+          db.execute("DELETE FROM articles WHERE id=?", ("test-article",))
+          remaining = db.execute(
+              "SELECT count(*) FROM articles_fts WHERE article_id=?",
+              ("test-article",)
+          ).fetchone()[0]
+          assert remaining == 0, "FTS delete trigger failed"
+
+          assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+          print("SQLite schema, foreign keys, FTS insert/update/delete triggers: OK")
           PY
