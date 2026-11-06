@@ -40,23 +40,15 @@ private val GlassBorder = Color.White.copy(alpha = 0.35f)
 private val TextOnDark = Color(0xFFF5F7FA)
 
 private data class LocalCase(
-    val id: String,
-    val title: String,
-    val notes: String,
-    val attachments: List<String>,
-    val updatedAt: Long
+    val id: String, val title: String, val notes: String,
+    val attachments: List<String>, val updatedAt: Long
 )
 
 private class CabinetStorage(private val context: Context) {
     private val prefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
-
     fun hasPassword(): Boolean = prefs.contains("pin_hash")
-    fun setPassword(pin: String) {
-        prefs.edit().putString("pin_hash", pin.hashCode().toString()).apply()
-    }
-    fun checkPassword(pin: String): Boolean =
-        prefs.getString("pin_hash", null) == pin.hashCode().toString()
-
+    fun setPassword(pin: String) { prefs.edit().putString("pin_hash", pin.hashCode().toString()).apply() }
+    fun checkPassword(pin: String): Boolean = prefs.getString("pin_hash", null) == pin.hashCode().toString()
     fun loadCases(): List<LocalCase> {
         val raw = prefs.getString("cases_json", "[]") ?: "[]"
         return try {
@@ -65,46 +57,24 @@ private class CabinetStorage(private val context: Context) {
                 for (i in 0 until arr.length()) {
                     val o = arr.getJSONObject(i)
                     val att = o.optJSONArray("attachments")
-                    val list = buildList {
-                        if (att != null) for (j in 0 until att.length()) add(att.getString(j))
-                    }
-                    add(
-                        LocalCase(
-                            o.getString("id"),
-                            o.getString("title"),
-                            o.optString("notes", ""),
-                            list,
-                            o.optLong("updatedAt", 0L)
-                        )
-                    )
+                    val list = buildList { if (att != null) for (j in 0 until att.length()) add(att.getString(j)) }
+                    add(LocalCase(o.getString("id"), o.getString("title"), o.optString("notes", ""), list, o.optLong("updatedAt", 0L)))
                 }
             }.sortedByDescending { it.updatedAt }
-        } catch (_: Exception) {
-            emptyList()
-        }
+        } catch (_: Exception) { emptyList() }
     }
-
     fun saveCases(cases: List<LocalCase>) {
         val arr = JSONArray()
         cases.forEach { c ->
             arr.put(JSONObject().apply {
-                put("id", c.id)
-                put("title", c.title)
-                put("notes", c.notes)
-                put("updatedAt", c.updatedAt)
-                put("attachments", JSONArray(c.attachments))
+                put("id", c.id); put("title", c.title); put("notes", c.notes)
+                put("updatedAt", c.updatedAt); put("attachments", JSONArray(c.attachments))
             })
         }
         prefs.edit().putString("cases_json", arr.toString()).apply()
     }
-
     fun persistUri(uri: Uri) {
-        try {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        } catch (_: Exception) { }
+        try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
     }
 }
 
@@ -117,37 +87,34 @@ private fun Context.findFragmentActivity(): FragmentActivity? {
     return null
 }
 
-private fun biometricStatus(context: Context): Int {
-    return BiometricManager.from(context).canAuthenticate(
-        BiometricManager.Authenticators.BIOMETRIC_WEAK or
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
-    )
-}
+private const val BIO_AUTHENTICATORS =
+    BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+
+private fun biometricStatus(context: Context): Int =
+    BiometricManager.from(context).canAuthenticate(BIO_AUTHENTICATORS)
 
 private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onError: (String) -> Unit) {
     val executor = ContextCompat.getMainExecutor(activity)
-    val prompt = BiometricPrompt(
-        activity,
-        executor,
-        object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                onSuccess()
-            }
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
-                    errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
-                ) {
-                    onError(errString.toString())
-                }
+    val prompt = BiometricPrompt(activity, executor, object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) { onSuccess() }
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                onError(errString.toString())
             }
         }
-    )
-    val info = BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Вход в личный кабинет")
-        .setSubtitle("Данные хранятся только на этом устройстве")
-        .setNegativeButtonText("Пароль")
-        .build()
-    prompt.authenticate(info)
+        override fun onAuthenticationFailed() { onError("Не удалось распознать биометрию") }
+    })
+    try {
+        val info = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Вход в личный кабинет")
+            .setSubtitle("Данные хранятся только на этом устройстве")
+            .setAllowedAuthenticators(BIO_AUTHENTICATORS)
+            .setNegativeButtonText("Пароль")
+            .build()
+        prompt.authenticate(info)
+    } catch (e: Exception) {
+        onError(e.message ?: "Ошибка запуска биометрии")
+    }
 }
 
 @Composable
@@ -165,104 +132,53 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var editNotes by remember { mutableStateOf("") }
     var editAttachments by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    val bioOk = remember(context) {
-        biometricStatus(context) == BiometricManager.BIOMETRIC_SUCCESS
+    val bioStatus = remember(context) { biometricStatus(context) }
+    val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
+
+    LaunchedEffect(Unit) {
+        if (storage.hasPassword() && bioOk && activity != null && !unlocked) {
+            showBiometric(activity, onSuccess = { unlocked = true }, onError = { })
+        }
     }
 
     val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            storage.persistUri(uri)
-            editAttachments = editAttachments + uri.toString()
-        }
+        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
     }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            storage.persistUri(uri)
-            editAttachments = editAttachments + uri.toString()
-        }
+        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
     }
 
     Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
         if (!unlocked) {
-            Column(
-                Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    "Все материалы кабинета хранятся только на вашем устройстве и доступны только вам. Данные не отправляются на сервер.",
-                    color = LegalGold.copy(alpha = 0.95f),
-                    textAlign = TextAlign.Center,
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp
-                )
+                Text("Все материалы кабинета хранятся только на вашем устройстве и доступны только вам.", color = LegalGold.copy(alpha = 0.95f), textAlign = TextAlign.Center, fontSize = 13.sp, lineHeight = 18.sp)
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    if (storage.hasPassword()) "Введите пароль или войдите по биометрии"
-                    else "Задайте пароль для защиты данных на устройстве",
-                    color = TextOnDark.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center,
-                    fontSize = 14.sp
-                )
+                Text(if (storage.hasPassword()) "Введите пароль или войдите по биометрии" else "Задайте пароль для защиты данных", color = TextOnDark.copy(0.8f), textAlign = TextAlign.Center, fontSize = 14.sp)
                 Spacer(Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = pin,
-                    onValueChange = { if (it.length <= 12) pin = it },
-                    label = { Text("Пароль") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    colors = cabinetFieldColors(),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OutlinedTextField(pin, { if (it.length <= 12) pin = it }, label = { Text("Пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
                 if (!storage.hasPassword()) {
                     Spacer(Modifier.height(10.dp))
-                    OutlinedTextField(
-                        value = pinConfirm,
-                        onValueChange = { if (it.length <= 12) pinConfirm = it },
-                        label = { Text("Повтор пароля") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        colors = cabinetFieldColors(),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    OutlinedTextField(pinConfirm, { if (it.length <= 12) pinConfirm = it }, label = { Text("Повтор пароля") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
                 }
-                error?.let {
-                    Spacer(Modifier.height(8.dp))
-                    Text(it, color = Color(0xFFFF8A80), fontSize = 13.sp)
-                }
+                error?.let { Spacer(Modifier.height(8.dp)); Text(it, color = Color(0xFFFF8A80), fontSize = 13.sp) }
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         error = null
-                        if (pin.length < 4) {
-                            error = "Минимум 4 символа"
-                            return@Button
-                        }
+                        if (pin.length < 4) { error = "Минимум 4 символа"; return@Button }
                         if (!storage.hasPassword()) {
-                            if (pin != pinConfirm) {
-                                error = "Пароли не совпадают"
-                                return@Button
-                            }
-                            storage.setPassword(pin)
-                            unlocked = true
-                        } else if (storage.checkPassword(pin)) {
-                            unlocked = true
-                        } else {
-                            error = "Неверный пароль"
-                        }
+                            if (pin != pinConfirm) { error = "Пароли не совпадают"; return@Button }
+                            storage.setPassword(pin); unlocked = true
+                        } else if (storage.checkPassword(pin)) unlocked = true
+                        else error = "Неверный пароль"
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
-                ) {
-                    Text(if (storage.hasPassword()) "Войти по паролю" else "Создать пароль и войти", fontWeight = FontWeight.Bold)
-                }
+                ) { Text(if (storage.hasPassword()) "Войти по паролю" else "Создать пароль и войти", fontWeight = FontWeight.Bold) }
 
-                // Always show biometric option after password exists
                 if (storage.hasPassword()) {
                     Spacer(Modifier.height(10.dp))
                     OutlinedButton(
@@ -270,8 +186,13 @@ internal fun CabinetScreen(padding: PaddingValues) {
                             error = null
                             val act = activity
                             when {
-                                act == null -> error = "Биометрия недоступна в этой среде"
-                                !bioOk -> error = "Настройте отпечаток или Face ID в настройках телефона"
+                                act == null -> error = "Биометрия недоступна (нет Activity)"
+                                !bioOk -> error = when (bioStatus) {
+                                    BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> "На устройстве нет биометрического датчика"
+                                    BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> "Биометрия временно недоступна"
+                                    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> "Добавьте отпечаток или лицо в настройках телефона"
+                                    else -> "Биометрия недоступна (код $bioStatus)"
+                                }
                                 else -> showBiometric(act, onSuccess = { unlocked = true }, onError = { error = it })
                             }
                         },
@@ -279,17 +200,10 @@ internal fun CabinetScreen(padding: PaddingValues) {
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) {
-                        Text("Войти по биометрии", fontWeight = FontWeight.SemiBold)
-                    }
+                    ) { Text("Войти по биометрии", fontWeight = FontWeight.SemiBold) }
                     if (!bioOk) {
                         Spacer(Modifier.height(6.dp))
-                        Text(
-                            "Биометрия на устройстве не настроена или недоступна",
-                            color = TextOnDark.copy(alpha = 0.55f),
-                            fontSize = 11.sp,
-                            textAlign = TextAlign.Center
-                        )
+                        Text("Код биометрии: $bioStatus — настройте отпечаток/лицо в системе", color = TextOnDark.copy(0.55f), fontSize = 11.sp, textAlign = TextAlign.Center)
                     }
                 }
             }
@@ -297,167 +211,67 @@ internal fun CabinetScreen(padding: PaddingValues) {
             Column(Modifier.fillMaxSize()) {
                 Text("Дело / материал", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    "Файлы и фото остаются на устройстве. В приложении — только ссылки для открытия.",
-                    color = TextOnDark.copy(0.65f),
-                    fontSize = 12.sp
-                )
+                OutlinedTextField(editTitle, { editTitle = it }, label = { Text("Название") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = editTitle,
-                    onValueChange = { editTitle = it },
-                    label = { Text("Название") },
-                    colors = cabinetFieldColors(),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = editNotes,
-                    onValueChange = { editNotes = it },
-                    label = { Text("Заметки") },
-                    minLines = 5,
-                    colors = cabinetFieldColors(),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OutlinedTextField(editNotes, { editNotes = it }, label = { Text("Заметки") }, minLines = 5, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
                 Text("Вложения (${editAttachments.size})", color = LegalGold, fontWeight = FontWeight.SemiBold)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                    OutlinedButton(
-                        onClick = { pickImage.launch("image/*") },
-                        border = BorderStroke(1.dp, GlassBorder),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)
-                    ) { Text("Фото") }
-                    OutlinedButton(
-                        onClick = { pickFile.launch(arrayOf("*/*")) },
-                        border = BorderStroke(1.dp, GlassBorder),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)
-                    ) { Text("Файл") }
+                    OutlinedButton(onClick = { pickImage.launch("image/*") }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
+                    OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Файл") }
                 }
                 LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(editAttachments) { uriStr ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .background(Color.White.copy(0.1f), RoundedCornerShape(10.dp))
-                                .clickable {
-                                    try {
-                                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                                            setDataAndType(Uri.parse(uriStr), null)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        context.startActivity(Intent.createChooser(intent, "Открыть"))
-                                    } catch (_: Exception) { }
-                                }
-                                .padding(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" },
-                                color = TextOnDark,
-                                fontSize = 13.sp,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                "✕",
-                                color = Color(0xFFFF8A80),
-                                modifier = Modifier.clickable {
-                                    editAttachments = editAttachments.filter { it != uriStr }
-                                }
-                            )
+                        Row(Modifier.fillMaxWidth().background(Color.White.copy(0.1f), RoundedCornerShape(10.dp)).clickable {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW).apply { setDataAndType(Uri.parse(uriStr), null); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                context.startActivity(Intent.createChooser(intent, "Открыть"))
+                            } catch (_: Exception) {}
+                        }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" }, color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            Text("✕", color = Color(0xFFFF8A80), modifier = Modifier.clickable { editAttachments = editAttachments.filter { it != uriStr } })
                         }
                     }
                 }
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(
-                        onClick = { editing = null },
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark),
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Отмена") }
-                    Button(
-                        onClick = {
-                            val id = editing!!.id
-                            val updated = LocalCase(
-                                id,
-                                editTitle.ifBlank { "Без названия" },
-                                editNotes,
-                                editAttachments,
-                                System.currentTimeMillis()
-                            )
-                            cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it }
-                            else listOf(updated) + cases
-                            storage.saveCases(cases)
-                            editing = null
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Сохранить") }
+                    OutlinedButton(onClick = { editing = null }, border = BorderStroke(1.dp, Color.White.copy(0.4f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark), modifier = Modifier.weight(1f)) { Text("Отмена") }
+                    Button(onClick = {
+                        val id = editing!!.id
+                        val updated = LocalCase(id, editTitle.ifBlank { "Без названия" }, editNotes, editAttachments, System.currentTimeMillis())
+                        cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it } else listOf(updated) + cases
+                        storage.saveCases(cases); editing = null
+                    }, colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy), modifier = Modifier.weight(1f)) { Text("Сохранить") }
                 }
             }
         } else {
-            Text(
-                "Материалы кабинета хранятся на устройстве и доступны только вам.",
-                color = LegalGold.copy(alpha = 0.9f),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Text("Материалы кабинета хранятся на устройстве и доступны только вам.", color = LegalGold.copy(0.9f), fontSize = 12.sp, modifier = Modifier.padding(bottom = 8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text("Локально на устройстве", color = TextOnDark.copy(alpha = 0.65f), fontSize = 12.sp)
+                    Text("Локально на устройстве", color = TextOnDark.copy(0.65f), fontSize = 12.sp)
                 }
-                TextButton(
-                    onClick = {
-                        editing = LocalCase(UUID.randomUUID().toString(), "", "", emptyList(), 0L)
-                        editTitle = ""
-                        editNotes = ""
-                        editAttachments = emptyList()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)
-                ) { Text("+ Дело") }
+                TextButton(onClick = {
+                    editing = LocalCase(UUID.randomUUID().toString(), "", "", emptyList(), 0L)
+                    editTitle = ""; editNotes = ""; editAttachments = emptyList()
+                }, colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)) { Text("+ Дело") }
             }
             Spacer(Modifier.height(12.dp))
             if (cases.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        "Пока нет дел.\nСоздайте дело, добавьте заметки, фото и файлы с устройства.",
-                        color = TextOnDark.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center
-                    )
+                    Text("Пока нет дел.\nСоздайте дело, добавьте заметки, фото и файлы.", color = TextOnDark.copy(0.7f), textAlign = TextAlign.Center)
                 }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(cases, key = { it.id }) { c ->
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(Color.White.copy(0.18f), Color.White.copy(0.08f))
-                                    ),
-                                    RoundedCornerShape(16.dp)
-                                )
-                                .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
-                                .clickable {
-                                    editing = c
-                                    editTitle = c.title
-                                    editNotes = c.notes
-                                    editAttachments = c.attachments
-                                }
-                                .padding(14.dp)
-                        ) {
+                        Box(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.White.copy(0.18f), Color.White.copy(0.08f))), RoundedCornerShape(16.dp)).border(1.dp, GlassBorder, RoundedCornerShape(16.dp)).clickable {
+                            editing = c; editTitle = c.title; editNotes = c.notes; editAttachments = c.attachments
+                        }.padding(14.dp)) {
                             Column {
                                 Text(c.title, color = TextOnDark, fontWeight = FontWeight.SemiBold)
                                 if (c.notes.isNotBlank()) {
                                     Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        c.notes.take(120) + if (c.notes.length > 120) "…" else "",
-                                        color = TextOnDark.copy(alpha = 0.7f),
-                                        fontSize = 13.sp
-                                    )
+                                    Text(c.notes.take(120) + if (c.notes.length > 120) "…" else "", color = TextOnDark.copy(0.7f), fontSize = 13.sp)
                                 }
                                 if (c.attachments.isNotEmpty()) {
                                     Spacer(Modifier.height(4.dp))
@@ -474,47 +288,21 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
 @Composable
 private fun cabinetFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = TextOnDark,
-    unfocusedTextColor = TextOnDark,
-    focusedBorderColor = LegalGold,
-    unfocusedBorderColor = Color.White.copy(alpha = 0.35f),
-    focusedLabelColor = LegalGold,
-    unfocusedLabelColor = TextOnDark.copy(alpha = 0.6f),
-    cursorColor = LegalGold
+    focusedTextColor = TextOnDark, unfocusedTextColor = TextOnDark,
+    focusedBorderColor = LegalGold, unfocusedBorderColor = Color.White.copy(0.35f),
+    focusedLabelColor = LegalGold, unfocusedLabelColor = TextOnDark.copy(0.6f), cursorColor = LegalGold
 )
 
 @Composable
 internal fun AboutScreen(padding: PaddingValues) {
-    Column(
-        Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
+    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text("О приложении", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         Text("ЗаконЪ · версия 0.1.0", color = LegalGold, fontWeight = FontWeight.SemiBold)
-        SectionTitle("Назначение")
-        BodyText("Приложение «ЗаконЪ» — справочная офлайн-библиотека нормативных материалов Российской Федерации.")
-        SectionTitle("Правовая оговорка")
-        BodyText(
-            "Создатель приложения Исаев Владислав Андреевич не несёт ответственности за полноту, актуальность и точность материалов. " +
-                "Материалы из открытых источников, носят справочный характер. Не являются юридической консультацией."
-        )
-        SectionTitle("Локальное хранение")
-        BodyText("Данные кабинета хранятся только на устройстве. Биометрия обрабатывается системой Android.")
-        SectionTitle("Сотрудничество")
-        BodyText("Valdissor@mail.ru")
-        SectionTitle("Автор")
-        BodyText("Исаев Владислав Андреевич")
+        Text("Локальное хранение", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Text("Данные кабинета хранятся только на устройстве. Биометрия обрабатывается системой Android.", color = TextOnDark.copy(0.88f), fontSize = 14.sp, lineHeight = 20.sp)
+        Text("Автор", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Text("Исаев Владислав Андреевич", color = TextOnDark.copy(0.88f), fontSize = 14.sp)
     }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(text, color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.padding(top = 6.dp))
-}
-
-@Composable
-private fun BodyText(text: String) {
-    Text(text, color = TextOnDark.copy(alpha = 0.88f), fontSize = 14.sp, lineHeight = 20.sp)
 }
 
 @Composable
