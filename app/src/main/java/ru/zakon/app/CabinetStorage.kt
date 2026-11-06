@@ -9,11 +9,15 @@ import androidx.core.content.FileProvider
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.UUID
 import javax.crypto.Cipher
+import javax.crypto.CipherInputStream
+import javax.crypto.CipherOutputStream
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -37,6 +41,12 @@ internal class CabinetStorage(private val context: Context) {
     private val random = SecureRandom()
     private val keyAlias = "ru.zakon.app.cabinet.aes.v1"
     private val attachmentDir = File(context.filesDir, "cabinet/attachments")
+    private val temporaryDir = File(context.cacheDir, "cabinet-open")
+
+    init {
+        // Remove decrypted viewing copies left by a previous app process.
+        temporaryDir.deleteRecursively()
+    }
 
     fun hasPassword(): Boolean =
         prefs.contains("pin_salt") || prefs.contains("pin_hash")
@@ -125,15 +135,26 @@ internal class CabinetStorage(private val context: Context) {
 
     /** Imports a picked file into app-private storage as encrypted bytes. */
     fun importAttachment(source: Uri): String {
-        val clear = context.contentResolver.openInputStream(source)?.use { it.readBytes() }
+        val input = context.contentResolver.openInputStream(source)
             ?: throw IllegalStateException("Не удалось прочитать выбранный файл")
         val id = UUID.randomUUID().toString()
-        val targetDir = attachmentDir
-        if (!targetDir.exists() && !targetDir.mkdirs()) {
+        if (!attachmentDir.exists() && !attachmentDir.mkdirs()) {
+            input.close()
             throw IllegalStateException("Не удалось создать защищённую папку вложений")
         }
-        val encrypted = encryptBytes(clear)
-        File(targetDir, "$id.bin").writeBytes(encrypted)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey())
+        try {
+            FileOutputStream(File(attachmentDir, "$id.bin")).use { fileOutput ->
+                fileOutput.write(cipher.iv)
+                CipherOutputStream(fileOutput, cipher).use { encryptedOutput ->
+                    input.use { sourceInput -> sourceInput.copyTo(encryptedOutput) }
+                }
+            }
+        } catch (e: Exception) {
+            File(attachmentDir, "$id.bin").delete()
+            throw e
+        }
         val mime = context.contentResolver.getType(source) ?: "application/octet-stream"
         val name = queryDisplayName(source) ?: "вложение"
         val safeName = Base64.encodeToString(
@@ -170,14 +191,26 @@ internal class CabinetStorage(private val context: Context) {
         require(id.matches(Regex("[a-fA-F0-9-]{36}"))) { "Некорректный идентификатор вложения" }
         val encryptedFile = File(attachmentDir, "$id.bin")
         require(encryptedFile.isFile) { "Зашифрованный файл не найден" }
-        val clear = decryptBytes(encryptedFile.readBytes())
         val originalName = attachmentLabel(reference)
         val extension = originalName.substringAfterLast('.', "")
             .takeIf { it.matches(Regex("[A-Za-z0-9]{1,10}")) }
             ?.let { ".$it" } ?: ".bin"
-        val temporary = File(context.cacheDir, "cabinet-open/$id$extension")
+        val temporary = File(temporaryDir, "$id$extension")
         temporary.parentFile?.mkdirs()
-        temporary.writeBytes(clear)
+        FileInputStream(encryptedFile).use { encryptedInput ->
+            val iv = ByteArray(12)
+            var offset = 0
+            while (offset < iv.size) {
+                val count = encryptedInput.read(iv, offset, iv.size - offset)
+                if (count < 0) throw IllegalStateException("Повреждённый файл вложения")
+                offset += count
+            }
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(128, iv))
+            CipherInputStream(encryptedInput, cipher).use { clearInput ->
+                FileOutputStream(temporary).use { clearOutput -> clearInput.copyTo(clearOutput) }
+            }
+        }
         return FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
