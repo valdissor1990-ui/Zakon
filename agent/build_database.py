@@ -74,8 +74,12 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: primary source is missing from sources[]")
         checks = doc.get("source_checks", [])
         checked_keys = [item.get("source_key") for item in checks]
+        if len(checked_keys) != len(set(checked_keys)):
+            raise ValueError(f"{doc_id}: duplicate source checks are not allowed")
         if len(set(checked_keys)) < 3:
             raise ValueError(f"{doc_id}: at least three distinct source checks are required")
+        if primary_key not in checked_keys:
+            raise ValueError(f"{doc_id}: primary source must be included in source_checks")
         if any(key not in source_ids or key not in registry_sources for key in checked_keys):
             raise ValueError(f"{doc_id}: a checked source is not registered or not captured")
         hosts = {urlparse(registry_sources[key]["url"]).netloc.lower() for key in checked_keys}
@@ -92,6 +96,16 @@ def build(records_path: Path, output_dir: Path) -> None:
         articles = sorted(doc.get("articles", []), key=lambda a: int(a.get("ordinal", 0)))
         if not articles:
             raise ValueError(f"{doc_id}: document has no articles")
+        seen_article_ids = set()
+        for article in articles:
+            article_id = article.get("id")
+            article_number = article.get("number")
+            body = article.get("body")
+            if not article_id or article_id in seen_article_ids:
+                raise ValueError(f"{doc_id}: every article needs a unique, non-empty id")
+            seen_article_ids.add(article_id)
+            if not article_number or not isinstance(body, str) or not body.strip():
+                raise ValueError(f"{doc_id}: article {article_id} needs a number and non-empty legal text")
         text_digest = sha256("\n".join(a.get("body", "") for a in articles).encode("utf-8"))
         if doc.get("text_sha256") != text_digest:
             raise ValueError(f"{doc_id}: text_sha256 does not match article bodies")
