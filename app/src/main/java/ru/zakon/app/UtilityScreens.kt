@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
@@ -32,51 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import org.json.JSONArray
-import org.json.JSONObject
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
 private val TextOnDark = Color(0xFFF5F7FA)
-
-private data class LocalCase(
-    val id: String, val title: String, val notes: String,
-    val attachments: List<String>, val updatedAt: Long
-)
-
-private class CabinetStorage(private val context: Context) {
-    private val prefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
-    fun hasPassword(): Boolean = prefs.contains("pin_hash")
-    fun setPassword(pin: String) { prefs.edit().putString("pin_hash", pin.hashCode().toString()).apply() }
-    fun checkPassword(pin: String): Boolean = prefs.getString("pin_hash", null) == pin.hashCode().toString()
-    fun loadCases(): List<LocalCase> {
-        val raw = prefs.getString("cases_json", "[]") ?: "[]"
-        return try {
-            val arr = JSONArray(raw)
-            buildList {
-                for (i in 0 until arr.length()) {
-                    val o = arr.getJSONObject(i)
-                    val att = o.optJSONArray("attachments")
-                    val list = buildList { if (att != null) for (j in 0 until att.length()) add(att.getString(j)) }
-                    add(LocalCase(o.getString("id"), o.getString("title"), o.optString("notes", ""), list, o.optLong("updatedAt", 0L)))
-                }
-            }.sortedByDescending { it.updatedAt }
-        } catch (_: Exception) { emptyList() }
-    }
-    fun saveCases(cases: List<LocalCase>) {
-        val arr = JSONArray()
-        cases.forEach { c ->
-            arr.put(JSONObject().apply {
-                put("id", c.id); put("title", c.title); put("notes", c.notes)
-                put("updatedAt", c.updatedAt); put("attachments", JSONArray(c.attachments))
-            })
-        }
-        prefs.edit().putString("cases_json", arr.toString()).apply()
-    }
-    fun persistUri(uri: Uri) {
-        try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-    }
-}
 
 private fun Context.findFragmentActivity(): FragmentActivity? {
     var ctx: Context? = this
@@ -87,11 +50,13 @@ private fun Context.findFragmentActivity(): FragmentActivity? {
     return null
 }
 
-private const val BIO_AUTHENTICATORS =
-    BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+private fun biometricAuthenticators(): Int =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    } else BiometricManager.Authenticators.BIOMETRIC_STRONG
 
 private fun biometricStatus(context: Context): Int =
-    BiometricManager.from(context).canAuthenticate(BIO_AUTHENTICATORS)
+    BiometricManager.from(context).canAuthenticate(biometricAuthenticators())
 
 private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onError: (String) -> Unit) {
     val executor = ContextCompat.getMainExecutor(activity)
@@ -105,12 +70,12 @@ private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onE
         override fun onAuthenticationFailed() { onError("Не удалось распознать биометрию") }
     })
     try {
-        val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Вход в личный кабинет")
-            .setSubtitle("Данные хранятся только на этом устройстве")
-            .setAllowedAuthenticators(BIO_AUTHENTICATORS)
-            .setNegativeButtonText("Пароль")
-            .build()
+        val builder = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Подтвердите личность")
+            .setSubtitle("Разрешение на доступ к ключу шифрования личного кабинета")
+            .setAllowedAuthenticators(biometricAuthenticators())
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) builder.setNegativeButtonText("Отмена")
+        val info = builder.build()
         prompt.authenticate(info)
     } catch (e: Exception) {
         onError(e.message ?: "Ошибка запуска биометрии")
@@ -122,11 +87,21 @@ internal fun CabinetScreen(padding: PaddingValues) {
     val context = LocalContext.current
     val activity = remember(context) { context.findFragmentActivity() }
     val storage = remember { CabinetStorage(context) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, storage) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) storage.clearTemporaryFiles()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
     var pinConfirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    var cases by remember { mutableStateOf(storage.loadCases()) }
+    var storageFailure by remember { mutableStateOf<String?>(null) }
+    var cases by remember { mutableStateOf<List<LocalCase>>(emptyList()) }
+    var casesLoaded by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<LocalCase?>(null) }
     var editTitle by remember { mutableStateOf("") }
     var editNotes by remember { mutableStateOf("") }
@@ -134,18 +109,49 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
     val bioStatus = remember(context) { biometricStatus(context) }
     val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
+    var keyProtection by remember { mutableStateOf("") }
+
+    val runProtected: (() -> Unit) -> Unit = { action ->
+        if (storage.requiresSystemAuthentication()) {
+            val act = activity
+            if (act == null) error = "Не удалось открыть системную проверку устройства"
+            else showBiometric(act, onSuccess = action, onError = { error = it })
+        } else action()
+    }
+    val completeUnlock: () -> Unit = { runProtected { unlocked = true } }
+
+    LaunchedEffect(casesLoaded) {
+        if (casesLoaded) keyProtection = storage.keyProtectionStatus()
+    }
 
     LaunchedEffect(Unit) {
         if (storage.hasPassword() && bioOk && activity != null && !unlocked) {
             showBiometric(activity, onSuccess = { unlocked = true }, onError = { })
         }
     }
+    LaunchedEffect(unlocked) {
+        if (unlocked && !casesLoaded) {
+            try {
+                cases = storage.loadCases()
+                casesLoaded = true
+                storageFailure = null
+            } catch (e: Exception) {
+                storageFailure = e.message ?: "Не удалось расшифровать данные кабинета"
+            }
+        }
+    }
 
     val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
+        if (uri != null) runProtected {
+            try { editAttachments = editAttachments + storage.importAttachment(uri); error = null }
+            catch (e: Exception) { error = e.message ?: "Не удалось защитить файл" }
+        }
     }
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) runProtected {
+            try { editAttachments = editAttachments + storage.importAttachment(uri); error = null }
+            catch (e: Exception) { error = e.message ?: "Не удалось защитить фотографию" }
+        }
     }
 
     Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
@@ -157,22 +163,25 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 Spacer(Modifier.height(16.dp))
                 Text(if (storage.hasPassword()) "Введите пароль или войдите по биометрии" else "Задайте пароль для защиты данных", color = TextOnDark.copy(0.8f), textAlign = TextAlign.Center, fontSize = 14.sp)
                 Spacer(Modifier.height(16.dp))
-                OutlinedTextField(pin, { if (it.length <= 12) pin = it }, label = { Text("Пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(pin, { if (it.length <= 64) pin = it }, label = { Text("Пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
                 if (!storage.hasPassword()) {
                     Spacer(Modifier.height(10.dp))
-                    OutlinedTextField(pinConfirm, { if (it.length <= 12) pinConfirm = it }, label = { Text("Повтор пароля") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(pinConfirm, { if (it.length <= 64) pinConfirm = it }, label = { Text("Повтор пароля") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
                 }
                 error?.let { Spacer(Modifier.height(8.dp)); Text(it, color = Color(0xFFFF8A80), fontSize = 13.sp) }
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         error = null
-                        if (pin.length < 4) { error = "Минимум 4 символа"; return@Button }
+                        if (pin.length < 8) { error = "Минимум 8 символов"; return@Button }
                         if (!storage.hasPassword()) {
                             if (pin != pinConfirm) { error = "Пароли не совпадают"; return@Button }
-                            storage.setPassword(pin); unlocked = true
-                        } else if (storage.checkPassword(pin)) unlocked = true
-                        else error = "Неверный пароль"
+                            storage.setPassword(pin); completeUnlock()
+                        } else if (storage.checkPassword(pin)) completeUnlock()
+                        else {
+                            val wait = storage.passwordLockRemainingSeconds()
+                            error = if (wait > 0) "Слишком много попыток. Повторите через $wait сек." else "Неверный пароль"
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
                     shape = RoundedCornerShape(14.dp),
@@ -207,6 +216,16 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     }
                 }
             }
+        } else if (!casesLoaded && storageFailure == null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = LegalGold) }
+        } else if (storageFailure != null) {
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Не удалось открыть защищённые данные", color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold, fontSize = 18.sp, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(10.dp))
+                Text(storageFailure ?: "Ошибка расшифровки", color = TextOnDark, textAlign = TextAlign.Center, fontSize = 13.sp)
+                Spacer(Modifier.height(10.dp))
+                Text("Данные не удалены. Не очищайте данные приложения и не переустанавливайте его. Закройте и снова откройте приложение.", color = LegalGold, textAlign = TextAlign.Center, fontSize = 13.sp)
+            }
         } else if (editing != null) {
             Column(Modifier.fillMaxSize()) {
                 Text("Дело / материал", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -216,19 +235,31 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 OutlinedTextField(editNotes, { editNotes = it }, label = { Text("Заметки") }, minLines = 5, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
                 Text("Вложения (${editAttachments.size})", color = LegalGold, fontWeight = FontWeight.SemiBold)
+                error?.let { Text(it, color = Color(0xFFFF8A80), fontSize = 12.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                    OutlinedButton(onClick = { pickImage.launch("image/*") }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
+                    OutlinedButton(onClick = { pickImage.launch(arrayOf("image/*")) }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
                     OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Файл") }
                 }
                 LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(editAttachments) { uriStr ->
                         Row(Modifier.fillMaxWidth().background(Color.White.copy(0.1f), RoundedCornerShape(10.dp)).clickable {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW).apply { setDataAndType(Uri.parse(uriStr), null); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-                                context.startActivity(Intent.createChooser(intent, "Открыть"))
-                            } catch (_: Exception) {}
+                                runProtected {
+                                    try {
+                                        val openedUri = storage.openAttachment(uriStr)
+                                        val mime = if (uriStr.startsWith("secure:") || uriStr.startsWith("secure2:")) uriStr.split(":", limit = 4).getOrNull(2) else context.contentResolver.getType(openedUri)
+                                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                                            setDataAndType(openedUri, mime ?: "*/*")
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, "Открыть"))
+                                    } catch (e: Exception) { error = e.message ?: "Не удалось открыть вложение" }
+                                }
+                            } catch (e: Exception) {
+                                error = e.message ?: "Не удалось открыть вложение"
+                            }
                         }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" }, color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            Text(storage.attachmentLabel(uriStr), color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             Text("✕", color = Color(0xFFFF8A80), modifier = Modifier.clickable { editAttachments = editAttachments.filter { it != uriStr } })
                         }
                     }
@@ -239,8 +270,15 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     Button(onClick = {
                         val id = editing!!.id
                         val updated = LocalCase(id, editTitle.ifBlank { "Без названия" }, editNotes, editAttachments, System.currentTimeMillis())
-                        cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it } else listOf(updated) + cases
-                        storage.saveCases(cases); editing = null
+                        val nextCases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it } else listOf(updated) + cases
+                        runProtected {
+                            try {
+                                storage.saveCases(nextCases)
+                                cases = nextCases
+                                editing = null
+                                error = null
+                            } catch (e: Exception) { error = e.message ?: "Не удалось сохранить защищённые данные" }
+                        }
                     }, colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy), modifier = Modifier.weight(1f)) { Text("Сохранить") }
                 }
             }
