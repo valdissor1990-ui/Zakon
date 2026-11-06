@@ -413,7 +413,10 @@ internal class CabinetStorage(private val context: Context) {
             .apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     setUserAuthenticationRequired(true)
-                    setUserAuthenticationValidityDurationSeconds(300)
+                    setUserAuthenticationParameters(
+                        300,
+                        KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
+                    )
                 }
                 if (preferStrongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     setIsStrongBoxBacked(true)
