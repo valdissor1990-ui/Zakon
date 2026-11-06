@@ -191,7 +191,7 @@ private fun ZakonApp(store: LegalStore) {
                     route == "constitution" -> CodeArticlesScreen(store, "const", padding, scrollIndexMap, "constitution") { navigate("article/$it") }
                     route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
                     route == "favorites" -> PlaceholderLight("Избранное", padding, "Сохранённые статьи появятся здесь.")
-                    route == "settings" -> PlaceholderLight("Настройки", padding, "Раздел в разработке.")
+                    route == "settings" -> ContentUpdateScreen(store, padding)
                     route == "about" -> AboutScreen(padding)
                     route == "cabinet" -> CabinetScreen(padding)
                     route == "constructor" -> ConstructorScreen(padding)
@@ -215,7 +215,7 @@ private fun titleFor(route: String): String = when {
     route == "favorites" -> "Избранное"
     route == "cabinet" -> "Личный кабинет"
     route == "about" -> "О приложении"
-    route == "settings" -> "Настройки"
+    route == "settings" -> "Обновление базы"
     route.startsWith("article/") -> "Статья"
     else -> "ЗаконЪ"
 }
