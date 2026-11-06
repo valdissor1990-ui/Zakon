@@ -106,14 +106,15 @@ private fun ZakonApp(store: LegalStore) {
         }
     ) { padding ->
         when {
-            route == "home" -> DocumentsScreen(store, padding, { navigate("document/" + it) }, { navigate("constructor") })
+            route == "home" -> DocumentsScreen(store, padding, { navigate("document/" + it) }, { navigate("constructor") }, { navigate("category/" + it) })
             route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
             route == "cabinet" -> CabinetScreen(padding)
             route == "more" -> MoreScreen(padding) { navigate("constructor") }
             route == "constructor" -> ConstructorScreen(padding)
+            route.startsWith("category/") -> CategoryScreen(store, route.removePrefix("category/"), padding) { navigate("document/" + it) }
             route.startsWith("document/") -> DocumentScreen(store, route.removePrefix("document/"), padding) { navigate("article/" + it) }
             route.startsWith("article/") -> ArticleScreen(store, route.removePrefix("article/"), padding)
-            else -> DocumentsScreen(store, padding, { navigate("document/" + it) }, { navigate("constructor") })
+            else -> DocumentsScreen(store, padding, { navigate("document/" + it) }, { navigate("constructor") }, { navigate("category/" + it) })
         }
     }
 }
@@ -132,7 +133,13 @@ private fun RussianFlagMark() {
 }
 
 @Composable
-private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (String) -> Unit, onConstructor: () -> Unit) {
+private fun DocumentsScreen(
+    store: LegalStore,
+    padding: PaddingValues,
+    onOpen: (String) -> Unit,
+    onConstructor: () -> Unit,
+    onSection: (String) -> Unit
+) {
     var docs by remember { mutableStateOf<List<LegalDocument>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf<String?>(null) }
@@ -203,7 +210,7 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(sections) { section -> LibraryTile(section) }
+                    items(sections) { section -> LibraryTile(section) { onSection(section.kind) } }
                 }
             }
             item {
@@ -229,9 +236,9 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
 }
 
 @Composable
-private fun LibraryTile(section: LibrarySection) {
+private fun LibraryTile(section: LibrarySection, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(132.dp),
+        modifier = Modifier.fillMaxWidth().height(132.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = LegalSurface),
         border = BorderStroke(1.dp, LegalGold.copy(alpha = 0.72f)),
@@ -242,6 +249,71 @@ private fun LibraryTile(section: LibrarySection) {
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(section.title, color = LegalNavy, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                 Text(section.subtitle, color = LegalMuted, style = MaterialTheme.typography.labelSmall, lineHeight = 15.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryScreen(
+    store: LegalStore,
+    kind: String,
+    padding: PaddingValues,
+    onOpen: (String) -> Unit
+) {
+    var documents by remember { mutableStateOf<List<LegalDocument>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(kind, store) {
+        loading = true
+        try {
+            documents = withContext(Dispatchers.IO) { store.getDocuments() }
+            error = null
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            error = failure.localizedMessage ?: "Не удалось загрузить документы."
+        } finally {
+            loading = false
+        }
+    }
+
+    val title = when (kind) {
+        "code" -> "Кодексы Российской Федерации"
+        "law" -> "Федеральные законы"
+        "constitution" -> "Конституция Российской Федерации"
+        else -> "Все документы"
+    }
+    val filtered = when (kind) {
+        "code" -> documents.filter {
+            it.documentType.contains("кодекс", ignoreCase = true) ||
+                it.title.contains("кодекс", ignoreCase = true)
+        }
+        "law" -> documents.filter {
+            it.documentType.contains("закон", ignoreCase = true) ||
+                it.title.contains("федеральный закон", ignoreCase = true)
+        }
+        "constitution" -> documents.filter { it.title.contains("конституц", ignoreCase = true) }
+        else -> documents
+    }
+
+    Column(
+        Modifier.fillMaxSize().padding(padding).padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
+        when {
+            loading -> CircularProgressIndicator(color = LegalGold)
+            error != null -> Text("Ошибка загрузки: $error", color = MaterialTheme.colorScheme.error)
+            filtered.isEmpty() -> EmptyContent(
+                if (documents.isEmpty()) null else "В этом разделе пока нет документов."
+            )
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                items(filtered, key = { it.id }) { doc -> DocumentCard(doc) { onOpen(doc.id) } }
             }
         }
     }
