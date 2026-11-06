@@ -84,7 +84,16 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var pin by remember { mutableStateOf("") }
     var pinConfirm by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    var cases by remember { mutableStateOf(storage.loadCases()) }
+    var storageFailure by remember { mutableStateOf<String?>(null) }
+    var cases by remember {
+        mutableStateOf(
+            try { storage.loadCases() }
+            catch (e: Exception) {
+                storageFailure = e.message ?: "Не удалось расшифровать данные кабинета"
+                emptyList()
+            }
+        )
+    }
     var editing by remember { mutableStateOf<LocalCase?>(null) }
     var editTitle by remember { mutableStateOf("") }
     var editNotes by remember { mutableStateOf("") }
@@ -170,6 +179,14 @@ internal fun CabinetScreen(padding: PaddingValues) {
                         Text("Код биометрии: $bioStatus — настройте отпечаток/лицо в системе", color = TextOnDark.copy(0.55f), fontSize = 11.sp, textAlign = TextAlign.Center)
                     }
                 }
+            }
+        } else if (storageFailure != null) {
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Не удалось открыть защищённые данные", color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold, fontSize = 18.sp, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(10.dp))
+                Text(storageFailure ?: "Ошибка расшифровки", color = TextOnDark, textAlign = TextAlign.Center, fontSize = 13.sp)
+                Spacer(Modifier.height(10.dp))
+                Text("Данные не удалены. Не очищайте данные приложения и не переустанавливайте его. Закройте и снова откройте приложение.", color = LegalGold, textAlign = TextAlign.Center, fontSize = 13.sp)
             }
         } else if (editing != null) {
             Column(Modifier.fillMaxSize()) {
