@@ -109,6 +109,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
     val bioStatus = remember(context) { biometricStatus(context) }
     val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
+    var keyProtection by remember { mutableStateOf("") }
 
     val runProtected: (() -> Unit) -> Unit = { action ->
         if (storage.requiresSystemAuthentication()) {
@@ -118,6 +119,10 @@ internal fun CabinetScreen(padding: PaddingValues) {
         } else action()
     }
     val completeUnlock: () -> Unit = { runProtected { unlocked = true } }
+
+    LaunchedEffect(casesLoaded) {
+        if (casesLoaded) keyProtection = storage.keyProtectionStatus()
+    }
 
     LaunchedEffect(Unit) {
         if (storage.hasPassword() && bioOk && activity != null && !unlocked) {
