@@ -32,51 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
 private val TextOnDark = Color(0xFFF5F7FA)
-
-private data class LocalCase(
-    val id: String, val title: String, val notes: String,
-    val attachments: List<String>, val updatedAt: Long
-)
-
-private class CabinetStorage(private val context: Context) {
-    private val prefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
-    fun hasPassword(): Boolean = prefs.contains("pin_hash")
-    fun setPassword(pin: String) { prefs.edit().putString("pin_hash", pin.hashCode().toString()).apply() }
-    fun checkPassword(pin: String): Boolean = prefs.getString("pin_hash", null) == pin.hashCode().toString()
-    fun loadCases(): List<LocalCase> {
-        val raw = prefs.getString("cases_json", "[]") ?: "[]"
-        return try {
-            val arr = JSONArray(raw)
-            buildList {
-                for (i in 0 until arr.length()) {
-                    val o = arr.getJSONObject(i)
-                    val att = o.optJSONArray("attachments")
-                    val list = buildList { if (att != null) for (j in 0 until att.length()) add(att.getString(j)) }
-                    add(LocalCase(o.getString("id"), o.getString("title"), o.optString("notes", ""), list, o.optLong("updatedAt", 0L)))
-                }
-            }.sortedByDescending { it.updatedAt }
-        } catch (_: Exception) { emptyList() }
-    }
-    fun saveCases(cases: List<LocalCase>) {
-        val arr = JSONArray()
-        cases.forEach { c ->
-            arr.put(JSONObject().apply {
-                put("id", c.id); put("title", c.title); put("notes", c.notes)
-                put("updatedAt", c.updatedAt); put("attachments", JSONArray(c.attachments))
-            })
-        }
-        prefs.edit().putString("cases_json", arr.toString()).apply()
-    }
-    fun persistUri(uri: Uri) {
-        try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-    }
-}
 
 private fun Context.findFragmentActivity(): FragmentActivity? {
     var ctx: Context? = this
@@ -142,10 +100,16 @@ internal fun CabinetScreen(padding: PaddingValues) {
     }
 
     val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
+        if (uri != null) {
+            try { editAttachments = editAttachments + storage.importAttachment(uri); error = null }
+            catch (e: Exception) { error = e.message ?: "Не удалось защитить файл" }
+        }
     }
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) { storage.persistUri(uri); editAttachments = editAttachments + uri.toString() }
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            try { editAttachments = editAttachments + storage.importAttachment(uri); error = null }
+            catch (e: Exception) { error = e.message ?: "Не удалось защитить фотографию" }
+        }
     }
 
     Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
@@ -216,19 +180,27 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 OutlinedTextField(editNotes, { editNotes = it }, label = { Text("Заметки") }, minLines = 5, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
                 Text("Вложения (${editAttachments.size})", color = LegalGold, fontWeight = FontWeight.SemiBold)
+                error?.let { Text(it, color = Color(0xFFFF8A80), fontSize = 12.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                    OutlinedButton(onClick = { pickImage.launch("image/*") }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
+                    OutlinedButton(onClick = { pickImage.launch(arrayOf("image/*")) }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
                     OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Файл") }
                 }
                 LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(editAttachments) { uriStr ->
                         Row(Modifier.fillMaxWidth().background(Color.White.copy(0.1f), RoundedCornerShape(10.dp)).clickable {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW).apply { setDataAndType(Uri.parse(uriStr), null); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                val openedUri = storage.openAttachment(uriStr)
+                                val mime = if (uriStr.startsWith("secure:")) uriStr.split(":", limit = 4).getOrNull(2) else context.contentResolver.getType(openedUri)
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(openedUri, mime ?: "*/*")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
                                 context.startActivity(Intent.createChooser(intent, "Открыть"))
-                            } catch (_: Exception) {}
+                            } catch (e: Exception) {
+                                error = e.message ?: "Не удалось открыть вложение"
+                            }
                         }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(uriStr.substringAfterLast('/').take(40).ifBlank { "вложение" }, color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            Text(storage.attachmentLabel(uriStr), color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             Text("✕", color = Color(0xFFFF8A80), modifier = Modifier.clickable { editAttachments = editAttachments.filter { it != uriStr } })
                         }
                     }
