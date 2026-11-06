@@ -9,7 +9,7 @@ data class LegalDocument(val id: String, val title: String, val documentType: St
 data class LegalArticle(val id: String, val documentId: String, val number: String, val title: String?, val body: String)
 data class SearchHit(val articleId: String, val documentTitle: String, val articleNumber: String, val articleTitle: String?, val preview: String)
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 1) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 2) {
     override fun onConfigure(db: SQLiteDatabase) { super.onConfigure(db); db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE documents (
@@ -21,7 +21,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
             number TEXT NOT NULL, title TEXT, body TEXT NOT NULL,
             FOREIGN KEY(document_id) REFERENCES documents(id) ON DELETE CASCADE)""")
         db.execSQL("CREATE INDEX idx_articles_doc ON articles(document_id, ordinal)")
-        db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id, document_title, article_number, article_title, body, tokenize=unicode61)")
+        db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id UNINDEXED, document_title, article_number, article_title, body, tokenize=unicode61)")
         db.execSQL("""CREATE TRIGGER articles_fts_insert AFTER INSERT ON articles BEGIN
             INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
             SELECT NEW.id,d.title,NEW.number,COALESCE(NEW.title,''),NEW.body FROM documents d WHERE d.id=NEW.document_id;
@@ -41,7 +41,15 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
         END""")
     }
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Versioned schema migrations are applied with content format upgrades.
+        if (oldVersion < 2) {
+            db.execSQL("DROP TABLE IF EXISTS articles_fts")
+            db.execSQL("CREATE VIRTUAL TABLE articles_fts USING fts4(article_id UNINDEXED, document_title, article_number, article_title, body, tokenize=unicode61)")
+            db.execSQL("""
+                INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body)
+                SELECT a.id,d.title,a.number,COALESCE(a.title,''),a.body
+                FROM articles a JOIN documents d ON d.id=a.document_id
+            """.trimIndent())
+        }
     }
     fun getDocuments(): List<LegalDocument> = readableDatabase.rawQuery(
         "SELECT id,title,document_type,number,legal_status,verification_status FROM documents ORDER BY title", null
