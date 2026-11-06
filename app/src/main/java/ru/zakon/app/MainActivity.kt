@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,9 +27,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,9 +122,7 @@ private fun ZakonApp(store: LegalStore) {
                             navigationIconContentColor = Color.White,
                             actionIconContentColor = Color.White
                         ),
-                        title = {
-                            Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        },
+                        title = { Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
                         navigationIcon = {
                             if (root) {
                                 Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = Color.White, fontSize = 22.sp)
@@ -145,28 +147,27 @@ private fun ZakonApp(store: LegalStore) {
                             "cabinet" -> navigate("cabinet")
                         }
                     }
-                    route == "codes" -> CodesMenuScreen(padding) { codeId ->
-                        navigate("code/$codeId")
-                    }
+                    route == "codes" -> CodesMenuScreen(padding) { navigate("code/$it") }
                     route.startsWith("code/") && route.endsWith("/liability") -> {
                         val id = route.removePrefix("code/").removeSuffix("/liability")
                         val code = AllRfCodes.find { it.id == id }
                         if (code != null) LiabilityScreen(code, padding) else PlaceholderLight("Не найдено", padding)
                     }
+                    route.startsWith("code/") && route.contains("/part/") -> {
+                        val partId = route.substringAfterLast("/")
+                        CodeArticlesScreen(store, partId, padding) { navigate("article/$it") }
+                    }
                     route.startsWith("code/") -> {
                         val id = route.removePrefix("code/")
                         val code = AllRfCodes.find { it.id == id }
-                        if (code != null) CodeDetailScreen(code, padding,
+                        if (code != null) CodeDetailScreen(
+                            store, code, padding,
                             onPart = { navigate("code/$id/part/$it") },
-                            onLiability = { navigate("code/$id/liability") }
+                            onLiability = { navigate("code/$id/liability") },
+                            onArticle = { navigate("article/$it") }
                         ) else PlaceholderLight("Не найдено", padding)
                     }
-                    route == "constitution" -> ConstitutionScreen(padding) { navigate("constitution/51") }
-                    route == "constitution/51" -> ArticleTextScreen(
-                        ConstitutionArticle51Title,
-                        ConstitutionArticle51Body,
-                        padding
-                    )
+                    route == "constitution" -> CodeArticlesScreen(store, "const", padding) { navigate("article/$it") }
                     route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
                     route == "favorites" -> PlaceholderLight("Избранное", padding, "Сохранённые статьи появятся здесь.")
                     route == "settings" -> PlaceholderLight("Настройки", padding, "Раздел в разработке.")
@@ -188,16 +189,14 @@ private fun titleFor(route: String): String = when {
     route.startsWith("code/") && route.endsWith("/liability") -> "Ответственность"
     route.startsWith("code/") -> AllRfCodes.find { route.contains(it.id) }?.shortName ?: "Кодекс"
     route == "constitution" -> "Конституция РФ"
-    route == "constitution/51" -> "Статья 51"
     route == "search" -> "Поиск"
     route == "favorites" -> "Избранное"
     route == "cabinet" -> "Личный кабинет"
     route == "about" -> "О приложении"
     route == "settings" -> "Настройки"
+    route.startsWith("article/") -> "Статья"
     else -> "ЗаконЪ"
 }
-
-// ─── Home ───────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit) {
@@ -224,19 +223,14 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
     }
 }
 
-// ─── Codes ──────────────────────────────────────────────────────────────────
-
 @Composable
 private fun CodesMenuScreen(padding: PaddingValues, onCodeClick: (String) -> Unit) {
+    val gridState = rememberLazyGridState()
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
-        Text(
-            "Основные кодексы Российской Федерации",
-            color = Color.White.copy(alpha = 0.8f),
-            fontSize = 13.sp,
-            modifier = Modifier.padding(bottom = 10.dp)
-        )
+        Text("Основные кодексы Российской Федерации", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
+            state = gridState,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 28.dp)
@@ -253,143 +247,129 @@ private fun CodesMenuScreen(padding: PaddingValues, onCodeClick: (String) -> Uni
     }
 }
 
+private fun docIdForCode(code: RfCode): String? = when (code.id) {
+    "uk" -> "uk"
+    "koap" -> "koap"
+    "tk" -> "tk"
+    else -> null
+}
+
 @Composable
 private fun CodeDetailScreen(
+    store: LegalStore,
     code: RfCode,
     padding: PaddingValues,
     onPart: (String) -> Unit,
-    onLiability: () -> Unit
+    onLiability: () -> Unit,
+    onArticle: (String) -> Unit
 ) {
     val scroll = rememberScrollState()
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .verticalScroll(scroll)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    var articles by remember { mutableStateOf<List<LegalArticle>>(emptyList()) }
+    val directDoc = docIdForCode(code)
+    LaunchedEffect(code.id) {
+        if (directDoc != null) articles = withContext(Dispatchers.IO) { store.getArticles(directDoc) }
+    }
+    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(code.fullName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
-        if (code.overview.isNotBlank()) {
-            Text(code.overview, color = Color.White.copy(alpha = 0.85f), fontSize = 14.sp, lineHeight = 21.sp)
-        }
+        if (code.overview.isNotBlank()) Text(code.overview, color = Color.White.copy(alpha = 0.85f), fontSize = 14.sp, lineHeight = 21.sp)
         if (code.parts.isNotEmpty()) {
             Text("Части", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            code.parts.forEach { part ->
-                GlassRow("§  ${part.title}") { onPart(part.id) }
-            }
+            code.parts.forEach { part -> GlassRow("§  ${part.title}") { onPart(part.id) } }
         }
         if (code.hasLiability) {
             Text("Ответственность", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             GlassRow("⚖  ${code.liabilityTitle}") { onLiability() }
         }
-        Text(
-            "Тексты статей подключаются из локальной правовой базы. Справочный характер.",
-            color = Color.White.copy(alpha = 0.5f),
-            fontSize = 12.sp
-        )
+        if (articles.isNotEmpty()) {
+            Text("Статьи", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            ArticleTiles(articles, onArticle)
+        } else if (directDoc == null && code.parts.isEmpty()) {
+            Text("Тексты статей для этого кодекса будут добавлены в базу.", color = Color.White.copy(0.55f), fontSize = 12.sp)
+        }
+        Text("Справочный характер. Сверяйте с официальными источниками.", color = Color.White.copy(alpha = 0.45f), fontSize = 11.sp)
+    }
+}
+
+@Composable
+private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: PaddingValues, onArticle: (String) -> Unit) {
+    var articles by remember { mutableStateOf<List<LegalArticle>>(emptyList()) }
+    var title by remember { mutableStateOf("") }
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(documentId) {
+        withContext(Dispatchers.IO) {
+            title = store.getDocument(documentId)?.title ?: documentId
+            articles = store.getArticles(documentId)
+        }
+    }
+    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
+        Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp))
+        if (articles.isEmpty()) Text("Статьи не найдены в локальной базе.", color = Color.White.copy(0.7f))
+        else LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            state = gridState,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
+        ) {
+            items(articles, key = { it.id }) { a -> ArticleTile(a) { onArticle(a.id) } }
+        }
+    }
+}
+
+@Composable
+private fun ArticleTiles(articles: List<LegalArticle>, onArticle: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        articles.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { a -> ArticleTile(a, Modifier.weight(1f)) { onArticle(a.id) } }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ArticleTile(article: LegalArticle, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val essence = article.title?.take(48) ?: article.body.replace("\n", " ").take(48)
+    Box(
+        modifier.height(88.dp).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.12f))
+            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(10.dp)
+    ) {
+        Column {
+            Text("ст. ${article.number}", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(essence, color = Color.White.copy(alpha = 0.88f), fontSize = 12.sp, lineHeight = 15.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
 @Composable
 private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     val scroll = rememberScrollState()
-    Column(
-        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
+    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(code.shortName + " — " + code.liabilityTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         code.liabilityItems.forEach { item ->
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .background(Color.White.copy(0.10f), RoundedCornerShape(14.dp))
-                    .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
-                    .padding(14.dp)
-            ) {
+            Column(Modifier.fillMaxWidth().background(Color.White.copy(0.10f), RoundedCornerShape(14.dp)).border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).padding(14.dp)) {
                 Text(item.title, color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Spacer(Modifier.height(6.dp))
                 Text(item.body, color = Color.White.copy(0.88f), fontSize = 14.sp, lineHeight = 21.sp)
             }
         }
-        if (code.liabilityItems.isEmpty()) {
-            Text("Раздел будет дополнен.", color = Color.White.copy(0.7f))
-        }
-    }
-}
-
-// ─── Constitution ───────────────────────────────────────────────────────────
-
-@Composable
-private fun ConstitutionScreen(padding: PaddingValues, onArticle51: () -> Unit) {
-    val scroll = rememberScrollState()
-    Column(
-        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Конституция Российской Федерации", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text(ConstitutionPreambleNote, color = Color.White.copy(0.7f), fontSize = 13.sp, lineHeight = 19.sp)
-        Text("Избранные статьи", color = LegalGold, fontWeight = FontWeight.SemiBold)
-        GlassRow("◆  Статья 51 — свидетельский иммунитет") { onArticle51() }
     }
 }
 
 @Composable
-private fun ArticleTextScreen(title: String, body: String, padding: PaddingValues) {
-    val scroll = rememberScrollState()
-    Column(
-        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(title, color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(
-            body,
-            color = Color.White.copy(alpha = 0.92f),
-            fontSize = 16.sp,
-            lineHeight = 24.sp
-        )
-        Text(
-            "Текст приведён в справочных целях. Актуальную редакцию сверяйте с официальными источниками.",
-            color = Color.White.copy(alpha = 0.5f),
-            fontSize = 12.sp
-        )
-    }
-}
-
-// ─── UI atoms ───────────────────────────────────────────────────────────────
-
-@Composable
-private fun GlassCard(
-    symbol: String,
-    title: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
+private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier
-            .height(100.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.20f), Color.White.copy(alpha = 0.08f))
-                )
-            )
-            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(10.dp),
+        modifier.height(100.dp).clip(RoundedCornerShape(18.dp))
+            .background(Brush.verticalGradient(listOf(Color.White.copy(0.20f), Color.White.copy(0.08f))))
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp)).clickable(onClick = onClick).padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(symbol, color = LegalGold, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(6.dp))
-            Text(
-                title,
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center,
-                lineHeight = 15.sp
-            )
+            Text(title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, lineHeight = 15.sp)
         }
     }
 }
@@ -397,12 +377,8 @@ private fun GlassCard(
 @Composable
 private fun GlassRow(text: String, onClick: () -> Unit) {
     Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(0.12f))
-            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(0.12f))
+            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -416,13 +392,8 @@ private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: 
     val bg = if (selected) LegalGold.copy(alpha = 0.22f) else Color.Transparent
     val textColor = if (selected) LegalGold else Color.White.copy(alpha = 0.9f)
     Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(bg)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 13.dp),
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
+            .background(bg).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(icon, color = textColor, fontSize = 18.sp, modifier = Modifier.width(28.dp))
@@ -433,11 +404,7 @@ private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: 
 
 @Composable
 private fun PlaceholderLight(title: String, padding: PaddingValues, subtitle: String = "") {
-    Column(
-        Modifier.fillMaxSize().padding(padding).padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
         if (subtitle.isNotBlank()) {
             Spacer(Modifier.height(8.dp))
