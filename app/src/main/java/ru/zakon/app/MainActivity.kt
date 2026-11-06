@@ -46,7 +46,7 @@ private fun ZakonApp(store: LegalStore) {
     Box(Modifier.fillMaxSize()) {
         // Full-screen background - Crop keeps aspect ratio, no stretch
         Image(
-            painter = painterResource(id = R.drawable.grok_1793949391711),
+            painter = painterResource(id = R.drawable.grok_1793951493468),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
