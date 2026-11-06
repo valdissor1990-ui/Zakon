@@ -35,57 +35,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val store = remember { LegalStore(applicationContext) }
-            DisposableEffect(store) {
-                onDispose { store.close() }
-            }
+            DisposableEffect(store) { onDispose { store.close() } }
             MaterialTheme(colorScheme = LegalColors) { ZakonApp(store) }
         }
     }
 }
 
-private val GlassBorder = Color.White.copy(alpha = 0.35f)
-private val GlassDark = Color(0xFF0D1B2A).copy(alpha = 0.78f)
-
-// ─── Data: all major RF codes ───────────────────────────────────────────────
-
-private data class CodePart(val id: String, val title: String)
-private data class RfCode(
-    val id: String,
-    val shortName: String,
-    val fullName: String,
-    val icon: String,
-    val parts: List<CodePart> = emptyList()
-)
-
-private val AllRfCodes = listOf(
-    RfCode("gk", "ГК РФ", "Гражданский кодекс", "📜", listOf(
-        CodePart("gk1", "Часть 1"), CodePart("gk2", "Часть 2"),
-        CodePart("gk3", "Часть 3"), CodePart("gk4", "Часть 4")
-    )),
-    RfCode("uk", "УК РФ", "Уголовный кодекс", "⚖️"),
-    RfCode("upk", "УПК РФ", "Уголовно-процессуальный кодекс", "🔍"),
-    RfCode("gpk", "ГПК РФ", "Гражданский процессуальный кодекс", "📋"),
-    RfCode("apk", "АПК РФ", "Арбитражный процессуальный кодекс", "🏛️"),
-    RfCode("koap", "КоАП РФ", "Кодекс об административных правонарушениях", "🚨"),
-    RfCode("tk", "ТК РФ", "Трудовой кодекс", "👷"),
-    RfCode("sk", "СК РФ", "Семейный кодекс", "👨‍👩‍👧"),
-    RfCode("zhk", "ЖК РФ", "Жилищный кодекс", "🏠"),
-    RfCode("zk", "ЗК РФ", "Земельный кодекс", "🌍"),
-    RfCode("grk", "ГрК РФ", "Градостроительный кодекс", "🏗️"),
-    RfCode("nk", "НК РФ", "Налоговый кодекс", "💰", listOf(
-        CodePart("nk1", "Часть 1"), CodePart("nk2", "Часть 2")
-    )),
-    RfCode("bk", "БК РФ", "Бюджетный кодекс", "📊"),
-    RfCode("vk", "ВК РФ", "Водный кодекс", "🌊"),
-    RfCode("lk", "ЛК РФ", "Лесной кодекс", "🌲"),
-    RfCode("air", "Воздушный кодекс", "Воздушный кодекс", "✈️"),
-    RfCode("ktm", "КТМ РФ", "Кодекс торгового мореплавания", "🚢"),
-    RfCode("kasi", "КАС РФ", "Кодекс административного судопроизводства", "📑"),
-    RfCode("tam", "ТК ЕАЭС", "Таможенный кодекс ЕАЭС", "📦"),
-    RfCode("uik", "УИК РФ", "Уголовно-исполнительный кодекс", "🔒")
-)
-
-// ─── App ────────────────────────────────────────────────────────────────────
+private val GlassBorder = Color.White.copy(alpha = 0.38f)
+private val GlassDark = Color(0xFF0D1B2A).copy(alpha = 0.80f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,9 +70,9 @@ private fun ZakonApp(store: LegalStore) {
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
                     listOf(
-                        Color.Black.copy(alpha = 0.40f),
-                        Color.Black.copy(alpha = 0.22f),
-                        Color.Black.copy(alpha = 0.55f)
+                        Color.Black.copy(alpha = 0.42f),
+                        Color.Black.copy(alpha = 0.24f),
+                        Color.Black.copy(alpha = 0.58f)
                     )
                 )
             )
@@ -130,43 +87,24 @@ private fun ZakonApp(store: LegalStore) {
                     modifier = Modifier.width(280.dp)
                 ) {
                     Spacer(Modifier.height(28.dp))
-                    Column(
-                        Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("🦅", fontSize = 42.sp)
-                        Spacer(Modifier.height(8.dp))
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("§", color = LegalGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(6.dp))
                         Text("ЗаконЪ", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                         Text("Правовая библиотека", color = LegalGold, style = MaterialTheme.typography.labelMedium)
                     }
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(20.dp))
                     HorizontalDivider(color = Color.White.copy(alpha = 0.15f))
                     Spacer(Modifier.height(8.dp))
-
-                    DrawerItem("🏠", "Главная", route == "home") {
-                        stack.clear(); stack.add("home"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("📖", "Кодексы", route == "codes" || route.startsWith("code/")) {
-                        stack.clear(); stack.add("codes"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("📜", "Конституция", route == "constitution") {
-                        stack.clear(); stack.add("constitution"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("⚖", "Федеральные законы", route.startsWith("category/law")) {
-                        stack.clear(); stack.add("category/law"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("★", "Избранное", route == "favorites") {
-                        stack.clear(); stack.add("favorites"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("⌕", "Поиск", route == "search") {
-                        stack.clear(); stack.add("search"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("⚙", "Настройки", route == "settings") {
-                        stack.clear(); stack.add("settings"); scope.launch { drawerState.close() }
-                    }
-                    DrawerItem("ℹ", "О приложении", route == "about") {
-                        stack.clear(); stack.add("about"); scope.launch { drawerState.close() }
-                    }
+                    DrawerItem("⌂", "Главная", route == "home") { stack.clear(); stack.add("home"); scope.launch { drawerState.close() } }
+                    DrawerItem("§", "Кодексы", route == "codes" || route.startsWith("code/")) { stack.clear(); stack.add("codes"); scope.launch { drawerState.close() } }
+                    DrawerItem("◆", "Конституция", route.startsWith("constitution")) { stack.clear(); stack.add("constitution"); scope.launch { drawerState.close() } }
+                    DrawerItem("⚖", "Федеральные законы", route.startsWith("category/law")) { stack.clear(); stack.add("category/law"); scope.launch { drawerState.close() } }
+                    DrawerItem("♟", "Личный кабинет", route == "cabinet") { stack.clear(); stack.add("cabinet"); scope.launch { drawerState.close() } }
+                    DrawerItem("★", "Избранное", route == "favorites") { stack.clear(); stack.add("favorites"); scope.launch { drawerState.close() } }
+                    DrawerItem("⌕", "Поиск", route == "search") { stack.clear(); stack.add("search"); scope.launch { drawerState.close() } }
+                    DrawerItem("⚙", "Настройки", route == "settings") { stack.clear(); stack.add("settings"); scope.launch { drawerState.close() } }
+                    DrawerItem("ℹ", "О приложении", route == "about") { stack.clear(); stack.add("about"); scope.launch { drawerState.close() } }
                 }
             }
         ) {
@@ -181,31 +119,17 @@ private fun ZakonApp(store: LegalStore) {
                             actionIconContentColor = Color.White
                         ),
                         title = {
-                            Text(
-                                when {
-                                    route == "codes" -> "Кодексы РФ"
-                                    route.startsWith("code/") -> {
-                                        val id = route.removePrefix("code/")
-                                        AllRfCodes.find { it.id == id }?.shortName ?: "Кодекс"
-                                    }
-                                    route == "constitution" -> "Конституция РФ"
-                                    route == "search" -> "Поиск"
-                                    route == "favorites" -> "Избранное"
-                                    else -> "ЗаконЪ"
-                                },
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
-                            )
+                            Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         },
                         navigationIcon = {
                             if (root) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = Color.White, fontSize = 24.sp)
+                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = Color.White, fontSize = 22.sp)
                             } else {
-                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), color = Color.White, fontSize = 32.sp)
+                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), color = Color.White, fontSize = 30.sp)
                             }
                         },
                         actions = {
-                            Text("⚙", Modifier.clickable { stack.clear(); stack.add("settings") }.padding(horizontal = 16.dp), color = Color.White, fontSize = 22.sp)
+                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 16.dp), color = Color.White, fontSize = 20.sp)
                         }
                     )
                 }
@@ -218,31 +142,36 @@ private fun ZakonApp(store: LegalStore) {
                             "laws" -> navigate("category/law")
                             "search" -> navigate("search")
                             "favorites" -> navigate("favorites")
+                            "cabinet" -> navigate("cabinet")
                         }
                     }
                     route == "codes" -> CodesMenuScreen(padding) { codeId ->
-                        val code = AllRfCodes.find { it.id == codeId }
-                        if (code != null && code.parts.isNotEmpty()) {
-                            navigate("code/$codeId")
-                        } else {
-                            // single-part code → open as document search later
-                            navigate("category/code")
-                        }
+                        navigate("code/$codeId")
+                    }
+                    route.startsWith("code/") && route.endsWith("/liability") -> {
+                        val id = route.removePrefix("code/").removeSuffix("/liability")
+                        val code = AllRfCodes.find { it.id == id }
+                        if (code != null) LiabilityScreen(code, padding) else PlaceholderLight("Не найдено", padding)
                     }
                     route.startsWith("code/") -> {
-                        val codeId = route.removePrefix("code/")
-                        val code = AllRfCodes.find { it.id == codeId }
-                        if (code != null) CodePartsScreen(code, padding) { partId ->
-                            navigate("category/code")
-                        } else PlaceholderScreen("Кодекс", "Не найден", padding)
+                        val id = route.removePrefix("code/")
+                        val code = AllRfCodes.find { it.id == id }
+                        if (code != null) CodeDetailScreen(code, padding,
+                            onPart = { navigate("code/$id/part/$it") },
+                            onLiability = { navigate("code/$id/liability") }
+                        ) else PlaceholderLight("Не найдено", padding)
                     }
-                    route == "constitution" -> PlaceholderScreen("Конституция РФ", "Основной закон Российской Федерации", padding)
+                    route == "constitution" -> ConstitutionScreen(padding) { navigate("constitution/51") }
+                    route == "constitution/51" -> ArticleTextScreen(
+                        ConstitutionArticle51Title,
+                        ConstitutionArticle51Body,
+                        padding
+                    )
                     route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
-                    route == "favorites" -> PlaceholderScreen("Избранное", "Здесь будут избранные статьи", padding)
-                    route == "settings" -> PlaceholderScreen("Настройки", "Раздел в разработке", padding)
-                    route == "about" -> PlaceholderScreen("О приложении", "ЗаконЪ — офлайн правовая библиотека России", padding)
+                    route == "favorites" -> PlaceholderLight("Избранное", padding, "Сохранённые статьи появятся здесь.")
+                    route == "settings" -> PlaceholderLight("Настройки", padding, "Раздел в разработке.")
+                    route == "about" -> AboutScreen(padding)
                     route == "cabinet" -> CabinetScreen(padding)
-                    route == "more" -> MoreScreen(padding) { navigate("constructor") }
                     route == "constructor" -> ConstructorScreen(padding)
                     route.startsWith("category/") -> CategoryScreen(store, route.removePrefix("category/"), padding) { navigate("document/" + it) }
                     route.startsWith("document/") -> DocumentScreen(store, route.removePrefix("document/"), padding) { navigate("article/" + it) }
@@ -254,67 +183,69 @@ private fun ZakonApp(store: LegalStore) {
     }
 }
 
+private fun titleFor(route: String): String = when {
+    route == "codes" -> "Кодексы РФ"
+    route.startsWith("code/") && route.endsWith("/liability") -> "Ответственность"
+    route.startsWith("code/") -> AllRfCodes.find { route.contains(it.id) }?.shortName ?: "Кодекс"
+    route == "constitution" -> "Конституция РФ"
+    route == "constitution/51" -> "Статья 51"
+    route == "search" -> "Поиск"
+    route == "favorites" -> "Избранное"
+    route == "cabinet" -> "Личный кабинет"
+    route == "about" -> "О приложении"
+    route == "settings" -> "Настройки"
+    else -> "ЗаконЪ"
+}
+
 // ─── Home ───────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit) {
     Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 18.dp),
+        Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Push cards lower
-        Spacer(Modifier.weight(0.55f))
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                GlassCard("📖", "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
-                GlassCard("📜", "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
+        Spacer(Modifier.weight(0.62f))
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                GlassCard("§", "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
+                GlassCard("◆", "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                GlassCard("⚖", "Федеральные\nзаконы и статьи", Modifier.weight(1f)) { onNavigate("laws") }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                GlassCard("⚖", "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
                 GlassCard("⌕", "Поиск", Modifier.weight(1f)) { onNavigate("search") }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 GlassCard("★", "Избранное", Modifier.weight(1f)) { onNavigate("favorites") }
-                // empty spacer to keep 2-column rhythm
-                Spacer(Modifier.weight(1f))
+                GlassCard("♟", "Личный\nкабинет", Modifier.weight(1f)) { onNavigate("cabinet") }
             }
         }
-
-        Spacer(Modifier.weight(0.25f))
+        Spacer(Modifier.weight(0.18f))
     }
 }
 
-// ─── Codes menu ─────────────────────────────────────────────────────────────
+// ─── Codes ──────────────────────────────────────────────────────────────────
 
 @Composable
 private fun CodesMenuScreen(padding: PaddingValues, onCodeClick: (String) -> Unit) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
+    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
         Text(
-            "Все кодексы Российской Федерации",
+            "Основные кодексы Российской Федерации",
             color = Color.White.copy(alpha = 0.8f),
-            fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 12.dp)
+            fontSize = 13.sp,
+            modifier = Modifier.padding(bottom = 10.dp)
         )
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(bottom = 28.dp)
         ) {
-            items(AllRfCodes) { code ->
+            items(AllRfCodes, key = { it.id }) { code ->
                 GlassCard(
-                    icon = code.icon,
-                    title = code.shortName + if (code.parts.isNotEmpty()) "\n(${code.parts.size} ч.)" else "",
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    symbol = code.symbol,
+                    title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
+                    modifier = Modifier.fillMaxWidth().height(104.dp),
                     onClick = { onCodeClick(code.id) }
                 )
             }
@@ -323,71 +254,166 @@ private fun CodesMenuScreen(padding: PaddingValues, onCodeClick: (String) -> Uni
 }
 
 @Composable
-private fun CodePartsScreen(code: RfCode, padding: PaddingValues, onPartClick: (String) -> Unit) {
+private fun CodeDetailScreen(
+    code: RfCode,
+    padding: PaddingValues,
+    onPart: (String) -> Unit,
+    onLiability: () -> Unit
+) {
+    val scroll = rememberScrollState()
     Column(
         Modifier
             .fillMaxSize()
             .padding(padding)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scroll)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(code.fullName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text("Выберите часть", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp, modifier = Modifier.padding(bottom = 16.dp))
-        code.parts.forEach { part ->
-            GlassCard(
-                icon = code.icon,
-                title = "${code.shortName}\n${part.title}",
-                modifier = Modifier.fillMaxWidth().height(100.dp).padding(bottom = 10.dp),
-                onClick = { onPartClick(part.id) }
-            )
+        Text(code.fullName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
+        if (code.overview.isNotBlank()) {
+            Text(code.overview, color = Color.White.copy(alpha = 0.85f), fontSize = 14.sp, lineHeight = 21.sp)
+        }
+        if (code.parts.isNotEmpty()) {
+            Text("Части", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            code.parts.forEach { part ->
+                GlassRow("§  ${part.title}") { onPart(part.id) }
+            }
+        }
+        if (code.hasLiability) {
+            Text("Ответственность", color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            GlassRow("⚖  ${code.liabilityTitle}") { onLiability() }
+        }
+        Text(
+            "Тексты статей подключаются из локальной правовой базы. Справочный характер.",
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
+    val scroll = rememberScrollState()
+    Column(
+        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(code.shortName + " — " + code.liabilityTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+        code.liabilityItems.forEach { item ->
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.White.copy(0.10f), RoundedCornerShape(14.dp))
+                    .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
+                    .padding(14.dp)
+            ) {
+                Text(item.title, color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Spacer(Modifier.height(6.dp))
+                Text(item.body, color = Color.White.copy(0.88f), fontSize = 14.sp, lineHeight = 21.sp)
+            }
+        }
+        if (code.liabilityItems.isEmpty()) {
+            Text("Раздел будет дополнен.", color = Color.White.copy(0.7f))
         }
     }
 }
 
-// ─── Shared glass card ──────────────────────────────────────────────────────
+// ─── Constitution ───────────────────────────────────────────────────────────
+
+@Composable
+private fun ConstitutionScreen(padding: PaddingValues, onArticle51: () -> Unit) {
+    val scroll = rememberScrollState()
+    Column(
+        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Конституция Российской Федерации", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(ConstitutionPreambleNote, color = Color.White.copy(0.7f), fontSize = 13.sp, lineHeight = 19.sp)
+        Text("Избранные статьи", color = LegalGold, fontWeight = FontWeight.SemiBold)
+        GlassRow("◆  Статья 51 — свидетельский иммунитет") { onArticle51() }
+    }
+}
+
+@Composable
+private fun ArticleTextScreen(title: String, body: String, padding: PaddingValues) {
+    val scroll = rememberScrollState()
+    Column(
+        Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(title, color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(
+            body,
+            color = Color.White.copy(alpha = 0.92f),
+            fontSize = 16.sp,
+            lineHeight = 24.sp
+        )
+        Text(
+            "Текст приведён в справочных целях. Актуальную редакцию сверяйте с официальными источниками.",
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 12.sp
+        )
+    }
+}
+
+// ─── UI atoms ───────────────────────────────────────────────────────────────
 
 @Composable
 private fun GlassCard(
-    icon: String,
+    symbol: String,
     title: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Box(
         modifier
-            .height(120.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .height(100.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.22f),
-                        Color.White.copy(alpha = 0.10f)
-                    )
+                    listOf(Color.White.copy(alpha = 0.20f), Color.White.copy(alpha = 0.08f))
                 )
             )
-            .border(1.dp, GlassBorder, RoundedCornerShape(20.dp))
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text(icon, fontSize = 28.sp)
-            Spacer(Modifier.height(8.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(symbol, color = LegalGold, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(6.dp))
             Text(
                 title,
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 17.sp
+                lineHeight = 15.sp
             )
         }
     }
 }
 
 @Composable
+private fun GlassRow(text: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(0.12f))
+            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text, color = Color.White, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Text("›", color = LegalGold, fontSize = 20.sp)
+    }
+}
+
+@Composable
 private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: () -> Unit) {
-    val bg = if (selected) LegalGold.copy(alpha = 0.25f) else Color.Transparent
+    val bg = if (selected) LegalGold.copy(alpha = 0.22f) else Color.Transparent
     val textColor = if (selected) LegalGold else Color.White.copy(alpha = 0.9f)
     Row(
         Modifier
@@ -396,24 +422,26 @@ private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: 
             .clip(RoundedCornerShape(12.dp))
             .background(bg)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(icon, fontSize = 20.sp, modifier = Modifier.width(32.dp))
-        Spacer(Modifier.width(12.dp))
-        Text(title, color = textColor, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, fontSize = 16.sp)
+        Text(icon, color = textColor, fontSize = 18.sp, modifier = Modifier.width(28.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(title, color = textColor, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, fontSize = 15.sp)
     }
 }
 
 @Composable
-private fun PlaceholderScreen(title: String, subtitle: String, padding: PaddingValues) {
+private fun PlaceholderLight(title: String, padding: PaddingValues, subtitle: String = "") {
     Column(
         Modifier.fillMaxSize().padding(padding).padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-        Spacer(Modifier.height(8.dp))
-        Text(subtitle, color = Color.White.copy(alpha = 0.7f), textAlign = TextAlign.Center)
+        Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        if (subtitle.isNotBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(subtitle, color = Color.White.copy(0.7f), textAlign = TextAlign.Center)
+        }
     }
 }
