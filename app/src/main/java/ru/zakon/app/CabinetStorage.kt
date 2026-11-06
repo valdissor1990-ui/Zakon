@@ -64,22 +64,44 @@ internal class CabinetStorage(private val context: Context) {
         ) { "Не удалось сохранить пароль" }
     }
 
+    fun passwordLockRemainingSeconds(): Long {
+        val until = prefs.getLong("pin_lock_until", 0L)
+        return ((until - System.currentTimeMillis()).coerceAtLeast(0L) + 999L) / 1000L
+    }
+
+    private fun recordFailedAttempt() {
+        val failures = (prefs.getInt("pin_failures", 0) + 1).coerceAtMost(20)
+        val exponent = (failures - 5).coerceAtLeast(0).coerceAtMost(5)
+        val delayMs = if (failures < 5) 0L else (30_000L shl exponent).coerceAtMost(15 * 60_000L)
+        prefs.edit().putInt("pin_failures", failures)
+            .putLong("pin_lock_until", if (delayMs == 0L) 0L else System.currentTimeMillis() + delayMs)
+            .commit()
+    }
+
+    private fun clearFailedAttempts() {
+        prefs.edit().remove("pin_failures").remove("pin_lock_until").commit()
+    }
+
     fun checkPassword(pin: String): Boolean {
+        if (passwordLockRemainingSeconds() > 0L) return false
         val saltText = prefs.getString("pin_salt", null)
         val verifierText = prefs.getString("pin_verifier", null)
         if (saltText != null && verifierText != null) {
-            return try {
+            val iterations = prefs.getInt("pin_iterations", 310_000)
+            val valid = try {
                 val salt = Base64.decode(saltText, Base64.NO_WRAP)
                 val expected = Base64.decode(verifierText, Base64.NO_WRAP)
-                MessageDigest.isEqual(expected, derivePin(pin, salt))
-            } catch (_: Exception) {
-                false
-            }
+                MessageDigest.isEqual(expected, derivePin(pin, salt, iterations))
+            } catch (_: Exception) { false }
+            if (!valid) { recordFailedAttempt(); return false }
+            clearFailedAttempts()
+            if (iterations < 600_000) setPassword(pin)
+            return true
         }
 
         // Upgrade the old 32-bit hash only after the correct legacy PIN is entered.
         val oldHash = prefs.getString("pin_hash", null) ?: return false
-        if (oldHash != pin.hashCode().toString()) return false
+        if (oldHash != pin.hashCode().toString()) { recordFailedAttempt(); return false }
         setPassword(pin)
         return true
     }
