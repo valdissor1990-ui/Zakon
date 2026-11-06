@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private val LegalNavy = Color(0xFF17283F)
@@ -50,7 +52,13 @@ private data class LibrarySection(val title: String, val subtitle: String, val s
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { MaterialTheme(colorScheme = LegalColors) { ZakonApp(LegalStore(this)) } }
+        setContent {
+            val store = remember { LegalStore(applicationContext) }
+            DisposableEffect(store) {
+                onDispose { store.close() }
+            }
+            MaterialTheme(colorScheme = LegalColors) { ZakonApp(store) }
+        }
     }
 }
 
@@ -127,7 +135,20 @@ private fun RussianFlagMark() {
 private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (String) -> Unit, onConstructor: () -> Unit) {
     var docs by remember { mutableStateOf<List<LegalDocument>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) { docs = withContext(Dispatchers.IO) { store.getDocuments() }; loading = false }
+    var loadError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(store) {
+        loading = true
+        try {
+            docs = withContext(Dispatchers.IO) { store.getDocuments() }
+            loadError = null
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            loadError = error.localizedMessage ?: "Не удалось прочитать локальную базу."
+        } finally {
+            loading = false
+        }
+    }
     val sections = listOf(
         LibrarySection("Кодексы", "ГК, УК, КоАП и другие", "§", "code"),
         LibrarySection("Федеральные законы", "Основные законы РФ", "⚖", "law"),
@@ -160,8 +181,7 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
                             Text("⚖", color = LegalGold, fontSize = 27.sp)
                         }
                         Text("ЗаконЪ", color = Color.White, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
-                        Text("Законодательство России
-в единой офлайн-библиотеке", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                        Text("Законодательство России\nв единой офлайн-библиотеке", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                         Text("Тексты законов • редакции • поиск", color = Color(0xFFD7DEE7), style = MaterialTheme.typography.bodySmall)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = onConstructor, border = BorderStroke(1.dp, LegalGold), colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold)) { Text("Конструктор документов") }
@@ -197,6 +217,8 @@ private fun DocumentsScreen(store: LegalStore, padding: PaddingValues, onOpen: (
             }
             if (loading) {
                 item { LinearProgressIndicator(Modifier.fillMaxWidth(), color = LegalGold) }
+            } else if (loadError != null) {
+                item { EmptyContent(message = "Не удалось загрузить каталог: $loadError") }
             } else if (docs.isEmpty()) {
                 item { EmptyContent() }
             } else {
@@ -252,6 +274,7 @@ private fun DocumentCard(doc: LegalDocument, onClick: () -> Unit) {
 private fun SearchScreen(store: LegalStore, query: String, onQuery: (String) -> Unit, padding: PaddingValues, onOpen: (String) -> Unit) {
     var hits by remember { mutableStateOf<List<SearchHit>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
+    var searchError by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
         Text("Поиск по законодательству", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text("Название документа, номер статьи или фраза из текста", color = LegalMuted, style = MaterialTheme.typography.bodySmall)
@@ -261,15 +284,33 @@ private fun SearchScreen(store: LegalStore, query: String, onQuery: (String) -> 
             label = { Text("Что ищем?") }, singleLine = true,
             shape = RoundedCornerShape(16.dp)
         )
-        LaunchedEffect(query) {
-            searching = query.isNotBlank()
-            hits = if (query.isBlank()) emptyList() else withContext(Dispatchers.IO) { store.search(query.trim()) }
-            searching = false
+        LaunchedEffect(query, store) {
+            val term = query.trim()
+            if (term.isBlank()) {
+                hits = emptyList()
+                searchError = null
+                searching = false
+            } else {
+                searching = true
+                try {
+                    delay(250)
+                    hits = withContext(Dispatchers.IO) { store.search(term) }
+                    searchError = null
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    hits = emptyList()
+                    searchError = error.localizedMessage ?: "Ошибка поиска по локальной базе."
+                } finally {
+                    searching = false
+                }
+            }
         }
         Spacer(Modifier.height(14.dp))
         when {
             query.isBlank() -> Text("Поиск работает по установленной локальной правовой базе.")
             searching -> CircularProgressIndicator(color = LegalGold)
+            searchError != null -> Text("Не удалось выполнить поиск: $searchError", color = MaterialTheme.colorScheme.error)
             hits.isEmpty() -> Text("Совпадений нет. Проверьте запрос или установите выпуск правовой базы.")
             else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 items(hits, key = { it.articleId }) { hit ->
@@ -295,16 +336,26 @@ private fun DocumentScreen(store: LegalStore, id: String, padding: PaddingValues
     var doc by remember { mutableStateOf<LegalDocument?>(null) }
     var articles by remember { mutableStateOf<List<LegalArticle>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(id) {
+    var loadError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(id, store) {
         loading = true
-        val pair = withContext(Dispatchers.IO) { store.getDocument(id) to store.getArticles(id) }
-        doc = pair.first
-        articles = pair.second
-        loading = false
+        try {
+            val pair = withContext(Dispatchers.IO) { store.getDocument(id) to store.getArticles(id) }
+            doc = pair.first
+            articles = pair.second
+            loadError = null
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            loadError = error.localizedMessage ?: "Не удалось прочитать документ."
+        } finally {
+            loading = false
+        }
     }
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 18.dp, vertical = 16.dp)) {
         when {
             loading -> CircularProgressIndicator(color = LegalGold)
+            loadError != null -> Text("Ошибка загрузки документа: $loadError", color = MaterialTheme.colorScheme.error)
             doc == null -> Text("Документ не найден в установленной базе.")
             else -> {
                 Text(doc!!.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
@@ -346,10 +397,19 @@ private fun DocumentScreen(store: LegalStore, id: String, padding: PaddingValues
 private fun ArticleScreen(store: LegalStore, id: String, padding: PaddingValues) {
     var article by remember { mutableStateOf<LegalArticle?>(null) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(id) {
+    var loadError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(id, store) {
         loading = true
-        article = withContext(Dispatchers.IO) { store.getArticle(id) }
-        loading = false
+        try {
+            article = withContext(Dispatchers.IO) { store.getArticle(id) }
+            loadError = null
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            loadError = error.localizedMessage ?: "Не удалось прочитать статью."
+        } finally {
+            loading = false
+        }
     }
     Column(
         Modifier.fillMaxSize().padding(padding).background(LegalPaper)
@@ -357,6 +417,7 @@ private fun ArticleScreen(store: LegalStore, id: String, padding: PaddingValues)
     ) {
         when {
             loading -> CircularProgressIndicator(color = LegalGold)
+            loadError != null -> Text("Ошибка загрузки статьи: $loadError", color = MaterialTheme.colorScheme.error)
             article == null -> Text("Статья не найдена в установленной базе.")
             else -> {
                 Text("НОРМАТИВНЫЙ ТЕКСТ", color = LegalGold, style = MaterialTheme.typography.labelSmall, letterSpacing = 1.5.sp, fontWeight = FontWeight.Bold)
@@ -467,14 +528,14 @@ private fun ConstructorScreen(padding: PaddingValues) {
 }
 
 @Composable
-private fun EmptyContent() {
+private fun EmptyContent(message: String? = null) {
     Surface(
         color = LegalSurface, shape = RoundedCornerShape(18.dp),
         border = BorderStroke(1.dp, LegalGold.copy(alpha = 0.55f))
     ) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Правовая база пока не установлена", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text("Интерфейс готов к подключению проверенных текстов, но документы ещё не загружены. Вымышленные нормы не показываются.", color = LegalMuted)
+            Text(if (message == null) "Правовая база пока не установлена" else "Проблема с правовой базой", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(message ?: "Интерфейс готов к подключению проверенных текстов, но документы ещё не загружены. Вымышленные нормы не показываются.", color = LegalMuted)
         }
     }
 }
