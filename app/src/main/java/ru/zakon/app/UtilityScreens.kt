@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
@@ -81,6 +84,14 @@ internal fun CabinetScreen(padding: PaddingValues) {
     val context = LocalContext.current
     val activity = remember(context) { context.findFragmentActivity() }
     val storage = remember { CabinetStorage(context) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, storage) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) storage.clearTemporaryFiles()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
     var pinConfirm by remember { mutableStateOf("") }
@@ -141,12 +152,15 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 Button(
                     onClick = {
                         error = null
-                        if (pin.length < 4) { error = "Минимум 4 символа"; return@Button }
+                        if (pin.length < 6) { error = "Минимум 6 символов"; return@Button }
                         if (!storage.hasPassword()) {
                             if (pin != pinConfirm) { error = "Пароли не совпадают"; return@Button }
                             storage.setPassword(pin); unlocked = true
                         } else if (storage.checkPassword(pin)) unlocked = true
-                        else error = "Неверный пароль"
+                        else {
+                            val wait = storage.passwordLockRemainingSeconds()
+                            error = if (wait > 0) "Слишком много попыток. Повторите через $wait сек." else "Неверный пароль"
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
                     shape = RoundedCornerShape(14.dp),
