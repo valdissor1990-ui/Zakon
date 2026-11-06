@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import java.util.UUID
 
 private val GlassBorder = Color.White.copy(alpha = 0.35f)
 private val TextOnDark = Color(0xFFF5F7FA)
