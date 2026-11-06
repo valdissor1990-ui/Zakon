@@ -1,7 +1,6 @@
 package ru.zakon.app
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -11,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
@@ -30,11 +30,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -59,6 +60,8 @@ private fun ZakonApp(store: LegalStore) {
     val back: () -> Unit = { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    // Exact scroll restoration: firstVisibleItemIndex per list route
+    val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
 
     BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
     BackHandler(enabled = !root && drawerState.isClosed) { back() }
@@ -147,7 +150,7 @@ private fun ZakonApp(store: LegalStore) {
                             "cabinet" -> navigate("cabinet")
                         }
                     }
-                    route == "codes" -> CodesMenuScreen(padding) { navigate("code/$it") }
+                    route == "codes" -> CodesMenuScreen(padding, scrollIndexMap) { navigate("code/$it") }
                     route.startsWith("code/") && route.endsWith("/liability") -> {
                         val id = route.removePrefix("code/").removeSuffix("/liability")
                         val code = AllRfCodes.find { it.id == id }
@@ -155,7 +158,7 @@ private fun ZakonApp(store: LegalStore) {
                     }
                     route.startsWith("code/") && route.contains("/part/") -> {
                         val partId = route.substringAfterLast("/")
-                        CodeArticlesScreen(store, partId, padding) { navigate("article/$it") }
+                        CodeArticlesScreen(store, partId, padding, scrollIndexMap, "part_$partId") { navigate("article/$it") }
                     }
                     route.startsWith("code/") -> {
                         val id = route.removePrefix("code/")
@@ -167,7 +170,7 @@ private fun ZakonApp(store: LegalStore) {
                             onArticle = { navigate("article/$it") }
                         ) else PlaceholderLight("Не найдено", padding)
                     }
-                    route == "constitution" -> CodeArticlesScreen(store, "const", padding) { navigate("article/$it") }
+                    route == "constitution" -> CodeArticlesScreen(store, "const", padding, scrollIndexMap, "constitution") { navigate("article/$it") }
                     route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
                     route == "favorites" -> PlaceholderLight("Избранное", padding, "Сохранённые статьи появятся здесь.")
                     route == "settings" -> PlaceholderLight("Настройки", padding, "Раздел в разработке.")
@@ -224,8 +227,22 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
 }
 
 @Composable
-private fun CodesMenuScreen(padding: PaddingValues, onCodeClick: (String) -> Unit) {
-    val gridState = rememberLazyGridState()
+private fun CodesMenuScreen(
+    padding: PaddingValues,
+    scrollIndexMap: MutableMap<String, Int>,
+    onCodeClick: (String) -> Unit
+) {
+    val key = "codes_menu"
+    val initial = scrollIndexMap[key] ?: 0
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
+    LaunchedEffect(gridState.isScrollInProgress) {
+        if (!gridState.isScrollInProgress) {
+            scrollIndexMap[key] = gridState.firstVisibleItemIndex
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose { scrollIndexMap[key] = gridState.firstVisibleItemIndex }
+    }
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
         Text("Основные кодексы Российской Федерации", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
         LazyVerticalGrid(
@@ -251,6 +268,10 @@ private fun docIdForCode(code: RfCode): String? = when (code.id) {
     "uk" -> "uk"
     "koap" -> "koap"
     "tk" -> "tk"
+    "upk" -> "upk"
+    "gpk" -> "gpk"
+    "sk" -> "sk"
+    "zhk" -> "zhk"
     else -> null
 }
 
@@ -291,10 +312,26 @@ private fun CodeDetailScreen(
 }
 
 @Composable
-private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: PaddingValues, onArticle: (String) -> Unit) {
+private fun CodeArticlesScreen(
+    store: LegalStore,
+    documentId: String,
+    padding: PaddingValues,
+    scrollIndexMap: MutableMap<String, Int>,
+    scrollKey: String,
+    onArticle: (String) -> Unit
+) {
     var articles by remember { mutableStateOf<List<LegalArticle>>(emptyList()) }
     var title by remember { mutableStateOf("") }
-    val gridState = rememberLazyGridState()
+    val initial = scrollIndexMap[scrollKey] ?: 0
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
+    LaunchedEffect(gridState.isScrollInProgress) {
+        if (!gridState.isScrollInProgress) {
+            scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex
+        }
+    }
+    DisposableEffect(scrollKey) {
+        onDispose { scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex }
+    }
     LaunchedEffect(documentId) {
         withContext(Dispatchers.IO) {
             title = store.getDocument(documentId)?.title ?: documentId
