@@ -9,7 +9,7 @@ data class LegalDocument(val id: String, val title: String, val documentType: St
 data class LegalArticle(val id: String, val documentId: String, val number: String, val title: String?, val body: String)
 data class SearchHit(val articleId: String, val documentTitle: String, val articleNumber: String, val articleTitle: String?, val preview: String)
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 3) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db", null, 4) {
     override fun onConfigure(db: SQLiteDatabase) { super.onConfigure(db); db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE documents (
@@ -51,7 +51,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context, "zakon-local.db",
                 FROM articles a JOIN documents d ON d.id=a.document_id
             """.trimIndent())
         }
-        if (oldVersion < 3) {
+        if (oldVersion < 4) {
             SeedData.populate(db)
         }
     }
