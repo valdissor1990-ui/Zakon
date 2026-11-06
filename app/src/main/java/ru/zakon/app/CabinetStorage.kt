@@ -53,11 +53,12 @@ internal class CabinetStorage(private val context: Context) {
 
     fun setPassword(pin: String) {
         val salt = ByteArray(16).also(random::nextBytes)
-        val verifier = derivePin(pin, salt)
+        val verifier = derivePin(pin, salt, 600_000)
         check(
             prefs.edit()
                 .putString("pin_salt", Base64.encodeToString(salt, Base64.NO_WRAP))
                 .putString("pin_verifier", Base64.encodeToString(verifier, Base64.NO_WRAP))
+                .putInt("pin_iterations", 600_000)
                 .remove("pin_hash")
                 .commit()
         ) { "Не удалось сохранить пароль" }
@@ -265,8 +266,8 @@ internal class CabinetStorage(private val context: Context) {
         }
     }
 
-    private fun derivePin(pin: String, salt: ByteArray): ByteArray {
-        val spec = PBEKeySpec(pin.toCharArray(), salt, 310_000, 256)
+    private fun derivePin(pin: String, salt: ByteArray, iterations: Int = 600_000): ByteArray {
+        val spec = PBEKeySpec(pin.toCharArray(), salt, iterations, 256)
         return try {
             SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
         } finally {
