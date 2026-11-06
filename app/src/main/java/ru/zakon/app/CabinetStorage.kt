@@ -2,8 +2,11 @@ package ru.zakon.app
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyInfo
 import android.security.keystore.KeyProperties
+import android.security.keystore.StrongBoxUnavailableException
 import android.util.Base64
 import androidx.core.content.FileProvider
 import org.json.JSONArray
@@ -315,17 +318,28 @@ internal class CabinetStorage(private val context: Context) {
             KeyProperties.KEY_ALGORITHM_AES,
             "AndroidKeyStore"
         )
-        generator.init(
-            KeyGenParameterSpec.Builder(
-                keyAlias,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setKeySize(256)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setRandomizedEncryptionRequired(true)
-                .build()
-        )
+        fun spec(preferStrongBox: Boolean) = KeyGenParameterSpec.Builder(
+            keyAlias,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        ).setKeySize(256)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setRandomizedEncryptionRequired(true)
+            .apply {
+                if (preferStrongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    setIsStrongBoxBacked(true)
+                }
+            }.build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            try {
+                generator.init(spec(true))
+                return generator.generateKey()
+            } catch (_: StrongBoxUnavailableException) {
+                // Not every device has StrongBox; use the Android Keystore/TEE fallback.
+            }
+        }
+        generator.init(spec(false))
         return generator.generateKey()
     }
 
@@ -346,4 +360,22 @@ internal class CabinetStorage(private val context: Context) {
 
     private fun encryptText(value: String): ByteArray = encryptBytes(value.toByteArray(Charsets.UTF_8))
     private fun decryptText(value: ByteArray): String = String(decryptBytes(value), Charsets.UTF_8)
+
+    fun keyProtectionStatus(): String {
+        return try {
+            val key = encryptionKey()
+            val factory = javax.crypto.SecretKeyFactory.getInstance("AES", "AndroidKeyStore")
+            val info = factory.getKeySpec(key, KeyInfo::class.java) as KeyInfo
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                when (info.securityLevel) {
+                    KeyProperties.SECURITY_LEVEL_STRONGBOX -> "StrongBox"
+                    KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT -> "Аппаратный TEE"
+                    else -> "Программный Android Keystore"
+                }
+            } else if (info.isInsideSecureHardware) "Аппаратный Android Keystore"
+            else "Программный Android Keystore"
+        } catch (_: Exception) {
+            "Уровень защиты ключа не удалось определить"
+        }
+    }
 }
