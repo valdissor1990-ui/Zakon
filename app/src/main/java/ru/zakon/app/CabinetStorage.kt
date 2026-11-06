@@ -43,9 +43,10 @@ internal class CabinetStorage(private val context: Context) {
     private val attachmentDir = File(context.filesDir, "cabinet/attachments")
     private val temporaryDir = File(context.cacheDir, "cabinet-open")
 
-    init {
-        // Remove decrypted viewing copies left by a previous app process.
-        temporaryDir.deleteRecursively()
+    init { clearTemporaryFiles() }
+
+    fun clearTemporaryFiles() {
+        if (temporaryDir.exists()) temporaryDir.deleteRecursively()
     }
 
     fun hasPassword(): Boolean =
@@ -230,8 +231,17 @@ internal class CabinetStorage(private val context: Context) {
             }
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(128, iv))
-            CipherInputStream(encryptedInput, cipher).use { clearInput ->
-                FileOutputStream(temporary).use { clearOutput -> clearInput.copyTo(clearOutput) }
+            FileOutputStream(temporary).use { clearOutput ->
+                val buffer = ByteArray(64 * 1024)
+                while (true) {
+                    val count = encryptedInput.read(buffer)
+                    if (count < 0) break
+                    val clear = cipher.update(buffer, 0, count)
+                    if (clear != null && clear.isNotEmpty()) clearOutput.write(clear)
+                }
+                val finalBytes = cipher.doFinal()
+                if (finalBytes.isNotEmpty()) clearOutput.write(finalBytes)
+                clearOutput.fd.sync()
             }
         }
         return FileProvider.getUriForFile(
