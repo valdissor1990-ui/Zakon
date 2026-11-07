@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
-import org.json.JSONObject
 
 object CodeIcons {
     private var cache: MutableMap<String, Bitmap> = mutableMapOf()
@@ -17,6 +16,8 @@ object CodeIcons {
         "zk" to "zk", "fz" to "fz", "bk" to "bk"
     )
 
+    private val assetNames = listOf("uk", "gk", "apk", "koap", "tk", "nk", "zhk", "zk", "fz", "bk")
+
     fun bitmapFor(context: Context, documentId: String): Bitmap? {
         ensureLoaded(context)
         val key = idMap[documentId.lowercase()] ?: documentId.lowercase()
@@ -27,23 +28,14 @@ object CodeIcons {
         if (loaded) return
         synchronized(this) {
             if (loaded) return
-            try {
-                for (name in listOf("code_icons.json", "code_icons_1.json", "code_icons_2.json")) {
-                    try {
-                        val json = context.assets.open(name).bufferedReader().readText()
-                        val root = JSONObject(json)
-                        val keys = root.keys()
-                        while (keys.hasNext()) {
-                            val k = keys.next()
-                            val b64 = root.getString(k)
-                            val bytes = Base64.decode(b64, Base64.DEFAULT)
-                            val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
-                            cache[k] = bmp
-                        }
-                    } catch (_: Exception) {
-                    }
+            for (name in assetNames) {
+                try {
+                    val b64 = context.assets.open("icon_$name.b64").bufferedReader().readText().trim()
+                    val bytes = Base64.decode(b64, Base64.DEFAULT)
+                    val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
+                    cache[name] = bmp
+                } catch (_: Exception) {
                 }
-            } catch (_: Exception) {
             }
             loaded = true
         }
