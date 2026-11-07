@@ -3,6 +3,7 @@ package ru.zakon.app
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +26,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 
-private val TextOnDark = Color(0xFFF5F7FA)
+private val OnSurface = Color(0xFF1A1A1A)
+private val Muted = Color(0xFF5C5C5C)
+private val Accent = Color(0xFF8A6A1A)
 
-/** Default manifest on GitHub (raw). Change when you host your own. */
 internal const val DEFAULT_CONTENT_MANIFEST_URL =
     "https://raw.githubusercontent.com/valdissor1990-ui/Zakon/main/content/updates/manifest.json"
 
@@ -52,19 +55,44 @@ private fun httpGetBytes(url: String): ByteArray {
 }
 
 @Composable
-internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
+internal fun SettingsScreen(store: LegalStore, padding: PaddingValues) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val storage = remember { CabinetStorage(context) }
+
+    var tab by remember { mutableStateOf(0) } // 0 base, 1 security
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text("Настройки", color = OnSurface, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        Spacer(Modifier.height(12.dp))
+        TabRow(selectedTabIndex = tab, containerColor = Color.Transparent, contentColor = Accent) {
+            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("База законов") })
+            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Безопасность") })
+        }
+        Spacer(Modifier.height(12.dp))
+        when (tab) {
+            0 -> ContentUpdateSection(store)
+            1 -> SecuritySettingsSection(storage)
+        }
+    }
+}
+
+@Composable
+private fun ContentUpdateSection(store: LegalStore) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var status by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var remoteInfo by remember { mutableStateOf<String?>(null) }
-
     val localVer = store.installedPackVersion()
     val localLabel = store.installedPackLabel()
 
-    val importLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         busy = true
         status = null
@@ -75,9 +103,9 @@ internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
                         ?: error("Не удалось прочитать файл")
                 }
                 val result = withContext(Dispatchers.IO) { store.importPackJson(text, requireNewer = false) }
-                status = "Импорт: v${result.version} (${result.label}). Документов: ${result.documentsUpserted}, статей: ${result.articlesUpserted}"
+                status = "Импорт: v${result.version}. Документов: ${result.documentsUpserted}, статей: ${result.articlesUpserted}"
             } catch (e: Exception) {
-                status = "Ошибка импорта: ${e.message}"
+                status = "Ошибка: ${e.message}"
             } finally {
                 busy = false
             }
@@ -98,22 +126,16 @@ internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
                     val packUrl = manifest.getString("pack_url")
                     val expectedSha = manifest.optString("sha256", "").lowercase()
                     remoteInfo = "Сервер: v$remoteVer · $label"
-
                     if (!force && remoteVer <= store.installedPackVersion()) {
-                        return@withContext "Уже актуальная база (локально v${store.installedPackVersion()})."
+                        return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
                     }
-
                     val packBytes = httpGetBytes(packUrl)
                     if (expectedSha.isNotBlank()) {
                         val actual = sha256Hex(packBytes)
-                        if (actual != expectedSha) {
-                            error("SHA-256 не совпал.\nОжидался: $expectedSha\nПолучен: $actual")
-                        }
+                        if (actual != expectedSha) error("SHA-256 не совпал")
                     }
-                    val packJson = String(packBytes, Charsets.UTF_8)
-                    val imported = store.importPackJson(packJson, requireNewer = false)
-                    "Обновлено: v${imported.version} (${imported.label}). " +
-                        "Документов: ${imported.documentsUpserted}, статей: ${imported.articlesUpserted}"
+                    val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
+                    "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
                 }
                 status = resultMsg
             } catch (e: Exception) {
@@ -124,68 +146,201 @@ internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .verticalScroll(rememberScrollState())
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Обновление базы", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-        Text(
-            "Законы можно обновлять без нового APK: скачать пакет или импортировать JSON-файл.",
-            color = TextOnDark.copy(0.8f),
-            fontSize = 14.sp,
-            lineHeight = 20.sp
-        )
-        Text("Локально: v$localVer · $localLabel", color = LegalGold, fontWeight = FontWeight.SemiBold)
-        remoteInfo?.let { Text(it, color = TextOnDark.copy(0.7f), fontSize = 13.sp) }
-
-        if (busy) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
-                color = LegalGold,
-                trackColor = Color.White.copy(0.2f)
-            )
-        }
-
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Локально: v$localVer · $localLabel", color = Accent, fontWeight = FontWeight.SemiBold)
+        remoteInfo?.let { Text(it, color = Muted, fontSize = 13.sp) }
+        if (busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent)
         Button(
-            onClick = { checkAndDownload(force = false) },
+            onClick = { checkAndDownload(false) },
             enabled = !busy,
-            colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color.White),
             modifier = Modifier.fillMaxWidth().height(48.dp)
-        ) { Text("Проверить и обновить", fontWeight = FontWeight.Bold) }
-
+        ) { Text("Проверить и обновить") }
         OutlinedButton(
-            onClick = { checkAndDownload(force = true) },
+            onClick = { checkAndDownload(true) },
             enabled = !busy,
-            border = BorderStroke(1.dp, LegalGold),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
-            shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) { Text("Скачать пакет заново") }
-
         OutlinedButton(
             onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
             enabled = !busy,
-            border = BorderStroke(1.dp, Color.White.copy(0.4f)),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark),
-            shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) { Text("Импорт JSON с устройства") }
+        status?.let { Text(it, color = OnSurface, fontSize = 14.sp) }
+    }
+}
 
-        status?.let {
-            Text(it, color = TextOnDark, fontSize = 14.sp, lineHeight = 20.sp)
-        }
+@Composable
+private fun SecuritySettingsSection(storage: CabinetStorage) {
+    val context = LocalContext.current
+    var currentPin by remember { mutableStateOf("") }
+    var newPin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+    var confirmWipe by remember { mutableStateOf(false) }
 
+    val bioStatus = remember {
+        BiometricManager.from(context).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+        )
+    }
+    val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Формат пакета: JSON с полями version, documents[], articles[]. " +
-                "Манифест: $DEFAULT_CONTENT_MANIFEST_URL",
-            color = TextOnDark.copy(0.55f),
+            when {
+                storage.hasPassword() -> "Пароль кабинета: включён"
+                storage.hasVerifier() && !storage.isPinEnabled() -> "Пароль: отключён (можно включить)"
+                else -> "Пароль кабинета: не задан"
+            },
+            color = OnSurface,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            if (bioOk) "Биометрия устройства: доступна (отпечаток / лицо)"
+            else "Биометрия: недоступна или не настроена в системе (код $bioStatus)",
+            color = Muted,
+            fontSize = 13.sp
+        )
+        Text(
+            "Пароль нигде не хранится — только криптографический verifier. Биометрия показывается при входе в кабинет, если пароль включён и датчик настроен.",
+            color = Muted,
             fontSize = 12.sp,
             lineHeight = 16.sp
         )
+
+        OutlinedTextField(
+            value = currentPin,
+            onValueChange = { if (it.length <= 32) currentPin = it },
+            label = { Text(if (storage.hasVerifier()) "Текущий пароль" else "Новый пароль") },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        if (!storage.hasVerifier()) {
+            OutlinedTextField(
+                value = confirmPin,
+                onValueChange = { if (it.length <= 32) confirmPin = it },
+                label = { Text("Повтор пароля") },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    message = null
+                    when {
+                        currentPin.length < 6 -> message = "Минимум 6 символов"
+                        currentPin != confirmPin -> message = "Пароли не совпадают"
+                        else -> {
+                            storage.setPassword(currentPin)
+                            storage.markPinPromptDone()
+                            message = "Пароль установлен"
+                            currentPin = ""; confirmPin = ""
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Задать пароль") }
+        } else {
+            if (storage.isPinEnabled()) {
+                OutlinedButton(
+                    onClick = {
+                        message = null
+                        if (storage.disablePin(currentPin)) {
+                            message = "Пароль отключён. Кабинет откроется без запроса."
+                            currentPin = ""
+                        } else message = "Неверный пароль"
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Отключить пароль") }
+            } else {
+                OutlinedButton(
+                    onClick = {
+                        storage.enablePin()
+                        message = "Пароль снова требуется при входе в кабинет"
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Включить пароль") }
+            }
+
+            OutlinedTextField(
+                value = newPin,
+                onValueChange = { if (it.length <= 32) newPin = it },
+                label = { Text("Новый пароль") },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = confirmPin,
+                onValueChange = { if (it.length <= 32) confirmPin = it },
+                label = { Text("Повтор нового") },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    message = null
+                    when {
+                        newPin.length < 6 -> message = "Минимум 6 символов"
+                        newPin != confirmPin -> message = "Пароли не совпадают"
+                        storage.changePassword(currentPin, newPin) -> {
+                            message = "Пароль изменён"
+                            currentPin = ""; newPin = ""; confirmPin = ""
+                        }
+                        else -> message = "Неверный текущий пароль"
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Сменить пароль") }
+
+            OutlinedButton(
+                onClick = {
+                    message = null
+                    if (storage.deletePin(currentPin, wipeData = false)) {
+                        message = "Пароль удалён"
+                        currentPin = ""
+                    } else message = "Неверный пароль"
+                },
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFB71C1C)),
+                border = BorderStroke(1.dp, Color(0xFFB71C1C)),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Удалить пароль") }
+
+            if (!confirmWipe) {
+                TextButton(onClick = { confirmWipe = true }) {
+                    Text("Удалить пароль и все дела…", color = Color(0xFFB71C1C))
+                }
+            } else {
+                Text("Удалить все дела кабинета?", color = Color(0xFFB71C1C), fontWeight = FontWeight.SemiBold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { confirmWipe = false }, modifier = Modifier.weight(1f)) { Text("Нет") }
+                    Button(
+                        onClick = {
+                            if (storage.deletePin(currentPin, wipeData = true)) {
+                                message = "Пароль и дела удалены"
+                                currentPin = ""
+                                confirmWipe = false
+                            } else message = "Неверный пароль"
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Да") }
+                }
+            }
+        }
+
+        message?.let { Text(it, color = Accent, fontSize = 14.sp) }
     }
+}
+
+/** Kept for callers that still reference the old name. */
+@Composable
+internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
+    SettingsScreen(store, padding)
 }
