@@ -76,19 +76,24 @@ private fun ZakonApp(store: LegalStore) {
     BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.grok_1793951493468),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        Box(
-            Modifier.fillMaxSize().background(
-                Brush.verticalGradient(
-                    listOf(Color.Black.copy(0.45f), Color.Black.copy(0.28f), Color.Black.copy(0.60f))
+        // Hide global background on pure-white screens (cabinet)
+        if (route != "cabinet") {
+            Image(
+                painter = painterResource(id = R.drawable.grok_1793951493468),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        listOf(Color.Black.copy(0.45f), Color.Black.copy(0.28f), Color.Black.copy(0.60f))
+                    )
                 )
             )
-        )
+        } else {
+            Box(Modifier.fillMaxSize().background(Color.White))
+        }
 
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -123,23 +128,24 @@ private fun ZakonApp(store: LegalStore) {
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
+                    val lightBar = route == "cabinet"
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Black.copy(alpha = 0.40f),
-                            titleContentColor = TextOnDark,
-                            navigationIconContentColor = TextOnDark,
-                            actionIconContentColor = TextOnDark
+                            containerColor = if (lightBar) Color.White else Color.Black.copy(alpha = 0.40f),
+                            titleContentColor = if (lightBar) Color(0xFF1A1A1A) else TextOnDark,
+                            navigationIconContentColor = if (lightBar) Color(0xFF1A1A1A) else TextOnDark,
+                            actionIconContentColor = if (lightBar) Color(0xFF1A1A1A) else TextOnDark
                         ),
-                        title = { Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextOnDark) },
+                        title = { Text(titleFor(route), fontWeight = FontWeight.Bold, fontSize = 18.sp) },
                         navigationIcon = {
                             if (isHome) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 22.sp)
+                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), fontSize = 22.sp)
                             } else {
-                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 30.sp)
+                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), fontSize = 30.sp)
                             }
                         },
                         actions = {
-                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 16.dp), color = TextOnDark, fontSize = 20.sp)
+                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 16.dp), fontSize = 20.sp)
                         }
                     )
                 }
@@ -175,8 +181,7 @@ private fun ZakonApp(store: LegalStore) {
                         val id = route.removePrefix("code/")
                         val code = AllRfCodes.find { it.id == id }
                         if (code != null) CodeHubScreen(
-                            code = code,
-                            padding = padding,
+                            code = code, padding = padding,
                             onContent = {
                                 when {
                                     code.parts.isNotEmpty() -> navigate("code/$id/part/${code.parts.first().id}")
@@ -215,7 +220,7 @@ private fun titleFor(route: String): String = when {
     route == "favorites" -> "Избранное"
     route == "cabinet" -> "Личный кабинет"
     route == "about" -> "О приложении"
-    route == "settings" -> "Обновление базы"
+    route == "settings" -> "Настройки"
     route.startsWith("article/") -> "Статья"
     else -> "ЗаконЪ"
 }
@@ -227,10 +232,7 @@ private fun docIdForCodeId(id: String): String? = when (id) {
 }
 
 @Composable
-private fun CodeHubScreen(
-    code: RfCode, padding: PaddingValues,
-    onContent: () -> Unit, onParts: (String) -> Unit, onLiability: () -> Unit
-) {
+private fun CodeHubScreen(code: RfCode, padding: PaddingValues, onContent: () -> Unit, onParts: (String) -> Unit, onLiability: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(code.fullName, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
         if (code.overview.isNotBlank()) Text(code.overview, color = TextMutedOnDark, fontSize = 14.sp, lineHeight = 21.sp)
