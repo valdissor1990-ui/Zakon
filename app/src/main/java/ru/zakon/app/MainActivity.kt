@@ -242,7 +242,7 @@ private fun docIdForCodeId(id: String): String? = when (id) {
 @Composable
 private fun CodeHubScreen(code: RfCode, padding: PaddingValues, onContent: () -> Unit, onParts: (String) -> Unit, onLiability: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(code.fullName, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
+        PremiumCodeHero(code)
         if (code.overview.isNotBlank()) Text(code.overview, color = TextMutedOnDark, fontSize = 14.sp, lineHeight = 21.sp)
         HubTile(code.symbol, "Содержание · ${code.shortName}", if (code.parts.isNotEmpty()) "Части и статьи" else "Статьи кодекса") { onContent() }
         if (code.parts.isNotEmpty()) {
@@ -305,7 +305,7 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
         Text("Основные кодексы Российской Федерации", color = TextMutedOnDark, fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2), state = gridState, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(bottom = 28.dp)) {
             items(AllRfCodes, key = { it.id }) { code ->
-                GlassCard(code.symbol, code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "", Modifier.fillMaxWidth().height(112.dp)) { onCodeClick(code.id) }
+                PremiumCodeTile(code) { onCodeClick(code.id) }
             }
         }
     }
