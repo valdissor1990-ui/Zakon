@@ -23,7 +23,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -45,8 +44,11 @@ import org.json.JSONObject
 import java.util.UUID
 import javax.crypto.Cipher
 
-private val GlassBorder = Color.White.copy(alpha = 0.35f)
-private val TextOnDark = Color(0xFFF5F7FA)
+private val WhiteBg = Color(0xFFFFFFFF)
+private val OnWhite = Color(0xFF1A1A1A)
+private val MutedGray = Color(0xFF6B6B6B)
+private val LineGray = Color(0xFFE0E0E0)
+private val AccentGold = Color(0xFF8A6A1A)
 
 private data class LocalCase(
     val id: String,
@@ -56,16 +58,8 @@ private data class LocalCase(
     val updatedAt: Long
 )
 
-/**
- * Secure cabinet storage.
- *
- * PIN is NEVER stored. Only salt + PBKDF2 verifier live in EncryptedSharedPreferences
- * (AES-256 keys via Android Keystore MasterKey). Offline dump of the prefs XML
- * does not yield a usable PIN without breaking Keystore + PBKDF2.
- *
- * Case payloads and attachment files are AES-256-GCM with a separate Keystore key.
- */
-private class CabinetStorage(private val context: Context) {
+/** Secure local cabinet storage. Visible to Settings. */
+internal class CabinetStorage(private val context: Context) {
     private val crypto = CabinetCrypto(context)
 
     private val securePrefs: SharedPreferences = run {
@@ -81,15 +75,11 @@ private class CabinetStorage(private val context: Context) {
         )
     }
 
-    /** Plain prefs only for non-secret migration leftovers cleanup. */
     private val legacyPrefs = context.getSharedPreferences("zakon_cabinet", Context.MODE_PRIVATE)
 
-    init {
-        migrateFromLegacyIfNeeded()
-    }
+    init { migrateFromLegacyIfNeeded() }
 
     private fun migrateFromLegacyIfNeeded() {
-        // Move any leftover plaintext secrets into encrypted prefs once, then wipe legacy.
         val legacyVerifier = legacyPrefs.getString("pin_verifier", null)
         val legacySalt = legacyPrefs.getString("pin_salt", null)
         if (legacyVerifier != null && legacySalt != null && !securePrefs.contains("pin_verifier")) {
@@ -103,25 +93,21 @@ private class CabinetStorage(private val context: Context) {
         if (legacyCasesEnc != null && !securePrefs.contains("cases_enc")) {
             securePrefs.edit().putString("cases_enc", legacyCasesEnc).apply()
         }
-        // Destroy weak legacy hashCode and plaintext cases permanently
         legacyPrefs.edit()
-            .remove("pin_hash")
-            .remove("pin_verifier")
-            .remove("pin_salt")
-            .remove("cases_json")
-            .remove("cases_enc")
-            .remove("pin_fail_count")
-            .remove("pin_lock_until")
+            .remove("pin_hash").remove("pin_verifier").remove("pin_salt")
+            .remove("cases_json").remove("cases_enc")
+            .remove("pin_fail_count").remove("pin_lock_until")
             .apply()
     }
 
-    fun isPinEnabled(): Boolean =
-        securePrefs.getBoolean("pin_enabled", hasVerifier())
-
-    fun hasVerifier(): Boolean =
-        securePrefs.contains("pin_verifier") && securePrefs.contains("pin_salt")
-
+    fun isPinEnabled(): Boolean = securePrefs.getBoolean("pin_enabled", hasVerifier())
+    fun hasVerifier(): Boolean = securePrefs.contains("pin_verifier") && securePrefs.contains("pin_salt")
     fun hasPassword(): Boolean = isPinEnabled() && hasVerifier()
+
+    fun isPinPromptDone(): Boolean = securePrefs.getBoolean("pin_prompt_done", false)
+    fun markPinPromptDone() {
+        securePrefs.edit().putBoolean("pin_prompt_done", true).apply()
+    }
 
     fun setPassword(pin: String) {
         require(pin.length >= 6) { "PIN too short" }
@@ -131,10 +117,10 @@ private class CabinetStorage(private val context: Context) {
             .putString("pin_salt", CabinetPinKdf.toBase64(salt))
             .putString("pin_verifier", CabinetPinKdf.toBase64(verifier))
             .putBoolean("pin_enabled", true)
+            .putBoolean("pin_prompt_done", true)
             .putInt("pin_fail_count", 0)
             .putLong("pin_lock_until", 0L)
             .apply()
-        // Wipe intermediate arrays
         salt.fill(0)
         verifier.fill(0)
         crypto.ensureKey(requireUserAuth = true)
@@ -151,8 +137,7 @@ private class CabinetStorage(private val context: Context) {
         val ok = try {
             CabinetPinKdf.matches(pin, salt, expected)
         } finally {
-            salt.fill(0)
-            expected.fill(0)
+            salt.fill(0); expected.fill(0)
         }
         if (ok) {
             securePrefs.edit().putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
@@ -162,34 +147,23 @@ private class CabinetStorage(private val context: Context) {
         return ok
     }
 
-    /** Disable lock screen but keep encrypted data and verifier (can re-enable with same PIN). */
     fun disablePin(currentPin: String): Boolean {
         if (!checkPassword(currentPin)) return false
         securePrefs.edit().putBoolean("pin_enabled", false).putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
         return true
     }
 
-    /** Re-enable existing verifier without changing PIN. */
     fun enablePin() {
-        if (hasVerifier()) {
-            securePrefs.edit().putBoolean("pin_enabled", true).apply()
-        }
+        if (hasVerifier()) securePrefs.edit().putBoolean("pin_enabled", true).apply()
     }
 
-    /**
-     * Permanently delete PIN material. Requires current PIN.
-     * Does not delete cases unless [wipeData] is true.
-     */
     fun deletePin(currentPin: String, wipeData: Boolean): Boolean {
         if (hasVerifier() && !checkPassword(currentPin)) return false
         securePrefs.edit()
-            .remove("pin_salt")
-            .remove("pin_verifier")
+            .remove("pin_salt").remove("pin_verifier")
             .putBoolean("pin_enabled", false)
-            .putInt("pin_fail_count", 0)
-            .putLong("pin_lock_until", 0L)
+            .putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L)
             .apply()
-        legacyPrefs.edit().remove("pin_hash").remove("pin_salt").remove("pin_verifier").apply()
         if (wipeData) wipeAllCabinetData()
         return true
     }
@@ -202,8 +176,7 @@ private class CabinetStorage(private val context: Context) {
     }
 
     fun wipeAllCabinetData() {
-        val cases = loadCases()
-        cases.forEach { c -> c.attachments.forEach { deleteAttachment(it) } }
+        loadCases().forEach { c -> c.attachments.forEach { deleteAttachment(it) } }
         securePrefs.edit().remove("cases_enc").apply()
         crypto.clearViewCache()
         crypto.encryptedDir().listFiles()?.forEach { it.delete() }
@@ -241,16 +214,12 @@ private class CabinetStorage(private val context: Context) {
         val arr = JSONArray()
         cases.forEach { c ->
             arr.put(JSONObject().apply {
-                put("id", c.id)
-                put("title", c.title)
-                put("notes", c.notes)
-                put("updatedAt", c.updatedAt)
-                put("attachments", JSONArray(c.attachments))
+                put("id", c.id); put("title", c.title); put("notes", c.notes)
+                put("updatedAt", c.updatedAt); put("attachments", JSONArray(c.attachments))
             })
         }
         try {
-            val payload = crypto.encryptString(arr.toString())
-            securePrefs.edit().putString("cases_enc", payload).apply()
+            securePrefs.edit().putString("cases_enc", crypto.encryptString(arr.toString())).apply()
         } catch (_: Exception) { }
     }
 
@@ -264,15 +233,7 @@ private class CabinetStorage(private val context: Context) {
                     val list = buildList {
                         if (att != null) for (j in 0 until att.length()) add(att.getString(j))
                     }
-                    add(
-                        LocalCase(
-                            o.getString("id"),
-                            o.getString("title"),
-                            o.optString("notes", ""),
-                            list,
-                            o.optLong("updatedAt", 0L)
-                        )
-                    )
+                    add(LocalCase(o.getString("id"), o.getString("title"), o.optString("notes", ""), list, o.optLong("updatedAt", 0L)))
                 }
             }.sortedByDescending { it.updatedAt }
         } catch (_: Exception) {
@@ -284,23 +245,18 @@ private class CabinetStorage(private val context: Context) {
         return try {
             val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
             crypto.importAndEncrypt(bytes, displayName ?: uri.lastPathSegment ?: "file")
-        } catch (_: Exception) {
-            null
-        }
+        } catch (_: Exception) { null }
     }
 
     fun openAttachment(encName: String, displayName: String): Uri? {
         return try {
             val file = crypto.decryptFileToCache(encName, displayName)
             FileProvider.getUriForFile(context, context.packageName + ".fileprovider", file)
-        } catch (_: Exception) {
-            null
-        }
+        } catch (_: Exception) { null }
     }
 
     fun deleteAttachment(encName: String) = crypto.deleteEncryptedFile(encName)
     fun clearViewCache() = crypto.clearViewCache()
-    fun securityLevel(): String = try { crypto.securityLevelLabel() } catch (_: Exception) { "—" }
     fun biometricCipher(): Cipher? = try {
         crypto.cipherForEncrypt(crypto.getSecretKey())
     } catch (_: Exception) { null }
@@ -335,12 +291,12 @@ private fun showBiometric(
                 errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
             ) onError(errString.toString())
         }
-        override fun onAuthenticationFailed() { onError("Не удалось распознать биометрию") }
+        override fun onAuthenticationFailed() { onError("Не распознано") }
     })
     try {
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Вход в личный кабинет")
-            .setSubtitle("Пароль не хранится. Данные — AES-GCM / Keystore")
+            .setSubtitle("Подтвердите личность")
             .setAllowedAuthenticators(BIO_AUTHENTICATORS)
             .setNegativeButtonText("Пароль")
             .build()
@@ -351,6 +307,10 @@ private fun showBiometric(
     }
 }
 
+/**
+ * Strict white cabinet UI.
+ * Gate only: first-run prompt / lock / open content. No security settings here.
+ */
 @Composable
 internal fun CabinetScreen(padding: PaddingValues) {
     val context = LocalContext.current
@@ -358,11 +318,13 @@ internal fun CabinetScreen(padding: PaddingValues) {
     val storage = remember { CabinetStorage(context) }
     val scope = rememberCoroutineScope()
 
-    var unlocked by remember {
-        mutableStateOf(!storage.hasPassword())
+    var unlocked by remember { mutableStateOf(!storage.hasPassword()) }
+    var showAskPin by remember {
+        mutableStateOf(!storage.hasVerifier() && !storage.isPinPromptDone())
     }
     var pin by remember { mutableStateOf("") }
     var pinConfirm by remember { mutableStateOf("") }
+    var settingPin by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var cases by remember { mutableStateOf(if (!storage.hasPassword()) storage.loadCases() else emptyList()) }
@@ -371,15 +333,9 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var editNotes by remember { mutableStateOf("") }
     var editAttachments by remember { mutableStateOf<List<String>>(emptyList()) }
     var lockTick by remember { mutableStateOf(0) }
-    var showSecurity by remember { mutableStateOf(false) }
-    var secPin by remember { mutableStateOf("") }
-    var secNewPin by remember { mutableStateOf("") }
-    var secConfirm by remember { mutableStateOf("") }
-    var confirmWipe by remember { mutableStateOf(false) }
 
     val bioStatus = remember(context) { biometricStatus(context) }
     val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
-    val secLevel = remember { storage.securityLevel() }
 
     DisposableEffect(Unit) { onDispose { storage.clearViewCache() } }
 
@@ -387,8 +343,9 @@ internal fun CabinetScreen(padding: PaddingValues) {
         while (storage.isLockedOut()) { delay(500); lockTick++ }
     }
 
-    LaunchedEffect(Unit) {
-        if (storage.hasPassword() && bioOk && activity != null && !unlocked && !storage.isLockedOut()) {
+    // Auto biometric when locked
+    LaunchedEffect(unlocked, showAskPin) {
+        if (!unlocked && !showAskPin && storage.hasPassword() && bioOk && activity != null && !storage.isLockedOut()) {
             showBiometric(activity, storage.biometricCipher(), onSuccess = {
                 unlocked = true
                 cases = storage.loadCases()
@@ -400,7 +357,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
         if (uri != null) scope.launch {
             busy = true
             val enc = withContext(Dispatchers.IO) { storage.importAttachment(uri, uri.lastPathSegment) }
-            if (enc != null) editAttachments = editAttachments + enc else error = "Не удалось зашифровать файл"
+            if (enc != null) editAttachments = editAttachments + enc else error = "Не удалось добавить файл"
             busy = false
         }
     }
@@ -408,383 +365,327 @@ internal fun CabinetScreen(padding: PaddingValues) {
         if (uri != null) scope.launch {
             busy = true
             val enc = withContext(Dispatchers.IO) { storage.importAttachment(uri, "photo.jpg") }
-            if (enc != null) editAttachments = editAttachments + enc else error = "Не удалось зашифровать фото"
+            if (enc != null) editAttachments = editAttachments + enc else error = "Не удалось добавить фото"
             busy = false
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-        if (!unlocked) {
-            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Пароль нигде не сохраняется — только криптографический verifier в EncryptedSharedPreferences. Дела и файлы: AES-256-GCM / Keystore.",
-                    color = LegalGold.copy(0.95f), textAlign = TextAlign.Center, fontSize = 13.sp, lineHeight = 18.sp
-                )
-                Spacer(Modifier.height(6.dp))
-                Text("Ключ: $secLevel", color = TextOnDark.copy(0.55f), fontSize = 11.sp)
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    if (storage.hasPassword()) "Введите пароль или биометрию"
-                    else if (storage.hasVerifier() && !storage.isPinEnabled()) "Пароль отключён. Можно войти или включить защиту снова."
-                    else "Задайте пароль (минимум 6 символов)",
-                    color = TextOnDark.copy(0.8f), textAlign = TextAlign.Center, fontSize = 14.sp
-                )
-                Spacer(Modifier.height(16.dp))
-
-                if (!storage.hasPassword() && storage.hasVerifier() && !storage.isPinEnabled()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .background(WhiteBg)
+    ) {
+        when {
+            // First visit: ask to set password
+            showAskPin -> {
+                Column(
+                    Modifier.fillMaxSize().padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Задать пароль для защиты дел и заметок?\nПароль можно позже включить или отключить в Настройках → Безопасность.",
+                        color = MutedGray,
+                        textAlign = TextAlign.Center,
+                        fontSize = 15.sp,
+                        lineHeight = 22.sp
+                    )
+                    Spacer(Modifier.height(24.dp))
                     Button(
+                        onClick = { settingPin = true; showAskPin = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) { Text("Да, задать пароль") }
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
                         onClick = {
+                            storage.markPinPromptDone()
+                            showAskPin = false
                             unlocked = true
                             cases = storage.loadCases()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) { Text("Открыть без пароля", fontWeight = FontWeight.Bold) }
-                    Spacer(Modifier.height(10.dp))
-                    OutlinedButton(
-                        onClick = { storage.enablePin(); error = "Защита включена — введите пароль" },
-                        border = BorderStroke(1.dp, LegalGold),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) { Text("Снова требовать пароль") }
-                    Spacer(Modifier.height(16.dp))
+                    ) { Text("Нет, открыть без пароля") }
                 }
+            }
 
-                if (storage.hasPassword() || !storage.hasVerifier()) {
+            // Setting PIN after "Yes"
+            settingPin && !unlocked -> {
+                Column(
+                    Modifier.fillMaxSize().padding(24.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Новый пароль", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Минимум 6 символов", color = MutedGray, fontSize = 13.sp)
+                    Spacer(Modifier.height(16.dp))
                     OutlinedTextField(
                         value = pin,
                         onValueChange = { if (it.length <= 32) pin = it },
-                        label = { Text(if (storage.hasVerifier()) "Пароль" else "Новый пароль") },
+                        label = { Text("Пароль") },
                         visualTransformation = PasswordVisualTransformation(),
                         singleLine = true,
-                        enabled = !storage.isLockedOut() && !busy,
-                        colors = cabinetFieldColors(),
-                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (!storage.hasVerifier()) {
-                        Spacer(Modifier.height(10.dp))
-                        OutlinedTextField(
-                            value = pinConfirm,
-                            onValueChange = { if (it.length <= 32) pinConfirm = it },
-                            label = { Text("Повтор пароля") },
-                            visualTransformation = PasswordVisualTransformation(),
-                            singleLine = true,
-                            colors = cabinetFieldColors(),
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = pinConfirm,
+                        onValueChange = { if (it.length <= 32) pinConfirm = it },
+                        label = { Text("Повтор") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    error?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = Color(0xFFB71C1C), fontSize = 13.sp)
                     }
-                }
-
-                if (storage.isLockedOut()) {
-                    Spacer(Modifier.height(8.dp))
-                    Text("Блокировка: ${storage.lockRemainingMs() / 1000} с", color = Color(0xFFFF8A80), fontSize = 13.sp)
-                }
-                error?.let {
-                    Spacer(Modifier.height(8.dp))
-                    Text(it, color = Color(0xFFFF8A80), fontSize = 13.sp, textAlign = TextAlign.Center)
-                }
-                Spacer(Modifier.height(16.dp))
-
-                if (storage.hasPassword() || !storage.hasVerifier()) {
+                    Spacer(Modifier.height(16.dp))
                     Button(
                         onClick = {
                             error = null
-                            if (storage.isLockedOut()) { error = "Подождите окончания блокировки"; return@Button }
-                            if (pin.length < 6) { error = "Минимум 6 символов"; return@Button }
+                            when {
+                                pin.length < 6 -> error = "Минимум 6 символов"
+                                pin != pinConfirm -> error = "Пароли не совпадают"
+                                else -> {
+                                    storage.setPassword(pin)
+                                    settingPin = false
+                                    unlocked = true
+                                    cases = storage.loadCases()
+                                    pin = ""; pinConfirm = ""
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) { Text("Сохранить и войти") }
+                    TextButton(onClick = {
+                        storage.markPinPromptDone()
+                        settingPin = false
+                        unlocked = true
+                        cases = storage.loadCases()
+                    }) { Text("Отмена — без пароля", color = MutedGray) }
+                }
+            }
+
+            // Locked
+            !unlocked -> {
+                Column(
+                    Modifier.fillMaxSize().padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Введите пароль", color = MutedGray, fontSize = 14.sp)
+                    Spacer(Modifier.height(20.dp))
+                    OutlinedTextField(
+                        value = pin,
+                        onValueChange = { if (it.length <= 32) pin = it },
+                        label = { Text("Пароль") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        enabled = !storage.isLockedOut() && !busy,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (storage.isLockedOut()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Подождите ${storage.lockRemainingMs() / 1000} с", color = Color(0xFFB71C1C))
+                    }
+                    error?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = Color(0xFFB71C1C), fontSize = 13.sp, textAlign = TextAlign.Center)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            error = null
+                            if (storage.isLockedOut()) {
+                                error = "Подождите окончания блокировки"
+                                return@Button
+                            }
                             busy = true
                             scope.launch {
-                                val result = withContext(Dispatchers.Default) {
-                                    if (!storage.hasVerifier()) {
-                                        if (pin != pinConfirm) "mismatch"
-                                        else { storage.setPassword(pin); "ok" }
-                                    } else if (storage.checkPassword(pin)) "ok" else "bad"
-                                }
+                                val ok = withContext(Dispatchers.Default) { storage.checkPassword(pin) }
                                 busy = false
-                                when (result) {
-                                    "ok" -> {
-                                        unlocked = true
-                                        cases = withContext(Dispatchers.IO) { storage.loadCases() }
-                                        pin = ""; pinConfirm = ""
-                                    }
-                                    "mismatch" -> error = "Пароли не совпадают"
-                                    else -> { error = "Неверный пароль"; lockTick++ }
+                                if (ok) {
+                                    unlocked = true
+                                    cases = storage.loadCases()
+                                    pin = ""
+                                } else {
+                                    error = "Неверный пароль"
+                                    lockTick++
                                 }
                             }
                         },
                         enabled = !busy && !storage.isLockedOut(),
-                        colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) {
-                        Text(
-                            if (storage.hasVerifier()) "Войти по паролю" else "Создать пароль и войти",
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                    ) { Text("Войти") }
 
-                if (storage.hasPassword()) {
-                    Spacer(Modifier.height(10.dp))
-                    OutlinedButton(
-                        onClick = {
-                            error = null
-                            val act = activity
-                            when {
-                                act == null -> error = "Биометрия недоступна"
-                                storage.isLockedOut() -> error = "Подождите блокировки"
-                                !bioOk -> error = "Настройте биометрию в системе"
-                                else -> showBiometric(act, storage.biometricCipher(), onSuccess = {
-                                    unlocked = true
-                                    cases = storage.loadCases()
-                                }, onError = { error = it })
-                            }
-                        },
-                        border = BorderStroke(1.dp, LegalGold),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) { Text("Войти по биометрии", fontWeight = FontWeight.SemiBold) }
-                }
-            }
-        } else if (showSecurity) {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                Text("Защита кабинета", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Пароль не записывается на диск. В EncryptedSharedPreferences лежит только соль и PBKDF2-verifier (600 000 итераций). Сами дела — отдельный AES-GCM ключ Keystore ($secLevel).",
-                    color = TextOnDark.copy(0.8f), fontSize = 13.sp, lineHeight = 18.sp
-                )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    if (storage.isPinEnabled()) "Статус: пароль ВКЛЮЧЁН" else "Статус: пароль ОТКЛЮЧЁН",
-                    color = LegalGold, fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = secPin,
-                    onValueChange = { if (it.length <= 32) secPin = it },
-                    label = { Text("Текущий пароль (для операций)") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    colors = cabinetFieldColors(),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(10.dp))
-
-                if (storage.isPinEnabled()) {
-                    OutlinedButton(
-                        onClick = {
-                            error = null
-                            if (storage.disablePin(secPin)) {
-                                error = "Пароль отключён. Данные дел по-прежнему зашифрованы на диске."
-                                secPin = ""
-                            } else error = "Неверный пароль"
-                        },
-                        border = BorderStroke(1.dp, LegalGold),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Отключить пароль") }
-                } else if (storage.hasVerifier()) {
-                    OutlinedButton(
-                        onClick = {
-                            storage.enablePin()
-                            error = "Пароль снова требуется при входе"
-                        },
-                        border = BorderStroke(1.dp, LegalGold),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LegalGold),
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Включить пароль") }
-                }
-
-                Spacer(Modifier.height(12.dp))
-                Text("Сменить пароль", color = TextOnDark, fontWeight = FontWeight.SemiBold)
-                OutlinedTextField(secNewPin, { if (it.length <= 32) secNewPin = it }, label = { Text("Новый пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(secConfirm, { if (it.length <= 32) secConfirm = it }, label = { Text("Повтор нового") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = {
-                        error = null
-                        when {
-                            secNewPin.length < 6 -> error = "Новый пароль: минимум 6 символов"
-                            secNewPin != secConfirm -> error = "Новые пароли не совпадают"
-                            storage.changePassword(secPin, secNewPin) -> {
-                                error = "Пароль изменён"
-                                secPin = ""; secNewPin = ""; secConfirm = ""
-                            }
-                            else -> error = "Неверный текущий пароль"
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Сохранить новый пароль") }
-
-                Spacer(Modifier.height(18.dp))
-                Text("Удалить пароль", color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold)
-                Text(
-                    "Удаляет salt и verifier. Восстановить старый пароль будет невозможно (его и не было на диске).",
-                    color = TextOnDark.copy(0.7f), fontSize = 12.sp
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = {
-                        error = null
-                        if (storage.deletePin(secPin, wipeData = false)) {
-                            error = "Пароль удалён. Задайте новый при следующей необходимости."
-                            secPin = ""
-                        } else error = "Неверный пароль"
-                    },
-                    border = BorderStroke(1.dp, Color(0xFFFF8A80)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8A80)),
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Удалить пароль (дела оставить)") }
-
-                Spacer(Modifier.height(10.dp))
-                if (!confirmWipe) {
-                    OutlinedButton(
-                        onClick = { confirmWipe = true },
-                        border = BorderStroke(1.dp, Color(0xFFFF5252)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Удалить пароль И все дела") }
-                } else {
-                    Text("Точно удалить все дела и вложения?", color = Color(0xFFFF8A80), fontWeight = FontWeight.SemiBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { confirmWipe = false }, modifier = Modifier.weight(1f)) { Text("Нет") }
-                        Button(
+                    // Biometric always offered when hardware ready and password on
+                    if (storage.hasPassword()) {
+                        Spacer(Modifier.height(10.dp))
+                        OutlinedButton(
                             onClick = {
-                                if (storage.deletePin(secPin, wipeData = true)) {
-                                    cases = emptyList()
-                                    error = "Пароль и все данные кабинета удалены"
-                                    secPin = ""
-                                    confirmWipe = false
-                                } else error = "Неверный пароль"
+                                error = null
+                                val act = activity
+                                when {
+                                    act == null -> error = "Биометрия недоступна"
+                                    storage.isLockedOut() -> error = "Подождите блокировки"
+                                    !bioOk -> error = when (bioStatus) {
+                                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> "Нет биометрического датчика"
+                                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> "Добавьте отпечаток или лицо в настройках телефона"
+                                        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> "Биометрия временно недоступна"
+                                        else -> "Биометрия недоступна (код $bioStatus)"
+                                    }
+                                    else -> showBiometric(act, storage.biometricCipher(), onSuccess = {
+                                        unlocked = true
+                                        cases = storage.loadCases()
+                                    }, onError = { error = it })
+                                }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                            modifier = Modifier.weight(1f)
-                        ) { Text("Да, удалить всё") }
-                    }
-                }
-
-                error?.let {
-                    Spacer(Modifier.height(10.dp))
-                    Text(it, color = LegalGold, fontSize = 13.sp)
-                }
-                Spacer(Modifier.height(16.dp))
-                TextButton(onClick = { showSecurity = false; error = null; secPin = ""; secNewPin = ""; secConfirm = "" }) {
-                    Text("‹ Назад к делам", color = TextOnDark)
-                }
-            }
-        } else if (editing != null) {
-            Column(Modifier.fillMaxSize()) {
-                Text("Дело / материал", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(Modifier.height(6.dp))
-                Text("Файлы шифруются в приватном каталоге приложения.", color = TextOnDark.copy(0.65f), fontSize = 12.sp)
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(editTitle, { editTitle = it }, label = { Text("Название") }, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(editNotes, { editNotes = it }, label = { Text("Заметки") }, minLines = 5, colors = cabinetFieldColors(), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(10.dp))
-                Text("Вложения (${editAttachments.size}) · AES-GCM", color = LegalGold, fontWeight = FontWeight.SemiBold)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                    OutlinedButton(onClick = { pickImage.launch("image/*") }, enabled = !busy, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Фото") }
-                    OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, enabled = !busy, border = BorderStroke(1.dp, GlassBorder), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark)) { Text("Файл") }
-                }
-                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(editAttachments) { encName ->
-                        Row(
-                            Modifier.fillMaxWidth().background(Color.White.copy(0.1f), RoundedCornerShape(10.dp)).clickable {
-                                val uri = storage.openAttachment(encName, encName.removeSuffix(".enc"))
-                                if (uri != null) {
-                                    try {
-                                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                                            setDataAndType(uri, null)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        context.startActivity(Intent.createChooser(intent, "Открыть"))
-                                    } catch (_: Exception) { error = "Не удалось открыть" }
-                                } else error = "Ошибка расшифровки"
-                            }.padding(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
-                            Text(encName.removeSuffix(".enc").take(40), color = TextOnDark, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                            Text("✕", color = Color(0xFFFF8A80), modifier = Modifier.clickable {
-                                storage.deleteAttachment(encName)
-                                editAttachments = editAttachments.filter { it != encName }
-                            })
+                            Text(if (bioOk) "Войти по биометрии" else "Биометрия (проверить)")
+                        }
+                        if (!bioOk) {
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                "Настройте отпечаток или Face Unlock в системе телефона",
+                                color = MutedGray,
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
-                }
-                Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = { editing = null }, border = BorderStroke(1.dp, Color.White.copy(0.4f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = TextOnDark), modifier = Modifier.weight(1f)) { Text("Отмена") }
-                    Button(
-                        onClick = {
-                            val id = editing!!.id
-                            val updated = LocalCase(id, editTitle.ifBlank { "Без названия" }, editNotes, editAttachments, System.currentTimeMillis())
-                            cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it } else listOf(updated) + cases
-                            storage.saveCases(cases)
-                            editing = null
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = LegalGold, contentColor = LegalNavy),
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Сохранить") }
-                }
-            }
-        } else {
-            Text("Данные зашифрованы ($secLevel). Пароль на диск не пишется.", color = LegalGold.copy(0.9f), fontSize = 12.sp, modifier = Modifier.padding(bottom = 8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("Личный кабинет", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+
+                    Spacer(Modifier.height(16.dp))
                     Text(
-                        if (storage.isPinEnabled()) "Защита паролем вкл." else "Защита паролем выкл.",
-                        color = TextOnDark.copy(0.65f), fontSize = 12.sp
+                        "Управление паролем — в Настройках → Безопасность",
+                        color = MutedGray,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
-                TextButton(onClick = { showSecurity = true }, colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)) { Text("Код") }
-                TextButton(onClick = {
-                    editing = LocalCase(UUID.randomUUID().toString(), "", "", emptyList(), 0L)
-                    editTitle = ""; editNotes = ""; editAttachments = emptyList()
-                }, colors = ButtonDefaults.textButtonColors(contentColor = LegalGold)) { Text("+ Дело") }
-                TextButton(onClick = {
-                    if (storage.hasPassword()) {
-                        unlocked = false
-                        pin = ""
-                    }
-                    storage.clearViewCache()
-                }, colors = ButtonDefaults.textButtonColors(contentColor = TextOnDark.copy(0.7f))) { Text("Выйти") }
             }
-            Spacer(Modifier.height(12.dp))
-            if (cases.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Нет дел.\nСоздайте дело — оно будет зашифровано.", color = TextOnDark.copy(0.7f), textAlign = TextAlign.Center)
+
+            // Editing a case
+            editing != null -> {
+                Column(Modifier.fillMaxSize().padding(16.dp)) {
+                    Text("Дело", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(editTitle, { editTitle = it }, label = { Text("Название") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(editNotes, { editNotes = it }, label = { Text("Заметки") }, minLines = 5, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(10.dp))
+                    Text("Вложения (${editAttachments.size})", color = AccentGold, fontWeight = FontWeight.SemiBold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
+                        OutlinedButton(onClick = { pickImage.launch("image/*") }, enabled = !busy) { Text("Фото") }
+                        OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, enabled = !busy) { Text("Файл") }
+                    }
+                    LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        items(editAttachments) { encName ->
+                            Row(
+                                Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(8.dp)).clickable {
+                                    val uri = storage.openAttachment(encName, encName.removeSuffix(".enc"))
+                                    if (uri != null) {
+                                        try {
+                                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                                setDataAndType(uri, null)
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            context.startActivity(Intent.createChooser(intent, "Открыть"))
+                                        } catch (_: Exception) { error = "Не удалось открыть" }
+                                    }
+                                }.padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(encName.removeSuffix(".enc").take(40), color = OnWhite, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("✕", color = Color(0xFFB71C1C), modifier = Modifier.clickable {
+                                    storage.deleteAttachment(encName)
+                                    editAttachments = editAttachments.filter { it != encName }
+                                })
+                            }
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedButton(onClick = { editing = null }, modifier = Modifier.weight(1f)) { Text("Отмена") }
+                        Button(
+                            onClick = {
+                                val id = editing!!.id
+                                val updated = LocalCase(id, editTitle.ifBlank { "Без названия" }, editNotes, editAttachments, System.currentTimeMillis())
+                                cases = if (cases.any { it.id == id }) cases.map { if (it.id == id) updated else it } else listOf(updated) + cases
+                                storage.saveCases(cases)
+                                editing = null
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White),
+                            modifier = Modifier.weight(1f)
+                        ) { Text("Сохранить") }
+                    }
                 }
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(cases, key = { it.id }) { c ->
-                        Box(
-                            Modifier.fillMaxWidth().background(
-                                Brush.verticalGradient(listOf(Color.White.copy(0.18f), Color.White.copy(0.08f))),
-                                RoundedCornerShape(16.dp)
-                            ).border(1.dp, GlassBorder, RoundedCornerShape(16.dp)).clickable {
-                                editing = c; editTitle = c.title; editNotes = c.notes; editAttachments = c.attachments
-                            }.padding(14.dp)
-                        ) {
-                            Column {
-                                Text(c.title, color = TextOnDark, fontWeight = FontWeight.SemiBold)
-                                if (c.notes.isNotBlank()) {
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(c.notes.take(120) + if (c.notes.length > 120) "…" else "", color = TextOnDark.copy(0.7f), fontSize = 13.sp)
-                                }
-                                if (c.attachments.isNotEmpty()) {
-                                    Spacer(Modifier.height(4.dp))
-                                    Text("Вложений: ${c.attachments.size} (шифр.)", color = LegalGold, fontSize = 12.sp)
+            }
+
+            // Open cabinet
+            else -> {
+                Column(Modifier.fillMaxSize().padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            Text(
+                                if (storage.hasPassword()) "Защищён паролем" else "Без пароля · настройка в «Настройки»",
+                                color = MutedGray,
+                                fontSize = 12.sp
+                            )
+                        }
+                        TextButton(onClick = {
+                            editing = LocalCase(UUID.randomUUID().toString(), "", "", emptyList(), 0L)
+                            editTitle = ""; editNotes = ""; editAttachments = emptyList()
+                        }) { Text("+ Дело", color = AccentGold) }
+                        if (storage.hasPassword()) {
+                            TextButton(onClick = {
+                                unlocked = false
+                                pin = ""
+                                storage.clearViewCache()
+                            }) { Text("Выйти", color = MutedGray) }
+                        }
+                    }
+                    HorizontalDivider(color = LineGray, modifier = Modifier.padding(vertical = 10.dp))
+                    if (cases.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Нет дел.\nНажмите «+ Дело».", color = MutedGray, textAlign = TextAlign.Center)
+                        }
+                    } else {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(cases, key = { it.id }) { c ->
+                                Column(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .border(1.dp, LineGray, RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            editing = c
+                                            editTitle = c.title
+                                            editNotes = c.notes
+                                            editAttachments = c.attachments
+                                        }
+                                        .padding(14.dp)
+                                ) {
+                                    Text(c.title, color = OnWhite, fontWeight = FontWeight.SemiBold)
+                                    if (c.notes.isNotBlank()) {
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            c.notes.take(120) + if (c.notes.length > 120) "…" else "",
+                                            color = MutedGray,
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                    if (c.attachments.isNotEmpty()) {
+                                        Spacer(Modifier.height(4.dp))
+                                        Text("Вложений: ${c.attachments.size}", color = AccentGold, fontSize = 12.sp)
+                                    }
                                 }
                             }
                         }
@@ -796,47 +697,41 @@ internal fun CabinetScreen(padding: PaddingValues) {
 }
 
 @Composable
-private fun cabinetFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = TextOnDark, unfocusedTextColor = TextOnDark,
-    focusedBorderColor = LegalGold, unfocusedBorderColor = Color.White.copy(0.35f),
-    focusedLabelColor = LegalGold, unfocusedLabelColor = TextOnDark.copy(0.6f),
-    cursorColor = LegalGold, disabledTextColor = TextOnDark.copy(0.4f),
-    disabledBorderColor = Color.White.copy(0.2f)
-)
-
-@Composable
 internal fun AboutScreen(padding: PaddingValues) {
-    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("О приложении", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("О приложении", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 22.sp)
         Text("ЗаконЪ · версия 0.1.0", color = LegalGold, fontWeight = FontWeight.SemiBold)
-        Text("Безопасность кабинета", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 15.sp)
         Text(
-            "Пароль не хранится на устройстве.\n" +
-                "В EncryptedSharedPreferences (ключ MasterKey / Android Keystore) — только соль и PBKDF2-HMAC-SHA256 verifier (600 000 итераций).\n" +
-                "Дела и вложения: AES-256-GCM, отдельный ключ Keystore.\n" +
-                "Старый небезопасный pin_hash (hashCode) при миграции уничтожается.\n" +
-                "Можно отключить, сменить или полностью удалить пароль в разделе «Код».",
-            color = TextOnDark.copy(0.88f), fontSize = 14.sp, lineHeight = 20.sp
+            "Личный кабинет: белый экран, пароль по желанию, настройка в «Настройки → Безопасность».\n" +
+                "Пароль не хранится — только PBKDF2-verifier в EncryptedSharedPreferences.\n" +
+                "Данные дел: AES-256-GCM / Android Keystore.",
+            color = Color(0xFFF5F7FA).copy(0.88f),
+            fontSize = 14.sp,
+            lineHeight = 20.sp
         )
-        Text("Автор", color = LegalGold, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-        Text("Исаев Владислав Андреевич", color = TextOnDark.copy(0.88f), fontSize = 14.sp)
-        Text(
-            "Материалы правовой базы — справочные. Сотрудничество: Valdissor@mail.ru",
-            color = TextOnDark.copy(0.75f), fontSize = 13.sp, lineHeight = 18.sp
-        )
+        Text("Автор", color = LegalGold, fontWeight = FontWeight.Bold)
+        Text("Исаев Владислав Андреевич", color = Color(0xFFF5F7FA).copy(0.88f))
+        Text("Сотрудничество: Valdissor@mail.ru", color = Color(0xFFF5F7FA).copy(0.75f), fontSize = 13.sp)
     }
 }
 
 @Composable
 internal fun MoreScreen(padding: PaddingValues, onConstructor: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
-        Text("Инструменты", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text("Инструменты", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
 
 @Composable
 internal fun ConstructorScreen(padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
-        Text("Конструктор документов", color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text("Конструктор документов", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
