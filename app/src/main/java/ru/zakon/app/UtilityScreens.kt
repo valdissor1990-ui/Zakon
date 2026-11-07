@@ -41,7 +41,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
-import javax.crypto.Cipher
 
 private val WhiteBg = Color(0xFFFFFFFF)
 private val OnWhite = Color(0xFF1A1A1A)
@@ -99,32 +98,50 @@ internal class CabinetStorage(private val context: Context) {
             .putBoolean("pin_enabled", true).putBoolean("pin_prompt_done", true)
             .putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
         salt.fill(0); verifier.fill(0)
-        crypto.ensureKey(requireUserAuth = true)
+        try { crypto.ensureKey(requireUserAuth = true) } catch (_: Exception) { }
         legacyPrefs.edit().remove("pin_hash").apply()
     }
 
     fun checkPassword(pin: String): Boolean {
         if (isLockedOut() || !hasVerifier()) return false
-        val salt = CabinetPinKdf.fromBase64(securePrefs.getString("pin_salt", null) ?: return false)
-        val expected = CabinetPinKdf.fromBase64(securePrefs.getString("pin_verifier", null) ?: return false)
-        val ok = try { CabinetPinKdf.matches(pin, salt, expected) } finally { salt.fill(0); expected.fill(0) }
-        if (ok) securePrefs.edit().putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
-        else registerFailedAttempt()
-        return ok
+        return try {
+            val salt = CabinetPinKdf.fromBase64(securePrefs.getString("pin_salt", null) ?: return false)
+            val expected = CabinetPinKdf.fromBase64(securePrefs.getString("pin_verifier", null) ?: return false)
+            val ok = try { CabinetPinKdf.matches(pin, salt, expected) } finally { salt.fill(0); expected.fill(0) }
+            if (ok) securePrefs.edit().putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
+            else registerFailedAttempt()
+            ok
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun disablePin(currentPin: String): Boolean {
         if (!checkPassword(currentPin)) return false
-        securePrefs.edit().putBoolean("pin_enabled", false).putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
+        securePrefs.edit().putBoolean("pin_enabled", false).putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).commit()
         return true
     }
     fun enablePin() { if (hasVerifier()) securePrefs.edit().putBoolean("pin_enabled", true).apply() }
 
     fun deletePin(currentPin: String, wipeData: Boolean): Boolean {
-        if (hasVerifier() && !checkPassword(currentPin)) return false
-        securePrefs.edit().remove("pin_salt").remove("pin_verifier").putBoolean("pin_enabled", false).putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
-        if (wipeData) wipeAllCabinetData()
-        return true
+        return try {
+            if (hasVerifier()) {
+                if (currentPin.isBlank() || !checkPassword(currentPin)) return false
+            }
+            securePrefs.edit()
+                .remove("pin_salt")
+                .remove("pin_verifier")
+                .putBoolean("pin_enabled", false)
+                .putInt("pin_fail_count", 0)
+                .putLong("pin_lock_until", 0L)
+                .commit()
+            if (wipeData) {
+                try { wipeAllCabinetData() } catch (_: Exception) { }
+            }
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun changePassword(oldPin: String, newPin: String): Boolean {
@@ -133,10 +150,16 @@ internal class CabinetStorage(private val context: Context) {
     }
 
     fun wipeAllCabinetData() {
-        loadCases().forEach { c -> c.attachments.forEach { deleteAttachment(it) } }
-        securePrefs.edit().remove("cases_enc").apply()
-        crypto.clearViewCache()
-        crypto.encryptedDir().listFiles()?.forEach { it.delete() }
+        try {
+            loadCases().forEach { c ->
+                c.attachments.forEach { name -> try { deleteAttachment(name) } catch (_: Exception) { } }
+            }
+        } catch (_: Exception) { }
+        try { securePrefs.edit().remove("cases_enc").commit() } catch (_: Exception) { }
+        try { crypto.clearViewCache() } catch (_: Exception) { }
+        try {
+            crypto.encryptedDir().listFiles()?.forEach { f -> try { f.delete() } catch (_: Exception) { } }
+        } catch (_: Exception) { }
     }
 
     fun isLockedOut(): Boolean = System.currentTimeMillis() < securePrefs.getLong("pin_lock_until", 0L)
@@ -190,9 +213,8 @@ internal class CabinetStorage(private val context: Context) {
         } catch (_: Exception) { null }
     }
 
-    fun deleteAttachment(encName: String) = crypto.deleteEncryptedFile(encName)
-    fun clearViewCache() = crypto.clearViewCache()
-    fun biometricCipher(): Cipher? = try { crypto.cipherForEncrypt(crypto.getSecretKey()) } catch (_: Exception) { null }
+    fun deleteAttachment(encName: String) = try { crypto.deleteEncryptedFile(encName) } catch (_: Exception) { }
+    fun clearViewCache() = try { crypto.clearViewCache() } catch (_: Exception) { }
 }
 
 private fun Context.findFragmentActivity(): FragmentActivity? {
@@ -201,24 +223,45 @@ private fun Context.findFragmentActivity(): FragmentActivity? {
     return null
 }
 
-private const val BIO_AUTHENTICATORS = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
-private fun biometricStatus(context: Context): Int = BiometricManager.from(context).canAuthenticate(BIO_AUTHENTICATORS)
+private const val BIO_STRONG = BiometricManager.Authenticators.BIOMETRIC_STRONG
+private const val BIO_WEAK = BiometricManager.Authenticators.BIOMETRIC_WEAK
+private const val BIO_ANY = BIO_STRONG or BIO_WEAK
 
-private fun showBiometric(activity: FragmentActivity, cipher: Cipher?, onSuccess: () -> Unit, onError: (String) -> Unit) {
+private fun biometricStatus(context: Context): Int {
+    val bm = BiometricManager.from(context)
+    val strong = bm.canAuthenticate(BIO_STRONG)
+    if (strong == BiometricManager.BIOMETRIC_SUCCESS) return strong
+    return bm.canAuthenticate(BIO_ANY)
+}
+
+/** No CryptoObject — Class 2 (weak) biometrics do not support crypto-based authentication. */
+private fun showBiometric(activity: FragmentActivity, onSuccess: () -> Unit, onError: (String) -> Unit) {
     val executor = ContextCompat.getMainExecutor(activity)
     val prompt = BiometricPrompt(activity, executor, object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) = onSuccess()
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-            if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) onError(errString.toString())
+            if (errorCode != BiometricPrompt.ERROR_USER_CANCELED && errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                onError(errString.toString())
+            }
         }
-        override fun onAuthenticationFailed() { onError("Не распознано") }
+        override fun onAuthenticationFailed() { }
     })
     try {
+        val bm = BiometricManager.from(activity)
+        val authenticators = when {
+            bm.canAuthenticate(BIO_STRONG) == BiometricManager.BIOMETRIC_SUCCESS -> BIO_STRONG
+            else -> BIO_ANY
+        }
         val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Вход в личный кабинет").setSubtitle("Подтвердите личность")
-            .setAllowedAuthenticators(BIO_AUTHENTICATORS).setNegativeButtonText("Пароль").build()
-        if (cipher != null) prompt.authenticate(info, BiometricPrompt.CryptoObject(cipher)) else prompt.authenticate(info)
-    } catch (e: Exception) { onError(e.message ?: "Ошибка биометрии") }
+            .setTitle("Вход в личный кабинет")
+            .setSubtitle("Подтвердите личность")
+            .setAllowedAuthenticators(authenticators)
+            .setNegativeButtonText("Пароль")
+            .build()
+        prompt.authenticate(info)
+    } catch (e: Exception) {
+        onError(e.message ?: "Ошибка биометрии")
+    }
 }
 
 @Composable
@@ -249,7 +292,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
     LaunchedEffect(lockTick) { while (storage.isLockedOut()) { delay(500); lockTick++ } }
     LaunchedEffect(unlocked, showAskPin) {
         if (!unlocked && !showAskPin && storage.hasPassword() && bioOk && activity != null && !storage.isLockedOut()) {
-            showBiometric(activity, storage.biometricCipher(), onSuccess = { unlocked = true; cases = storage.loadCases() }, onError = { })
+            showBiometric(activity, onSuccess = { unlocked = true; cases = storage.loadCases() }, onError = { })
         }
     }
 
@@ -340,7 +383,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                                     BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> "Биометрия временно недоступна"
                                     else -> "Биометрия недоступна (код $bioStatus)"
                                 }
-                                else -> showBiometric(act, storage.biometricCipher(), onSuccess = { unlocked = true; cases = storage.loadCases() }, onError = { error = it })
+                                else -> showBiometric(act, onSuccess = { unlocked = true; cases = storage.loadCases() }, onError = { error = it })
                             }
                         }, modifier = Modifier.fillMaxWidth().height(48.dp)) { Text(if (bioOk) "Войти по биометрии" else "Биометрия (проверить)") }
                         if (!bioOk) {
@@ -440,22 +483,22 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
 @Composable
 internal fun AboutScreen(padding: PaddingValues) {
-    Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("О приложении", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 22.sp)
-        Text("ЗаконЪ · версия 0.1.0", color = LegalGold, fontWeight = FontWeight.SemiBold)
-        Text("Личный кабинет: белый экран, пароль по желанию, настройка в «Настройки → Безопасность».", color = Color(0xFFF5F7FA).copy(0.88f), fontSize = 14.sp, lineHeight = 20.sp)
-        Text("Автор", color = LegalGold, fontWeight = FontWeight.Bold)
-        Text("Исаев Владислав Андреевич", color = Color(0xFFF5F7FA).copy(0.88f))
-        Text("Сотрудничество: Valdissor@mail.ru", color = Color(0xFFF5F7FA).copy(0.75f), fontSize = 13.sp)
+    Column(Modifier.fillMaxSize().background(Color.White).padding(padding).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("О приложении", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        Text("ЗаконЪ · версия 0.1.0", color = AccentGold, fontWeight = FontWeight.SemiBold)
+        Text("Личный кабинет: белый экран, пароль по желанию, настройка в «Настройки → Безопасность».", color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp)
+        Text("Автор", color = AccentGold, fontWeight = FontWeight.Bold)
+        Text("Исаев Владислав Андреевич", color = OnWhite)
+        Text("Сотрудничество: Valdissor@mail.ru", color = MutedGray, fontSize = 13.sp)
     }
 }
 
 @Composable
 internal fun MoreScreen(padding: PaddingValues, onConstructor: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) { Text("Инструменты", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) { Text("Инструменты", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp) }
 }
 
 @Composable
 internal fun ConstructorScreen(padding: PaddingValues) {
-    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) { Text("Конструктор документов", color = Color(0xFFF5F7FA), fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) { Text("Конструктор документов", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp) }
 }
