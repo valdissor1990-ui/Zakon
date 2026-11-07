@@ -30,8 +30,9 @@ object CodeIcons {
             if (loaded) return
             for (name in assetNames) {
                 try {
-                    val b64 = context.assets.open("icon_$name.b64").bufferedReader().readText().trim()
-                    val bytes = Base64.decode(b64, Base64.DEFAULT)
+                    val a = context.assets.open("icon_${name}_a.b64").bufferedReader().readText().trim()
+                    val b = context.assets.open("icon_${name}_b.b64").bufferedReader().readText().trim()
+                    val bytes = Base64.decode(a + b, Base64.DEFAULT)
                     val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
                     cache[name] = bmp
                 } catch (_: Exception) {
