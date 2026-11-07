@@ -28,18 +28,22 @@ object CodeIcons {
         synchronized(this) {
             if (loaded) return
             try {
-                val json = context.assets.open("code_icons.json").bufferedReader().readText()
-                val root = JSONObject(json)
-                val keys = root.keys()
-                while (keys.hasNext()) {
-                    val k = keys.next()
-                    val b64 = root.getString(k)
-                    val bytes = Base64.decode(b64, Base64.DEFAULT)
-                    val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
-                    cache[k] = bmp
+                for (name in listOf("code_icons.json", "code_icons_1.json", "code_icons_2.json")) {
+                    try {
+                        val json = context.assets.open(name).bufferedReader().readText()
+                        val root = JSONObject(json)
+                        val keys = root.keys()
+                        while (keys.hasNext()) {
+                            val k = keys.next()
+                            val b64 = root.getString(k)
+                            val bytes = Base64.decode(b64, Base64.DEFAULT)
+                            val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
+                            cache[k] = bmp
+                        }
+                    } catch (_: Exception) {
+                    }
                 }
             } catch (_: Exception) {
-                // icons optional
             }
             loaded = true
         }
