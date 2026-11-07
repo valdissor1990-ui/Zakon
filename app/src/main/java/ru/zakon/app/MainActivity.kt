@@ -76,8 +76,9 @@ private fun ZakonApp(store: LegalStore) {
     BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
-        // Hide global background on pure-white screens (cabinet)
-        if (route != "cabinet") {
+        val whiteScreen = route == "cabinet" || route == "settings" || route == "about" ||
+            route == "favorites" || route == "constructor"
+        if (!whiteScreen) {
             Image(
                 painter = painterResource(id = R.drawable.grok_1793951493468),
                 contentDescription = null,
@@ -128,7 +129,8 @@ private fun ZakonApp(store: LegalStore) {
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
-                    val lightBar = route == "cabinet"
+                    val lightBar = route == "cabinet" || route == "settings" || route == "about" ||
+                        route == "favorites" || route == "constructor"
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = if (lightBar) Color.White else Color.Black.copy(alpha = 0.40f),
@@ -195,7 +197,13 @@ private fun ZakonApp(store: LegalStore) {
                     }
                     route == "constitution" -> CodeArticlesScreen(store, "const", padding, scrollIndexMap, "constitution") { navigate("article/$it") }
                     route == "search" -> SearchScreen(store, query, { query = it }, padding) { navigate("article/" + it) }
-                    route == "favorites" -> PlaceholderLight("Избранное", padding, "Сохранённые статьи появятся здесь.")
+                    route == "favorites" -> {
+                        Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Избранное", color = Color(0xFF1A1A1A), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text("Сохранённые статьи появятся здесь.", color = Color(0xFF6B6B6B), textAlign = TextAlign.Center)
+                        }
+                    }
                     route == "settings" -> ContentUpdateScreen(store, padding)
                     route == "about" -> AboutScreen(padding)
                     route == "cabinet" -> CabinetScreen(padding)
