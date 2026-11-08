@@ -310,7 +310,7 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
                     title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
                     symbol = code.symbol,
                     bitmap = bmp,
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    modifier = Modifier.fillMaxWidth().height(104.dp),
                     onClick = { onCodeClick(code.id) }
                 )
             }
@@ -332,10 +332,10 @@ private fun CodeBookCard(
             .background(Color.White.copy(alpha = 0.12f))
             .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
-            .padding(8.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon takes half of the tile
+        // Иконка ровно в половину плитки (квадрат по высоте карточки)
         Box(
             Modifier
                 .fillMaxHeight()
@@ -347,20 +347,20 @@ private fun CodeBookCard(
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = title,
-                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                    modifier = Modifier.fillMaxSize().padding(3.dp),
                     contentScale = ContentScale.Fit
                 )
             } else {
-                IconBadge(symbol, 40.dp)
+                IconBadge(symbol, 36.dp)
             }
         }
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             title,
             color = TextOnDark,
             fontWeight = FontWeight.SemiBold,
             fontSize = 13.sp,
-            lineHeight = 17.sp,
+            lineHeight = 16.sp,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
@@ -408,10 +408,10 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(code.shortName + " — " + code.liabilityTitle, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         code.liabilityItems.forEach { item ->
-            Column(Modifier.fillMaxWidth().background(Color.White.copy(0.10f), RoundedCornerShape(14.dp)).border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).padding(14.dp)) {
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(0.10f)).border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).padding(14.dp)) {
                 Text(item.title, color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Spacer(Modifier.height(6.dp))
-                Text(item.body, color = TextOnDark, fontSize = 13.sp, lineHeight = 18.sp)
+                Text(item.body, color = TextOnDark, fontSize = 13.sp, lineHeight = 19.sp)
             }
         }
     }
@@ -421,48 +421,44 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
 private fun IconBadge(symbol: String, size: androidx.compose.ui.unit.Dp) {
     Box(
         Modifier.size(size).shadow(4.dp, CircleShape).clip(CircleShape)
-            .background(Brush.radialGradient(listOf(Color(0xFFFFE9A8), LegalGold, Color(0xFF8A6A1A))))
-            .border(1.5.dp, Color.White.copy(0.45f), CircleShape),
+            .background(Brush.verticalGradient(listOf(LegalGold, Color(0xFFB8860B)))),
         contentAlignment = Alignment.Center
     ) {
-        Text(symbol, color = Color(0xFF1A1408), fontWeight = FontWeight.Bold, fontSize = (size.value * 0.42f).sp)
+        Text(symbol, color = Color.White, fontWeight = FontWeight.Bold, fontSize = (size.value * 0.42f).sp)
     }
 }
 
 @Composable
 private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(
-        modifier.height(108.dp).clip(RoundedCornerShape(18.dp))
-            .background(Brush.verticalGradient(listOf(Color.White.copy(0.24f), Color.White.copy(0.08f))))
-            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp)).clickable(onClick = onClick).padding(10.dp),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier.height(108.dp).shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp))
+            .background(Brush.verticalGradient(listOf(Color.White.copy(0.22f), Color.White.copy(0.08f))))
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp)).clickable(onClick = onClick).padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            IconBadge(symbol, 40.dp)
-            Spacer(Modifier.height(8.dp))
-            Text(title, color = TextOnDark, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, lineHeight = 15.sp)
-        }
+        IconBadge(symbol, 36.dp)
+        Spacer(Modifier.height(8.dp))
+        Text(title, color = TextOnDark, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 16.sp)
     }
 }
 
 @Composable
 private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: () -> Unit) {
-    val bg = if (selected) LegalGold.copy(alpha = 0.22f) else Color.Transparent
+    val bg = if (selected) Color.White.copy(0.15f) else Color.Transparent
     val textColor = if (selected) LegalGold else TextOnDark
-    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp).clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(icon, color = textColor, fontSize = 18.sp, modifier = Modifier.width(28.dp))
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(12.dp))
         Text(title, color = textColor, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, fontSize = 15.sp)
     }
 }
 
 @Composable
-private fun PlaceholderLight(title: String, padding: PaddingValues, subtitle: String = "") {
-    Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        if (subtitle.isNotBlank()) {
-            Spacer(Modifier.height(8.dp))
-            Text(subtitle, color = TextMutedOnDark, textAlign = TextAlign.Center)
-        }
+private fun PlaceholderLight(msg: String, padding: PaddingValues) {
+    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        Text(msg, color = TextMutedOnDark, fontSize = 16.sp)
     }
 }
