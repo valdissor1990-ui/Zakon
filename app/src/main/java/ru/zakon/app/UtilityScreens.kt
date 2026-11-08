@@ -37,12 +37,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-private val WhiteBg = Color(0xFFFFFFFF)
-private val OnWhite = Color(0xFF1A1A1A)
-private val MutedGray = Color(0xFF6B6B6B)
-private val LineGray = Color(0xFFE0E0E0)
-private val AccentGold = Color(0xFF8A6A1A)
-private val SoftBg = Color(0xFFF7F7F5)
+private val CabBg = Color(0xFF0F1A24)
+private val OnCab = Color(0xFFF5F7FA)
+private val MutedGray = Color(0xFF9AA5B1)
+private val LineGray = Color(0xFF2A3A4A)
+private val AccentGold = Color(0xFFC9A227)
+private val SoftBg = Color(0xFF15202B)
 
 private fun Context.findAct(): FragmentActivity? {
     var c: Context? = this
@@ -105,54 +105,128 @@ internal fun CabinetScreen(padding: PaddingValues) {
     val canBio = remember(ctx) { bioOk(ctx) }
     fun save(n: CabinetWorkspace) { ws = n; st.saveWorkspace(n) }
     DisposableEffect(Unit) { onDispose { st.clearViewCache() } }
-    LaunchedEffect(unlocked, askPin) {
-        if (!unlocked && !askPin && st.hasPassword() && canBio && act != null && !st.isLockedOut())
+    LaunchedEffect(unlocked, askPin, setPin) {
+        if (!unlocked && !askPin && !setPin && st.hasPassword() && canBio && act != null && !st.isLockedOut())
             showBio(act, { unlocked = true; ws = st.loadWorkspace() }, {})
     }
-    Box(Modifier.fillMaxSize().padding(padding).background(WhiteBg)) {
+    Box(Modifier.fillMaxSize().padding(padding).background(CabBg)) {
         when {
             askPin -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text("Личный кабинет", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Spacer(Modifier.height(12.dp))
-                Text("Задать пароль для защиты данных?\nПозже — Настройки → Безопасность.", color = MutedGray, textAlign = TextAlign.Center)
+                Text("Задать пароль для защиты данных?\nОтпечаток/Face ID заработают после установки пароля.", color = MutedGray, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(20.dp))
-                Button(onClick = { setPin = true; askPin = false }, colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White), modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Да, задать пароль") }
-                OutlinedButton(onClick = { st.markPinPromptDone(); askPin = false; unlocked = true; ws = st.loadWorkspace() }, modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Нет, без пароля") }
+                Button(
+                    onClick = { setPin = true; askPin = false; unlocked = false; error = null; pin = ""; pin2 = "" },
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) { Text("Да, задать пароль") }
+                OutlinedButton(
+                    onClick = { st.markPinPromptDone(); askPin = false; unlocked = true; ws = st.loadWorkspace() },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = OnCab)
+                ) { Text("Нет, без пароля") }
             }
-            setPin && !unlocked -> Column(Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState())) {
-                Text("Новый пароль", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                OutlinedTextField(pin, { if (it.length <= 32) pin = it }, label = { Text("Пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(pin2, { if (it.length <= 32) pin2 = it }, label = { Text("Повтор") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
-                error?.let { Text(it, color = Color(0xFFB71C1C)) }
-                Button(onClick = {
-                    error = null
-                    when {
-                        pin.length < 6 -> error = "Минимум 6 символов"
-                        pin != pin2 -> error = "Не совпадают"
-                        else -> { st.setPassword(pin); setPin = false; unlocked = true; ws = st.loadWorkspace(); pin = ""; pin2 = "" }
-                    }
-                }, colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White), modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Сохранить") }
-                TextButton(onClick = { st.markPinPromptDone(); setPin = false; unlocked = true; ws = st.loadWorkspace() }) { Text("Без пароля", color = MutedGray) }
+            setPin -> Column(Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Новый пароль", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Минимум 6 символов. После сохранения можно входить по отпечатку.", color = MutedGray, fontSize = 13.sp)
+                OutlinedTextField(
+                    pin, { if (it.length <= 32) pin = it },
+                    label = { Text("Пароль") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = OnCab, unfocusedTextColor = OnCab,
+                        focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
+                        focusedLabelColor = AccentGold, unfocusedLabelColor = MutedGray
+                    )
+                )
+                OutlinedTextField(
+                    pin2, { if (it.length <= 32) pin2 = it },
+                    label = { Text("Повтор") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = OnCab, unfocusedTextColor = OnCab,
+                        focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
+                        focusedLabelColor = AccentGold, unfocusedLabelColor = MutedGray
+                    )
+                )
+                error?.let { Text(it, color = Color(0xFFFF8A80)) }
+                Button(
+                    onClick = {
+                        error = null
+                        when {
+                            pin.length < 6 -> error = "Минимум 6 символов"
+                            pin != pin2 -> error = "Пароли не совпадают"
+                            else -> {
+                                try {
+                                    st.setPassword(pin)
+                                    setPin = false
+                                    unlocked = true
+                                    ws = st.loadWorkspace()
+                                    pin = ""; pin2 = ""
+                                } catch (e: Exception) {
+                                    error = e.message ?: "Не удалось сохранить пароль"
+                                }
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) { Text("Сохранить пароль") }
+                TextButton(onClick = {
+                    st.markPinPromptDone(); setPin = false; unlocked = true; ws = st.loadWorkspace(); pin = ""; pin2 = ""
+                }) { Text("Без пароля", color = MutedGray) }
             }
             !unlocked -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                OutlinedTextField(pin, { if (it.length <= 32) pin = it }, label = { Text("Пароль") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, enabled = !st.isLockedOut(), modifier = Modifier.fillMaxWidth())
-                if (st.isLockedOut()) Text("Подождите ${st.lockRemainingMs() / 1000} с", color = Color(0xFFB71C1C))
-                error?.let { Text(it, color = Color(0xFFB71C1C)) }
-                Button(onClick = {
-                    busy = true
-                    scope.launch {
-                        val ok = withContext(Dispatchers.Default) { st.checkPassword(pin) }
-                        busy = false
-                        if (ok) { unlocked = true; ws = st.loadWorkspace(); pin = "" } else error = "Неверный пароль"
-                    }
-                }, enabled = !busy && !st.isLockedOut(), colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White), modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Войти") }
-                OutlinedButton(onClick = {
-                    val a = act
-                    if (a == null) error = "Нет Activity"
-                    else if (!canBio) error = "Биометрия недоступна"
-                    else showBio(a, { unlocked = true; ws = st.loadWorkspace() }, { error = it })
-                }, modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Биометрия") }
+                Text("Личный кабинет", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    pin, { if (it.length <= 32) pin = it },
+                    label = { Text("Пароль") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    enabled = !st.isLockedOut(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = OnCab, unfocusedTextColor = OnCab,
+                        focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
+                        focusedLabelColor = AccentGold, unfocusedLabelColor = MutedGray
+                    )
+                )
+                if (st.isLockedOut()) Text("Подождите ${st.lockRemainingMs() / 1000} с", color = Color(0xFFFF8A80))
+                error?.let { Text(it, color = Color(0xFFFF8A80)) }
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        busy = true
+                        scope.launch {
+                            val ok = withContext(Dispatchers.Default) { st.checkPassword(pin) }
+                            busy = false
+                            if (ok) { unlocked = true; ws = st.loadWorkspace(); pin = ""; error = null }
+                            else error = "Неверный пароль"
+                        }
+                    },
+                    enabled = !busy && !st.isLockedOut(),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) { Text(if (busy) "…" else "Войти") }
+                if (canBio) {
+                    OutlinedButton(
+                        onClick = {
+                            val a = act
+                            if (a == null) error = "Нет Activity"
+                            else showBio(a, { unlocked = true; ws = st.loadWorkspace(); error = null }, { error = it })
+                        },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = OnCab)
+                    ) { Text("Отпечаток / Face ID") }
+                } else {
+                    Text("Биометрия недоступна на этом устройстве", color = MutedGray, fontSize = 12.sp)
+                }
             }
             else -> {
                 BackHandler(enabled = route !is CabRoute.Hub) {
@@ -165,7 +239,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
                     }
                 }
                 when (val r = route) {
-                    CabRoute.Hub -> HubUI(ws, st.hasPassword(),
+                    CabRoute.Hub -> HubUI(ws, st.hasPassword(), canBio,
                         onClients = { route = CabRoute.Clients },
                         onCases = { route = CabRoute.Cases },
                         onCase = { route = CabRoute.KView(it); tab = 0 },
@@ -204,12 +278,19 @@ internal fun CabinetScreen(padding: PaddingValues) {
     }
 }
 
-@Composable private fun HubUI(ws: CabinetWorkspace, hasPw: Boolean, onClients: () -> Unit, onCases: () -> Unit, onCase: (String) -> Unit, onLock: () -> Unit) {
+@Composable private fun HubUI(ws: CabinetWorkspace, hasPw: Boolean, canBio: Boolean, onClients: () -> Unit, onCases: () -> Unit, onCase: (String) -> Unit, onLock: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Личный кабинет", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(if (hasPw) "Защищён · только на устройстве" else "Без пароля · только на устройстве", color = MutedGray, fontSize = 12.sp)
+                Text("Личный кабинет", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(
+                    when {
+                        hasPw && canBio -> "Пароль и биометрия · только на устройстве"
+                        hasPw -> "Защищён паролем · только на устройстве"
+                        else -> "Без пароля · только на устройстве"
+                    },
+                    color = MutedGray, fontSize = 12.sp
+                )
             }
             if (hasPw) TextButton(onClick = onLock) { Text("Выйти", color = MutedGray) }
         }
@@ -229,7 +310,7 @@ internal fun CabinetScreen(padding: PaddingValues) {
         else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(ws.cases.take(8), key = { it.id }) { c ->
                 Column(Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable { onCase(c.id) }.padding(12.dp)) {
-                    Text(c.title, color = OnWhite, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(c.title, color = OnCab, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("${lab(CaseCategories, c.category)} · ${lab(CaseStatuses, c.status)}", color = MutedGray, fontSize = 12.sp)
                 }
             }
@@ -239,12 +320,12 @@ internal fun CabinetScreen(padding: PaddingValues) {
 
 @Composable private fun Stat(t: String, v: String, m: Modifier, onClick: () -> Unit) =
     Column(m.border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(12.dp)) {
-        Text(t, color = MutedGray, fontSize = 11.sp); Text(v, color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(t, color = MutedGray, fontSize = 11.sp); Text(v, color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 
 @Composable private fun MenuRow(t: String, s: String, onClick: () -> Unit) =
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) { Text(t, color = OnWhite, fontWeight = FontWeight.SemiBold); Text(s, color = MutedGray, fontSize = 12.sp) }
+        Column(Modifier.weight(1f)) { Text(t, color = OnCab, fontWeight = FontWeight.SemiBold); Text(s, color = MutedGray, fontSize = 12.sp) }
         Text("›", color = AccentGold, fontSize = 20.sp)
     }
 
@@ -252,13 +333,13 @@ internal fun CabinetScreen(padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
-            Text(title, color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.weight(1f))
+            Text(title, color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.weight(1f))
             TextButton(onClick = onAdd) { Text("+", color = AccentGold) }
         }
         if (items.isEmpty()) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Пусто", color = MutedGray) }
         else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items, key = { it.first }) { (id, label) ->
-                Text(label, color = OnWhite, fontWeight = FontWeight.SemiBold,
+                Text(label, color = OnCab, fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable { onOpen(id) }.padding(14.dp))
             }
         }
@@ -271,10 +352,10 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var phone by remember { mutableStateOf(initial?.phone ?: "") }
     var email by remember { mutableStateOf(initial?.email ?: "") }
     var notes by remember { mutableStateOf(initial?.notes ?: "") }
-    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
-            Text(if (initial == null) "Новый клиент" else "Клиент", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(if (initial == null) "Новый клиент" else "Клиент", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
         Row { FilterChip(selected = type == "person", onClick = { type = "person" }, label = { Text("Физлицо") }); Spacer(Modifier.width(8.dp)); FilterChip(selected = type == "org", onClick = { type = "org" }, label = { Text("Юрлицо") }) }
         OutlinedTextField(name, { name = it }, label = { Text("ФИО / название") }, modifier = Modifier.fillMaxWidth())
@@ -282,8 +363,8 @@ internal fun CabinetScreen(padding: PaddingValues) {
         OutlinedTextField(email, { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(notes, { notes = it }, label = { Text("Заметки") }, minLines = 2, modifier = Modifier.fillMaxWidth())
         Button(onClick = { if (name.isNotBlank()) onSave(CabClient(initial?.id ?: UUID.randomUUID().toString(), type, name.trim(), phone.trim(), email.trim(), notes.trim())) },
-            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White), modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Сохранить") }
-        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить", color = Color(0xFFB71C1C)) }
+            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black), modifier = Modifier.fillMaxWidth()) { Text("Сохранить") }
+        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить", color = Color(0xFFFF8A80)) }
     }
 }
 
@@ -296,12 +377,16 @@ internal fun CabinetScreen(padding: PaddingValues) {
     var caseNumber by remember { mutableStateOf(initial?.caseNumber ?: "") }
     var subject by remember { mutableStateOf(initial?.subject ?: "") }
     var notes by remember { mutableStateOf(initial?.notes ?: "") }
-    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
-            Text(if (initial == null) "Новое дело" else "Дело", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(if (initial == null) "Новое дело" else "Дело", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
         OutlinedTextField(title, { title = it }, label = { Text("Название") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(court, { court = it }, label = { Text("Суд") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(caseNumber, { caseNumber = it }, label = { Text("Номер дела") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(subject, { subject = it }, label = { Text("Предмет") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(notes, { notes = it }, label = { Text("Заметки") }, minLines = 2, modifier = Modifier.fillMaxWidth())
         Text("Категория", color = MutedGray, fontSize = 12.sp)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             CaseCategories.forEach { (k, v) -> FilterChip(selected = category == k, onClick = { category = k }, label = { Text(v) }) }
@@ -313,70 +398,45 @@ internal fun CabinetScreen(padding: PaddingValues) {
         if (clients.isNotEmpty()) {
             Text("Клиент", color = MutedGray, fontSize = 12.sp)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                FilterChip(selected = clientId == null, onClick = { clientId = null }, label = { Text("—") })
+                FilterChip(selected = clientId == null, onClick = { clientId = null }, label = { Text("Не выбран") })
                 clients.forEach { c -> FilterChip(selected = clientId == c.id, onClick = { clientId = c.id }, label = { Text(c.name) }) }
             }
         }
-        OutlinedTextField(court, { court = it }, label = { Text("Суд") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(caseNumber, { caseNumber = it }, label = { Text("Номер дела") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(subject, { subject = it }, label = { Text("Предмет") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(notes, { notes = it }, label = { Text("Заметки") }, minLines = 2, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            if (title.isNotBlank()) onSave(CabCase(initial?.id ?: UUID.randomUUID().toString(), title.trim(), category, status, clientId, court.trim(), caseNumber.trim(), subject.trim(), notes.trim()))
-        }, colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.White), modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Сохранить") }
-        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить дело", color = Color(0xFFB71C1C)) }
+        Button(onClick = { if (title.isNotBlank()) onSave(CabCase(initial?.id ?: UUID.randomUUID().toString(), title.trim(), category, status, clientId, court.trim(), caseNumber.trim(), subject.trim(), notes.trim())) },
+            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black), modifier = Modifier.fillMaxWidth()) { Text("Сохранить") }
+        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить", color = Color(0xFFFF8A80)) }
     }
 }
 
-@Composable private fun CaseView(
-    ws: CabinetWorkspace, caseId: String, tab: Int, onTab: (Int) -> Unit,
-    onBack: () -> Unit, onEdit: () -> Unit,
-    st: CabinetStorage, scope: kotlinx.coroutines.CoroutineScope, busy: Boolean,
-    onBusy: (Boolean) -> Unit, onErr: (String) -> Unit, onSaveWs: (CabinetWorkspace) -> Unit
-) {
-    val ctx = LocalContext.current
-    val c = ws.cases.find { it.id == caseId } ?: return
+@Composable private fun CaseView(ws: CabinetWorkspace, caseId: String, tab: Int, onTab: (Int) -> Unit, onBack: () -> Unit, onEdit: () -> Unit, st: CabinetStorage, scope: kotlinx.coroutines.CoroutineScope, busy: Boolean, onBusy: (Boolean) -> Unit, onErr: (String?) -> Unit, onSaveWs: (CabinetWorkspace) -> Unit) {
+    val c = ws.cases.find { it.id == caseId }
+    if (c == null) {
+        Column(Modifier.padding(16.dp)) { TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }; Text("Дело не найдено", color = OnCab) }
+        return
+    }
     val events = ws.events.filter { it.caseId == caseId }.sortedByDescending { it.at }
     val docs = ws.docs.filter { it.caseId == caseId }
     val tasks = ws.tasks.filter { it.caseId == caseId }
-    val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        onBusy(true)
-        scope.launch {
-            val name = withContext(Dispatchers.IO) { st.importAttachment(uri, uri.lastPathSegment) }
-            onBusy(false)
-            if (name == null) onErr("Не удалось добавить файл")
-            else {
-                val doc = CabDoc(UUID.randomUUID().toString(), caseId, uri.lastPathSegment ?: "Файл", name)
-                onSaveWs(ws.copy(docs = listOf(doc) + ws.docs))
-            }
-        }
-    }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
             Column(Modifier.weight(1f)) {
-                Text(c.title, color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(c.title, color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text("${lab(CaseCategories, c.category)} · ${lab(CaseStatuses, c.status)}", color = MutedGray, fontSize = 12.sp)
             }
             TextButton(onClick = onEdit) { Text("Изменить", color = AccentGold) }
         }
-        TabRow(selectedTabIndex = tab, containerColor = WhiteBg, contentColor = AccentGold) {
-            listOf("Хронология", "Документы", "Задачи").forEachIndexed { i, t ->
-                Tab(selected = tab == i, onClick = { onTab(i) }, text = { Text(t, fontSize = 13.sp) })
-            }
+        TabRow(selectedTabIndex = tab, containerColor = CabBg, contentColor = AccentGold) {
+            listOf("Ход", "Документы", "Задачи").forEachIndexed { i, t -> Tab(selected = tab == i, onClick = { onTab(i) }, text = { Text(t) }) }
         }
+        Spacer(Modifier.height(8.dp))
         when (tab) {
             0 -> {
-                Row { TextButton(onClick = {
-                    val e = CabEvent(UUID.randomUUID().toString(), caseId, "note", "Заметка", "", System.currentTimeMillis())
-                    onSaveWs(ws.copy(events = listOf(e) + ws.events))
-                }) { Text("+ Событие", color = AccentGold) } }
-                if (events.isEmpty()) Text("Нет событий", color = MutedGray)
-                else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (events.isEmpty()) Text("Записей пока нет", color = MutedGray)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(events, key = { it.id }) { e ->
-                        Column(Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(10.dp)).padding(12.dp)) {
-                            Text(e.title, color = OnWhite, fontWeight = FontWeight.SemiBold)
+                        Column(Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).padding(12.dp)) {
+                            Text(e.title, color = OnCab, fontWeight = FontWeight.SemiBold)
                             if (e.body.isNotBlank()) Text(e.body, color = MutedGray, fontSize = 13.sp)
                             Text(fmt(e.at), color = MutedGray, fontSize = 11.sp)
                         }
@@ -384,72 +444,21 @@ internal fun CabinetScreen(padding: PaddingValues) {
                 }
             }
             1 -> {
-                Row {
-                    TextButton(onClick = { pick.launch(arrayOf("*/*")) }, enabled = !busy) { Text("+ Файл", color = AccentGold) }
-                }
-                if (docs.isEmpty()) Text("Нет документов", color = MutedGray)
-                else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (docs.isEmpty()) Text("Документов пока нет", color = MutedGray)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(docs, key = { it.id }) { d ->
-                        Row(Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(10.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(d.title, color = OnWhite, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            TextButton(onClick = {
-                                val uri = st.openAttachment(d.encName, d.title)
-                                if (uri != null) {
-                                    try {
-                                        ctx.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "*/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-                                    } catch (_: Exception) { onErr("Нет приложения для просмотра") }
-                                } else onErr("Не удалось открыть")
-                            }) { Text("Открыть", color = AccentGold) }
-                            TextButton(onClick = {
-                                st.deleteAttachment(d.encName)
-                                onSaveWs(ws.copy(docs = ws.docs.filter { it.id != d.id }))
-                            }) { Text("✕", color = Color(0xFFB71C1C)) }
-                        }
+                        Text(d.title, color = OnCab, modifier = Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).padding(12.dp))
                     }
                 }
             }
-            2 -> {
-                Row { TextButton(onClick = {
-                    val t = CabTask(UUID.randomUUID().toString(), caseId, "Новая задача")
-                    onSaveWs(ws.copy(tasks = listOf(t) + ws.tasks))
-                }) { Text("+ Задача", color = AccentGold) } }
-                if (tasks.isEmpty()) Text("Нет задач", color = MutedGray)
-                else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            else -> {
+                if (tasks.isEmpty()) Text("Задач пока нет", color = MutedGray)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(tasks, key = { it.id }) { t ->
-                        Row(Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(10.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text(t.title, color = OnWhite, fontWeight = FontWeight.SemiBold)
-                                Text(lab(listOf("new" to "Новая", "doing" to "В работе", "done" to "Выполнена", "cancel" to "Отменена"), t.status), color = MutedGray, fontSize = 12.sp)
-                            }
-                            TextButton(onClick = {
-                                val ns = if (t.status == "done") "new" else "done"
-                                onSaveWs(ws.copy(tasks = ws.tasks.map { if (it.id == t.id) it.copy(status = ns, updatedAt = System.currentTimeMillis()) else it }))
-                            }) { Text(if (t.status == "done") "↩" else "✓", color = AccentGold) }
-                        }
+                        Text("${t.title} · ${t.status}", color = OnCab, modifier = Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).padding(12.dp))
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-internal fun AboutScreen(padding: PaddingValues) {
-    Column(Modifier.fillMaxSize().background(Color.White).padding(padding).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("О приложении", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-        Text("ЗаконЪ · 0.2.0", color = AccentGold, fontWeight = FontWeight.SemiBold)
-        Text("Кабинет: клиенты, дела, хронология, документы, задачи. Данные только на устройстве.", color = MutedGray, fontSize = 14.sp)
-        Text("Исаев Владислав Андреевич", color = OnWhite)
-        Text("Valdissor@mail.ru", color = MutedGray, fontSize = 13.sp)
-    }
-}
-
-@Composable
-internal fun MoreScreen(padding: PaddingValues, onConstructor: () -> Unit) {
-    Column(Modifier.padding(padding).padding(18.dp)) { Text("Инструменты", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp) }
-}
-
-@Composable
-internal fun ConstructorScreen(padding: PaddingValues) {
-    Column(Modifier.padding(padding).padding(18.dp)) { Text("Конструктор", color = OnWhite, fontWeight = FontWeight.Bold, fontSize = 20.sp) }
 }
