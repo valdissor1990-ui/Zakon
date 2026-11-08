@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -77,9 +75,15 @@ private fun ZakonApp(store: LegalStore) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
+    var cabinetBackHandler by remember { mutableStateOf<(() -> Boolean)?>(null) }
+
+    fun goBack() {
+        if (route == "cabinet" && cabinetBackHandler?.invoke() == true) return
+        back()
+    }
 
     BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
-    BackHandler(enabled = !isHome && drawerState.isClosed) { back() }
+    BackHandler(enabled = !isHome && drawerState.isClosed) { goBack() }
     BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
@@ -93,7 +97,7 @@ private fun ZakonApp(store: LegalStore) {
             Box(
                 Modifier.fillMaxSize().background(
                     Brush.verticalGradient(
-                        listOf(Color.Black.copy(0.50f), Color.Black.copy(0.35f), Color.Black.copy(0.65f))
+                        listOf(Color.Black.copy(0.28f), Color.Black.copy(0.16f), Color.Black.copy(0.38f))
                     )
                 )
             )
@@ -136,7 +140,7 @@ private fun ZakonApp(store: LegalStore) {
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = if (isHome) Color.Black.copy(alpha = 0.40f) else Color.White,
+                            containerColor = if (isHome) Color.Black.copy(alpha = 0.28f) else Color.White,
                             titleContentColor = if (isHome) TextOnDark else TextOnLight,
                             navigationIconContentColor = if (isHome) TextOnDark else TextOnLight,
                             actionIconContentColor = if (isHome) TextOnDark else TextOnLight
@@ -146,7 +150,7 @@ private fun ZakonApp(store: LegalStore) {
                             if (isHome) {
                                 Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), fontSize = 22.sp)
                             } else {
-                                Text("‹", Modifier.clickable { back() }.padding(horizontal = 16.dp), fontSize = 30.sp)
+                                Text("‹", Modifier.clickable { goBack() }.padding(horizontal = 16.dp), fontSize = 30.sp)
                             }
                         },
                         actions = {
@@ -209,7 +213,7 @@ private fun ZakonApp(store: LegalStore) {
                     }
                     route == "settings" -> ContentUpdateScreen(store, padding)
                     route == "about" -> AboutScreen(padding)
-                    route == "cabinet" -> CabinetScreen(padding)
+                    route == "cabinet" -> CabinetScreen(padding) { handler -> cabinetBackHandler = handler }
                     route == "constructor" -> ConstructorScreen(padding)
                     route.startsWith("category/") -> CategoryScreen(store, route.removePrefix("category/"), padding) { navigate("document/" + it) }
                     route.startsWith("document/") -> DocumentScreen(store, route.removePrefix("document/"), padding) { navigate("article/" + it) }
@@ -310,8 +314,8 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 28.dp)
         ) {
             items(AllRfCodes, key = { it.id }) { code ->
@@ -343,39 +347,23 @@ private fun CodeBookCard(
         Box(
             Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.70f)
-                .padding(horizontal = 4.dp, vertical = 6.dp)
-                .graphicsLayer {
-                    rotationY = -18f
-                    cameraDistance = 12f * density
-                    transformOrigin = TransformOrigin(0.1f, 0.5f)
-                    shadowElevation = 24f
-                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 4.dp)
-                    clip = false
-                }
+                .height(128.dp)
+                .padding(end = 3.dp, bottom = 3.dp)
         ) {
             Box(
-                Modifier.matchParentSize().offset(x = 10.dp, y = 4.dp)
-                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 10.dp, bottomEnd = 10.dp, bottomStart = 2.dp))
-                    .background(Color(0xFFE8DFD0))
+                Modifier
+                    .matchParentSize()
+                    .offset(x = 3.dp, y = 3.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF0E8D8))
             )
             Box(
-                Modifier.matchParentSize().offset(x = 6.dp, y = 2.dp)
-                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 11.dp, bottomEnd = 11.dp, bottomStart = 2.dp))
-                    .background(Color(0xFFF3EBDD))
-            )
-            Box(
-                Modifier.matchParentSize().offset(x = 3.dp, y = 1.dp)
-                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 2.dp))
-                    .background(Color(0xFFFAF6EE))
-                    .border(0.5.dp, Color(0xFFD4C8B0), RoundedCornerShape(topStart = 2.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 2.dp))
-            )
-            Box(
-                Modifier.matchParentSize()
-                    .shadow(16.dp, RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
-                    .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
+                Modifier
+                    .matchParentSize()
+                    .shadow(6.dp, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color(0xFF2A1810))
-                    .border(1.5.dp, Color(0xFFC9A227).copy(alpha = 0.65f), RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
+                    .border(1.dp, Color(0xFFC9A227).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
             ) {
                 if (bitmap != null) {
                     Image(
@@ -386,38 +374,37 @@ private fun CodeBookCard(
                     )
                 } else {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        IconBadge(symbol, 48.dp)
+                        IconBadge(symbol, 36.dp)
                     }
                 }
                 Box(
-                    Modifier.fillMaxHeight().width(12.dp).align(Alignment.CenterStart)
-                        .background(Brush.horizontalGradient(listOf(Color(0xFF0D0705), Color(0xFF3D2418), Color(0xFF1A0E08).copy(alpha = 0.4f))))
+                    Modifier
+                        .fillMaxHeight()
+                        .width(8.dp)
+                        .align(Alignment.CenterStart)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFF0D0705), Color(0xFF3D2418), Color.Transparent)
+                            )
+                        )
                 )
                 Box(
-                    Modifier.fillMaxHeight().width(2.dp).align(Alignment.CenterStart).offset(x = 12.dp)
-                        .background(Brush.verticalGradient(listOf(Color(0xFFE8C547).copy(0.3f), Color(0xFFC9A227), Color(0xFFE8C547).copy(0.3f))))
-                )
-                Box(
-                    Modifier.fillMaxWidth().fillMaxHeight(0.35f).align(Alignment.TopCenter)
-                        .background(Brush.verticalGradient(listOf(Color.White.copy(0.22f), Color.Transparent)))
-                )
-                Box(
-                    Modifier.fillMaxWidth().height(24.dp).align(Alignment.BottomCenter)
-                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.35f))))
-                )
-                Box(
-                    Modifier.fillMaxHeight().width(18.dp).align(Alignment.CenterEnd)
-                        .background(Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(0.08f))))
+                    Modifier
+                        .fillMaxHeight()
+                        .width(1.5.dp)
+                        .align(Alignment.CenterStart)
+                        .offset(x = 8.dp)
+                        .background(Color(0xFFC9A227).copy(alpha = 0.65f))
                 )
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         Text(
             title,
             color = TextOnLight,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-            lineHeight = 16.sp,
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
