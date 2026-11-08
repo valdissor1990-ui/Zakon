@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -110,7 +111,7 @@ private fun ZakonApp(store: LegalStore) {
                     HorizontalDivider(color = Color.White.copy(alpha = 0.15f))
                     Spacer(Modifier.height(8.dp))
                     DrawerItem("⌂", "Главная", route == "home") { stack.clear(); stack.add("home"); scope.launch { drawerState.close() } }
-                    DrawerItem("§", "Кодексы", route == "codes" || route.startsWith("code/")) { stack.clear(); stack.add("home"); stack.add("codes"); scope.launch { drawerState.close() } }
+                    DrawerItem("§", "Кодексы", route == "codes" || route.startsWith("code/") ) { stack.clear(); stack.add("home"); stack.add("codes"); scope.launch { drawerState.close() } }
                     DrawerItem("◆", "Конституция", route.startsWith("constitution")) { stack.clear(); stack.add("home"); stack.add("constitution"); scope.launch { drawerState.close() } }
                     DrawerItem("⚖", "Федеральные законы", route.startsWith("category/law")) { stack.clear(); stack.add("home"); stack.add("category/law"); scope.launch { drawerState.close() } }
                     DrawerItem("♟", "Личный кабинет", route == "cabinet") { stack.clear(); stack.add("home"); stack.add("cabinet"); scope.launch { drawerState.close() } }
@@ -290,17 +291,72 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
 @Composable
 private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<String, Int>, onCodeClick: (String) -> Unit) {
     val key = "codes_menu"
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     val initial = scrollIndexMap[key] ?: 0
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
     LaunchedEffect(gridState.isScrollInProgress) { if (!gridState.isScrollInProgress) scrollIndexMap[key] = gridState.firstVisibleItemIndex }
     DisposableEffect(Unit) { onDispose { scrollIndexMap[key] = gridState.firstVisibleItemIndex } }
     Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 14.dp, vertical = 10.dp)) {
         Text("Основные кодексы Российской Федерации", color = TextMutedOnDark, fontSize = 13.sp, modifier = Modifier.padding(bottom = 10.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2), state = gridState, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(bottom = 28.dp)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            state = gridState,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(bottom = 28.dp)
+        ) {
             items(AllRfCodes, key = { it.id }) { code ->
-                GlassCard(code.symbol, code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "", Modifier.fillMaxWidth().height(112.dp)) { onCodeClick(code.id) }
+                val bmp = remember(code.id) { CodeIcons.bitmapFor(ctx, code.id) }
+                CodeBookCard(
+                    title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
+                    symbol = code.symbol,
+                    bitmap = bmp,
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    onClick = { onCodeClick(code.id) }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun CodeBookCard(
+    title: String,
+    symbol: String,
+    bitmap: android.graphics.Bitmap?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.12f))
+            .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = title,
+                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            IconBadge(symbol, 48.dp)
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            title,
+            color = TextOnDark,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
