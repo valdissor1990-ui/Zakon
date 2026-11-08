@@ -6,7 +6,7 @@ on:
     paths: ["app/**", "*.gradle.kts", "gradle.properties"]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
@@ -33,3 +33,15 @@ jobs:
         with:
           name: zakon-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Publish APK to Release (direct .apk download)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: debug-latest
+          name: Zakon debug APK
+          body: "Прямая загрузка APK без ZIP. Сборка ${{ github.sha }}"
+          files: app/build/outputs/apk/debug/app-debug.apk
+          fail_on_unmatched_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
