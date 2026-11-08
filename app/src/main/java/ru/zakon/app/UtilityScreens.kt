@@ -319,17 +319,13 @@ internal fun CabinetScreen(padding: PaddingValues) {
 }
 
 @Composable private fun Stat(t: String, v: String, m: Modifier, onClick: () -> Unit) =
-    Column(m.border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(12.dp).background(SoftBg, RoundedCornerShape(12.dp)), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(m.border(1.dp, LineGray, RoundedCornerShape(12.dp)).background(SoftBg, RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(v, color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Text(t, color = MutedGray, fontSize = 12.sp)
     }
 
 @Composable private fun MenuRow(title: String, sub: String, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 4.dp).border(1.dp, LineGray, RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick).padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(title, color = OnCab, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
             Text(sub, color = MutedGray, fontSize = 12.sp)
@@ -349,106 +345,51 @@ internal fun CabinetScreen(padding: PaddingValues) {
         if (items.isEmpty()) Text("Пока пусто", color = MutedGray)
         else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items, key = { it.first }) { (id, label) ->
-                Row(
-                    Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable { onOpen(id) }.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(label, color = OnCab, modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text("›", color = AccentGold)
-                }
+                Text(label, color = OnCab, modifier = Modifier.fillMaxWidth().border(1.dp, LineGray, RoundedCornerShape(12.dp)).clickable { onOpen(id) }.padding(12.dp))
             }
         }
     }
 }
 
-@Composable private fun ClientForm(existing: ClientCard?, onBack: () -> Unit, onSave: (ClientCard) -> Unit, onDelete: (String) -> Unit) {
-    var name by remember { mutableStateOf(existing?.name ?: "") }
-    var phone by remember { mutableStateOf(existing?.phone ?: "") }
-    var note by remember { mutableStateOf(existing?.note ?: "") }
+@Composable private fun ClientForm(initial: CabClient?, onBack: () -> Unit, onSave: (CabClient) -> Unit, onDelete: (String) -> Unit) {
+    var name by remember { mutableStateOf(initial?.name ?: "") }
     Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(if (existing == null) "Новый клиент" else "Клиент", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        OutlinedTextField(name, { name = it }, label = { Text("ФИО") }, modifier = Modifier.fillMaxWidth(), colors = fieldColors())
-        OutlinedTextField(phone, { phone = it }, label = { Text("Телефон") }, modifier = Modifier.fillMaxWidth(), colors = fieldColors())
-        OutlinedTextField(note, { note = it }, label = { Text("Заметка") }, modifier = Modifier.fillMaxWidth(), minLines = 2, colors = fieldColors())
-        Button(
-            onClick = {
-                if (name.isBlank()) return@Button
-                onSave(ClientCard(id = existing?.id ?: UUID.randomUUID().toString(), name = name.trim(), phone = phone.trim(), note = note.trim()))
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Сохранить") }
-        TextButton(onClick = onBack) { Text("Отмена", color = MutedGray) }
-        if (existing != null) TextButton(onClick = { onDelete(existing.id) }) { Text("Удалить", color = Color(0xFFC62828)) }
+        TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
+        Text(if (initial == null) "Новый клиент" else "Клиент", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        OutlinedTextField(name, { name = it }, label = { Text("Имя") }, modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = OnCab, unfocusedTextColor = OnCab, focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray))
+        Button(onClick = { if (name.isNotBlank()) onSave(CabClient(id = initial?.id ?: UUID.randomUUID().toString(), name = name.trim())) },
+            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black), modifier = Modifier.fillMaxWidth()) { Text("Сохранить") }
+        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить", color = Color(0xFFC62828)) }
     }
 }
 
-@Composable private fun CaseForm(existing: CaseCard?, clients: List<ClientCard>, onBack: () -> Unit, onSave: (CaseCard) -> Unit, onDelete: (String) -> Unit) {
-    var title by remember { mutableStateOf(existing?.title ?: "") }
-    var status by remember { mutableStateOf(existing?.status ?: "open") }
-    var category by remember { mutableStateOf(existing?.category ?: "other") }
-    var clientId by remember { mutableStateOf(existing?.clientId ?: "") }
+@Composable private fun CaseForm(initial: CabCase?, clients: List<CabClient>, onBack: () -> Unit, onSave: (CabCase) -> Unit, onDelete: (String) -> Unit) {
+    var title by remember { mutableStateOf(initial?.title ?: "") }
     Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(if (existing == null) "Новое дело" else "Дело", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        OutlinedTextField(title, { title = it }, label = { Text("Название") }, modifier = Modifier.fillMaxWidth(), colors = fieldColors())
-        Text("Статус", color = MutedGray, fontSize = 12.sp)
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            CaseStatuses.forEach { (k, v) ->
-                FilterChip(selected = status == k, onClick = { status = k }, label = { Text(v) })
-            }
-        }
-        Text("Категория", color = MutedGray, fontSize = 12.sp)
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            CaseCategories.forEach { (k, v) ->
-                FilterChip(selected = category == k, onClick = { category = k }, label = { Text(v) })
-            }
-        }
-        Button(
-            onClick = {
-                if (title.isBlank()) return@Button
-                onSave(CaseCard(id = existing?.id ?: UUID.randomUUID().toString(), title = title.trim(), status = status, category = category, clientId = clientId))
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Сохранить") }
-        TextButton(onClick = onBack) { Text("Отмена", color = MutedGray) }
-        if (existing != null) TextButton(onClick = { onDelete(existing.id) }) { Text("Удалить", color = Color(0xFFC62828)) }
+        TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
+        Text(if (initial == null) "Новое дело" else "Дело", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        OutlinedTextField(title, { title = it }, label = { Text("Название") }, modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = OnCab, unfocusedTextColor = OnCab, focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray))
+        Button(onClick = { if (title.isNotBlank()) onSave(CabCase(id = initial?.id ?: UUID.randomUUID().toString(), title = title.trim(), clientId = initial?.clientId, category = initial?.category ?: "other", status = initial?.status ?: "active")) },
+            colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black), modifier = Modifier.fillMaxWidth()) { Text("Сохранить") }
+        if (initial != null) TextButton(onClick = { onDelete(initial.id) }) { Text("Удалить", color = Color(0xFFC62828)) }
     }
 }
 
-@Composable private fun CaseView(
-    ws: CabinetWorkspace, id: String, tab: Int, onTab: (Int) -> Unit,
-    onBack: () -> Unit, onEdit: () -> Unit,
-    st: CabinetStorage, scope: kotlinx.coroutines.CoroutineScope, busy: Boolean, onBusy: (Boolean) -> Unit, onErr: (String) -> Unit, onSaveWs: (CabinetWorkspace) -> Unit
-) {
-    val c = ws.cases.find { it.id == id }
-    if (c == null) {
-        Column(Modifier.fillMaxSize().padding(16.dp)) {
-            TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
-            Text("Дело не найдено", color = MutedGray)
-        }
-        return
-    }
+@Composable private fun CaseView(ws: CabinetWorkspace, caseId: String, tab: Int, onTab: (Int) -> Unit, onBack: () -> Unit, onEdit: () -> Unit, st: CabinetStorage, scope: kotlinx.coroutines.CoroutineScope, busy: Boolean, onBusy: (Boolean) -> Unit, onErr: (String?) -> Unit, onSaveWs: (CabinetWorkspace) -> Unit) {
+    val c = ws.cases.find { it.id == caseId }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Назад", color = AccentGold) }
-            Column(Modifier.weight(1f)) {
-                Text(c.title, color = OnCab, fontWeight = FontWeight.Bold, fontSize = 17.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("${lab(CaseCategories, c.category)} · ${lab(CaseStatuses, c.status)}", color = MutedGray, fontSize = 12.sp)
-            }
+            Spacer(Modifier.weight(1f))
+            Text(c?.title ?: "Дело", color = OnCab, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.weight(1f))
             TextButton(onClick = onEdit) { Text("Изменить", color = AccentGold) }
         }
-        Spacer(Modifier.height(8.dp))
-        Text("Хронология, документы и задачи — в следующих обновлениях.", color = MutedGray, fontSize = 13.sp)
+        Text("Карточка дела", color = MutedGray, fontSize = 13.sp)
     }
 }
-
-@Composable private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = OnCab, unfocusedTextColor = OnCab,
-    focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
-    focusedLabelColor = AccentGold, unfocusedLabelColor = MutedGray,
-    cursorColor = AccentGold
-)
 
 @Composable
 internal fun AboutScreen(padding: PaddingValues) {
@@ -459,7 +400,7 @@ internal fun AboutScreen(padding: PaddingValues) {
         Text("О приложении", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         Text("ЗаконЪ · версия 0.2.0", color = AccentGold, fontWeight = FontWeight.SemiBold)
         Text(
-            "Офлайн-справочник кодексов и законов РФ. Личный кабинет: клиенты, дела, хронология, документы и задачи. Все данные только на устройстве.",
+            "Офлайн-справочник кодексов и законов РФ. Личный кабинет: клиенты, дела. Все данные только на устройстве.",
             color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp
         )
         Text("Автор", color = AccentGold, fontWeight = FontWeight.Bold)
@@ -475,14 +416,8 @@ internal fun AboutScreen(padding: PaddingValues) {
 
 @Composable
 internal fun ConstructorScreen(padding: PaddingValues) {
-    Column(
-        Modifier.fillMaxSize().padding(padding).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Конструктор документов", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(
-            "Шаблоны заявлений, ходатайств и обращений появятся в следующих обновлениях.",
-            color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp
-        )
+        Text("Шаблоны заявлений появятся в следующих обновлениях.", color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp)
     }
 }
