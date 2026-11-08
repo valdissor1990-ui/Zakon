@@ -300,8 +300,8 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
             contentPadding = PaddingValues(bottom = 28.dp)
         ) {
             items(AllRfCodes, key = { it.id }) { code ->
@@ -310,7 +310,7 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
                     title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
                     symbol = code.symbol,
                     bitmap = bmp,
-                    modifier = Modifier.fillMaxWidth().height(104.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { onCodeClick(code.id) }
                 )
             }
@@ -326,44 +326,47 @@ private fun CodeBookCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.12f))
-            .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+    // Плитка как книжка: большая картинка сверху, название под ней
+    Column(
+        modifier = modifier
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Иконка ровно в половину плитки (квадрат по высоте карточки)
         Box(
             Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(10.dp)),
+                .fillMaxWidth()
+                .aspectRatio(0.72f) // книжный формат
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.10f))
+                .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
+                .shadow(6.dp, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             if (bitmap != null) {
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = title,
-                    modifier = Modifier.fillMaxSize().padding(3.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(6.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Fit
                 )
             } else {
-                IconBadge(symbol, 36.dp)
+                IconBadge(symbol, 48.dp)
             }
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.height(6.dp))
         Text(
             title,
             color = TextOnDark,
             fontWeight = FontWeight.SemiBold,
             fontSize = 13.sp,
             lineHeight = 16.sp,
-            maxLines = 3,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -408,7 +411,12 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(code.shortName + " — " + code.liabilityTitle, color = TextOnDark, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         code.liabilityItems.forEach { item ->
-            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(0.10f)).border(1.dp, GlassBorder, RoundedCornerShape(14.dp)).padding(14.dp)) {
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(0.10f))
+                    .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
+                    .padding(14.dp)
+            ) {
                 Text(item.title, color = LegalGold, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Spacer(Modifier.height(6.dp))
                 Text(item.body, color = TextOnDark, fontSize = 13.sp, lineHeight = 19.sp)
@@ -418,23 +426,17 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
 }
 
 @Composable
-private fun IconBadge(symbol: String, size: androidx.compose.ui.unit.Dp) {
-    Box(
-        Modifier.size(size).shadow(4.dp, CircleShape).clip(CircleShape)
-            .background(Brush.verticalGradient(listOf(LegalGold, Color(0xFFB8860B)))),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(symbol, color = Color.White, fontWeight = FontWeight.Bold, fontSize = (size.value * 0.42f).sp)
-    }
-}
-
-@Composable
 private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
-        modifier.height(108.dp).shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp))
+        modifier
+            .height(108.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(Brush.verticalGradient(listOf(Color.White.copy(0.22f), Color.White.copy(0.08f))))
-            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp)).clickable(onClick = onClick).padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            .border(1.dp, GlassBorder, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         IconBadge(symbol, 36.dp)
         Spacer(Modifier.height(8.dp))
@@ -443,15 +445,28 @@ private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifi
 }
 
 @Composable
+private fun IconBadge(symbol: String, size: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier.size(size).shadow(4.dp, CircleShape).clip(CircleShape)
+            .background(Brush.radialGradient(listOf(LegalGold.copy(0.85f), LegalGold.copy(0.35f))))
+            .border(1.dp, Color.White.copy(0.3f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(symbol, color = Color.White, fontWeight = FontWeight.Bold, fontSize = (size.value * 0.42f).sp)
+    }
+}
+
+@Composable
 private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: () -> Unit) {
-    val bg = if (selected) Color.White.copy(0.15f) else Color.Transparent
+    val bg = if (selected) Color.White.copy(0.12f) else Color.Transparent
     val textColor = if (selected) LegalGold else TextOnDark
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp).clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(12.dp),
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(icon, color = textColor, fontSize = 18.sp, modifier = Modifier.width(28.dp))
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(10.dp))
         Text(title, color = textColor, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, fontSize = 15.sp)
     }
 }
@@ -459,6 +474,6 @@ private fun DrawerItem(icon: String, title: String, selected: Boolean, onClick: 
 @Composable
 private fun PlaceholderLight(msg: String, padding: PaddingValues) {
     Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-        Text(msg, color = TextMutedOnDark, fontSize = 16.sp)
+        Text(msg, color = TextMutedOnDark, fontSize = 15.sp)
     }
 }
