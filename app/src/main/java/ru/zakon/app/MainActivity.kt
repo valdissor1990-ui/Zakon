@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -308,8 +310,8 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 28.dp)
         ) {
             items(AllRfCodes, key = { it.id }) { code ->
@@ -341,31 +343,39 @@ private fun CodeBookCard(
         Box(
             Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.72f)
-                .padding(end = 5.dp, bottom = 5.dp)
+                .aspectRatio(0.70f)
+                .padding(horizontal = 4.dp, vertical = 6.dp)
+                .graphicsLayer {
+                    rotationY = -18f
+                    cameraDistance = 12f * density
+                    transformOrigin = TransformOrigin(0.1f, 0.5f)
+                    shadowElevation = 24f
+                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 4.dp)
+                    clip = false
+                }
         ) {
             Box(
-                Modifier
-                    .matchParentSize()
-                    .offset(x = 5.dp, y = 5.dp)
-                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 4.dp))
-                    .background(Color(0xFFF5F0E6))
-                    .border(1.dp, Color(0xFFD4C8B0), RoundedCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 4.dp))
+                Modifier.matchParentSize().offset(x = 10.dp, y = 4.dp)
+                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 10.dp, bottomEnd = 10.dp, bottomStart = 2.dp))
+                    .background(Color(0xFFE8DFD0))
             )
             Box(
-                Modifier
-                    .matchParentSize()
-                    .offset(x = 2.5.dp, y = 2.5.dp)
-                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 4.dp))
+                Modifier.matchParentSize().offset(x = 6.dp, y = 2.dp)
+                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 11.dp, bottomEnd = 11.dp, bottomStart = 2.dp))
+                    .background(Color(0xFFF3EBDD))
+            )
+            Box(
+                Modifier.matchParentSize().offset(x = 3.dp, y = 1.dp)
+                    .clip(RoundedCornerShape(topStart = 2.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 2.dp))
                     .background(Color(0xFFFAF6EE))
+                    .border(0.5.dp, Color(0xFFD4C8B0), RoundedCornerShape(topStart = 2.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 2.dp))
             )
             Box(
-                Modifier
-                    .matchParentSize()
-                    .shadow(12.dp, RoundedCornerShape(topStart = 6.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 6.dp))
-                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 6.dp))
+                Modifier.matchParentSize()
+                    .shadow(16.dp, RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
+                    .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
                     .background(Color(0xFF2A1810))
-                    .border(1.5.dp, Color(0xFFC9A227).copy(alpha = 0.55f), RoundedCornerShape(topStart = 6.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 6.dp))
+                    .border(1.5.dp, Color(0xFFC9A227).copy(alpha = 0.65f), RoundedCornerShape(topStart = 5.dp, topEnd = 14.dp, bottomEnd = 14.dp, bottomStart = 5.dp))
             ) {
                 if (bitmap != null) {
                     Image(
@@ -380,49 +390,28 @@ private fun CodeBookCard(
                     }
                 }
                 Box(
-                    Modifier
-                        .fillMaxHeight()
-                        .width(10.dp)
-                        .align(Alignment.CenterStart)
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(Color(0xFF1A0E08), Color(0xFF3D2418), Color(0xFF1A0E08).copy(0.3f))
-                            )
-                        )
+                    Modifier.fillMaxHeight().width(12.dp).align(Alignment.CenterStart)
+                        .background(Brush.horizontalGradient(listOf(Color(0xFF0D0705), Color(0xFF3D2418), Color(0xFF1A0E08).copy(alpha = 0.4f))))
                 )
                 Box(
-                    Modifier
-                        .fillMaxHeight()
-                        .width(1.5.dp)
-                        .align(Alignment.CenterStart)
-                        .offset(x = 10.dp)
-                        .background(Color(0xFFC9A227).copy(alpha = 0.7f))
+                    Modifier.fillMaxHeight().width(2.dp).align(Alignment.CenterStart).offset(x = 12.dp)
+                        .background(Brush.verticalGradient(listOf(Color(0xFFE8C547).copy(0.3f), Color(0xFFC9A227), Color(0xFFE8C547).copy(0.3f))))
                 )
                 Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(28.dp)
-                        .align(Alignment.TopCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.White.copy(0.18f), Color.Transparent)
-                            )
-                        )
+                    Modifier.fillMaxWidth().fillMaxHeight(0.35f).align(Alignment.TopCenter)
+                        .background(Brush.verticalGradient(listOf(Color.White.copy(0.22f), Color.Transparent)))
                 )
                 Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(20.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Transparent, Color.Black.copy(0.22f))
-                            )
-                        )
+                    Modifier.fillMaxWidth().height(24.dp).align(Alignment.BottomCenter)
+                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.35f))))
+                )
+                Box(
+                    Modifier.fillMaxHeight().width(18.dp).align(Alignment.CenterEnd)
+                        .background(Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(0.08f))))
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             title,
             color = TextOnLight,
