@@ -9,20 +9,23 @@ object CodeIcons {
     private var cache: MutableMap<String, Bitmap> = mutableMapOf()
     private var loaded = false
 
+    // Map every RfCode id to an available asset (unique where we have art, aliases otherwise)
     private val idMap = mapOf(
-        "uk" to "uk", "upk" to "upk", "uik" to "uik",
-        "gk" to "gk", "gpk" to "gpk", "grk" to "grk",
-        "apk" to "apk", "koap" to "koap", "kas" to "kas",
-        "tk" to "tk", "sk" to "sk",
-        "nk" to "nk", "bk" to "bk",
-        "zhk" to "zhk", "zk" to "zk",
-        "vk" to "vk", "lk" to "lk", "air" to "air", "ktm" to "ktm",
-        "fz" to "fz", "const" to "fz", "constitution" to "fz"
+        "uk" to "uk", "upk" to "uk", "uik" to "uk",
+        "gk" to "gk", "gpk" to "gk",
+        "apk" to "apk",
+        "koap" to "koap", "kas" to "koap",
+        "tk" to "tk", "sk" to "tk",
+        "nk" to "nk",
+        "zhk" to "zhk",
+        "zk" to "zk", "grk" to "zk",
+        "bk" to "bk",
+        "fz" to "fz", "const" to "fz", "constitution" to "fz",
+        "vk" to "fz", "lk" to "fz", "air" to "fz", "ktm" to "fz"
     )
 
     private val assetNames = listOf(
-        "uk", "gk", "apk", "koap", "tk", "nk", "zhk", "zk", "fz", "bk",
-        "upk", "gpk", "sk", "grk", "vk", "lk", "air", "ktm", "kas", "uik"
+        "uk", "gk", "apk", "koap", "tk", "nk", "zhk", "zk", "fz", "bk"
     )
 
     fun bitmapFor(context: Context, documentId: String): Bitmap? {
@@ -32,7 +35,7 @@ object CodeIcons {
     }
 
     private fun ensureLoaded(context: Context) {
-        if (loaded) return
+        if (loaded) if (loaded) return
         synchronized(this) {
             if (loaded) return
             for (name in assetNames) {
