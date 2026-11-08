@@ -29,18 +29,20 @@ jobs:
           gradle-version: "8.13"
       - name: Run Android tests, lint and build
         run: gradle testDebugUnitTest lintDebug assembleDebug
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk Zakon-debug.apk
       - uses: actions/upload-artifact@v7
         with:
           name: zakon-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-      - name: Publish APK to Release (direct .apk download)
+          path: Zakon-debug.apk
+      - name: Publish APK to Release (direct .apk, no zip)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: debug-latest
           name: Zakon debug APK
-          body: "Прямая загрузка APK без ZIP. Сборка ${{ github.sha }}"
-          files: app/build/outputs/apk/debug/app-debug.apk
+          body: "Прямая загрузка APK без ZIP.\n\nКоммит: ${{ github.sha }}"
+          files: Zakon-debug.apk
           fail_on_unmatched_files: true
           make_latest: true
         env:
