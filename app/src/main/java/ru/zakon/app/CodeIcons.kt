@@ -10,13 +10,20 @@ object CodeIcons {
     private var loaded = false
 
     private val idMap = mapOf(
-        "uk" to "uk", "const" to "fz", "constitution" to "fz",
-        "gk" to "gk", "apk" to "apk", "koap" to "koap",
-        "tk" to "tk", "nk" to "nk", "zhk" to "zhk",
-        "zk" to "zk", "fz" to "fz", "bk" to "bk"
+        "uk" to "uk", "upk" to "upk", "uik" to "uik",
+        "gk" to "gk", "gpk" to "gpk", "grk" to "grk",
+        "apk" to "apk", "koap" to "koap", "kas" to "kas",
+        "tk" to "tk", "sk" to "sk",
+        "nk" to "nk", "bk" to "bk",
+        "zhk" to "zhk", "zk" to "zk",
+        "vk" to "vk", "lk" to "lk", "air" to "air", "ktm" to "ktm",
+        "fz" to "fz", "const" to "fz", "constitution" to "fz"
     )
 
-    private val assetNames = listOf("uk", "gk", "apk", "koap", "tk", "nk", "zhk", "zk", "fz", "bk")
+    private val assetNames = listOf(
+        "uk", "gk", "apk", "koap", "tk", "nk", "zhk", "zk", "fz", "bk",
+        "upk", "gpk", "sk", "grk", "vk", "lk", "air", "ktm", "kas", "uik"
+    )
 
     fun bitmapFor(context: Context, documentId: String): Bitmap? {
         ensureLoaded(context)
