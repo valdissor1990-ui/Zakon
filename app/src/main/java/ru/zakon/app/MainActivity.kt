@@ -77,7 +77,6 @@ private fun ZakonApp(store: LegalStore) {
     BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
-        // Unified dark kremlin background on all screens
         Image(
             painter = painterResource(id = R.drawable.grok_1793951493468),
             contentDescription = null,
@@ -111,7 +110,7 @@ private fun ZakonApp(store: LegalStore) {
                     HorizontalDivider(color = Color.White.copy(alpha = 0.15f))
                     Spacer(Modifier.height(8.dp))
                     DrawerItem("⌂", "Главная", route == "home") { stack.clear(); stack.add("home"); scope.launch { drawerState.close() } }
-                    DrawerItem("§", "Кодексы", route == "codes" || route.startsWith("code/") ) { stack.clear(); stack.add("home"); stack.add("codes"); scope.launch { drawerState.close() } }
+                    DrawerItem("§", "Кодексы", route == "codes" || route.startsWith("code/")) { stack.clear(); stack.add("home"); stack.add("codes"); scope.launch { drawerState.close() } }
                     DrawerItem("◆", "Конституция", route.startsWith("constitution")) { stack.clear(); stack.add("home"); stack.add("constitution"); scope.launch { drawerState.close() } }
                     DrawerItem("⚖", "Федеральные законы", route.startsWith("category/law")) { stack.clear(); stack.add("home"); stack.add("category/law"); scope.launch { drawerState.close() } }
                     DrawerItem("♟", "Личный кабинет", route == "cabinet") { stack.clear(); stack.add("home"); stack.add("cabinet"); scope.launch { drawerState.close() } }
@@ -311,7 +310,7 @@ private fun CodesMenuScreen(padding: PaddingValues, scrollIndexMap: MutableMap<S
                     title = code.shortName + if (code.parts.isNotEmpty()) "\n${code.parts.size} ч." else "",
                     symbol = code.symbol,
                     bitmap = bmp,
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    modifier = Modifier.fillMaxWidth().height(100.dp),
                     onClick = { onCodeClick(code.id) }
                 )
             }
@@ -333,26 +332,35 @@ private fun CodeBookCard(
             .background(Color.White.copy(alpha = 0.12f))
             .border(1.dp, GlassBorder, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
-            .padding(10.dp),
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = title,
-                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Fit
-            )
-        } else {
-            IconBadge(symbol, 48.dp)
+        // Icon takes half of the tile
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = title,
+                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                IconBadge(symbol, 40.dp)
+            }
         }
         Spacer(Modifier.width(10.dp))
         Text(
             title,
             color = TextOnDark,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
+            fontSize = 13.sp,
+            lineHeight = 17.sp,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
