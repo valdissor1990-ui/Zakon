@@ -9,7 +9,6 @@ object CodeIcons {
     private var cache: MutableMap<String, Bitmap> = mutableMapOf()
     private var loaded = false
 
-    // Map every RfCode id to an available asset (unique where we have art, aliases otherwise)
     private val idMap = mapOf(
         "uk" to "uk", "upk" to "uk", "uik" to "uk",
         "gk" to "gk", "gpk" to "gk",
@@ -35,7 +34,7 @@ object CodeIcons {
     }
 
     private fun ensureLoaded(context: Context) {
-        if (loaded) if (loaded) return
+        if (loaded) return
         synchronized(this) {
             if (loaded) return
             for (name in assetNames) {
