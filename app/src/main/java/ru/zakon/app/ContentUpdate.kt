@@ -52,19 +52,37 @@ private fun sha256Hex(bytes: ByteArray): String {
 }
 
 private fun httpGetBytes(url: String): ByteArray {
-    val conn = (URL(url).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 20_000
-        readTimeout = 60_000
-        requestMethod = "GET"
-        instanceFollowRedirects = true
+    var current = URL(url)
+    require(current.protocol.equals("https", ignoreCase = true)) {
+        "Загрузка правовой базы разрешена только по HTTPS"
     }
-    try {
-        val code = conn.responseCode
-        if (code !in 200..299) error("HTTP $code")
-        return conn.inputStream.use { it.readBytes() }
-    } finally {
-        conn.disconnect()
+    repeat(6) { redirectCount ->
+        val conn = (current.openConnection() as HttpURLConnection).apply {
+            connectTimeout = 20_000
+            readTimeout = 60_000
+            requestMethod = "GET"
+            instanceFollowRedirects = false
+        }
+        try {
+            val code = conn.responseCode
+            if (code in 300..399) {
+                require(redirectCount < 5) { "Слишком много перенаправлений при загрузке базы" }
+                val location = conn.getHeaderField("Location")
+                    ?: error("Сервер вернул перенаправление без адреса")
+                val next = URL(current, location)
+                require(next.protocol.equals("https", ignoreCase = true)) {
+                    "Запрещено перенаправление загрузки правовой базы на незащищённый HTTP"
+                }
+                current = next
+            } else {
+                if (code !in 200..299) error("HTTP $code")
+                return conn.inputStream.use { it.readBytes() }
+            }
+        } finally {
+            conn.disconnect()
+        }
     }
+    error("Не удалось завершить перенаправление загрузки")
 }
 
 @Composable
