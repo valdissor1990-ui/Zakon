@@ -26,7 +26,7 @@ def validate_iso_date(value: str | None, label: str, required: bool = False) -> 
         if required:
             raise ValueError(f"{label} is required")
         return
-    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\\d{2}-\\d{2}", value):
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
         raise ValueError(f"{label} must use YYYY-MM-DD")
     from datetime import date
     try:
