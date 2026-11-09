@@ -15,7 +15,8 @@ REQUIRED = ("schema_version", "version_code", "content_version", "created_at",
 def main() -> int:
     manifest_path = Path(sys.argv[1] if len(sys.argv) > 1 else "../content/manifest.example.json")
     default_key = Path(__file__).resolve().parents[1] / "content" / "signing" / "public.pem"
-    public_key_path = Path(sys.argv[2]) if len(sys.argv) > 2 else default_key    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    public_key_path = Path(sys.argv[2]) if len(sys.argv) > 2 else default_key
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
     missing = [key for key in REQUIRED if key not in data]
     if missing:
         raise SystemExit(f"Manifest is missing fields: {', '.join(missing)}")
