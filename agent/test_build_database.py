@@ -26,7 +26,8 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
                     "release": {
                         "version": "test-1",
                         "created_at": "2026-11-06T00:00:00Z",
-                        "effective_as_of": "2026-11-06"
+                        "effective_as_of": "2026-11-06",
+                        "version_code": 7
                     },
                     "sources": [],
                     "documents": [{
