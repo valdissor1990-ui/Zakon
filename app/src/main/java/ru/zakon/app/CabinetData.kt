@@ -43,7 +43,7 @@ internal class CabinetStorage(private val context: Context) {
     fun isPinPromptDone() = securePrefs.getBoolean("pin_prompt_done", false)
     fun markPinPromptDone() { securePrefs.edit().putBoolean("pin_prompt_done", true).apply() }
     fun setPassword(pin: String) {
-        require(pin.length >= 6)
+        require(pin.length >= 8) { "Пароль должен быть не короче 8 символов" }
         val salt = CabinetPinKdf.newSalt(); val verifier = CabinetPinKdf.derive(pin, salt)
         securePrefs.edit().putString("pin_salt", CabinetPinKdf.toBase64(salt)).putString("pin_verifier", CabinetPinKdf.toBase64(verifier)).putBoolean("pin_enabled", true).putBoolean("pin_prompt_done", true).putInt("pin_fail_count", 0).putLong("pin_lock_until", 0L).apply()
         salt.fill(0); verifier.fill(0)
@@ -72,7 +72,7 @@ internal class CabinetStorage(private val context: Context) {
         } catch (_: Exception) { false }
     }
     fun changePassword(oldPin: String, newPin: String): Boolean {
-        if (!checkPassword(oldPin) || newPin.length < 6) return false
+        if (!checkPassword(oldPin) || newPin.length < 8) return false
         setPassword(newPin)
         return true
     }
