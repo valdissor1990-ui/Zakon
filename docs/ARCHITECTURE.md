@@ -39,7 +39,9 @@
 - content_version — человекочитаемая версия;
 - created_at, effective_as_of — даты формирования и актуальности;
 - database.file, database.sha256, database.download_url;
-- validation.status — публикация разрешена только со статусом validated.
+- validation.status — публикация разрешена только со статусом validated;
+- signature.algorithm, signature.download_url — подпись RSA/SHA-256, которой подтверждается точное содержимое манифеста;
+- delta.from_version_code, delta.to_version_code, delta.sha256, delta.download_url — необязательный патч между двумя версиями.
 
 Пример находится в content/manifest.example.json.
 
