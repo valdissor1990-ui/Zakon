@@ -8,7 +8,11 @@ from validate_catalog import validate_catalog
 
 class LegalCatalogTests(unittest.TestCase):
     def setUp(self):
-        self.registry = {"sources": [{"id": "official"}, {"id": "bank"}, {"id": "minjust"}]}
+        self.registry = {"sources": [
+            {"id": "official", "system_id": "publication", "operator_id": "gspi"},
+            {"id": "bank", "system_id": "law-bank", "operator_id": "gspi"},
+            {"id": "minjust", "system_id": "minjust", "operator_id": "minjust"}
+        ]}
         self.catalog = {
             "sources": ["official", "bank", "minjust"],
             "documents": [{
