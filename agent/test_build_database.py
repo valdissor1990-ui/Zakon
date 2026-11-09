@@ -58,6 +58,23 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "captured original or metadata is missing"):
                     build_database.validate_source_evidence(source, {"url": "https://example.gov/"})
 
+    def test_boolean_is_not_a_valid_release_version(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            records = root / "records.json"
+            records.write_text(json.dumps({
+                "release": {
+                    "version": "test",
+                    "created_at": "2026-11-09T00:00:00Z",
+                    "effective_as_of": "2026-11-09",
+                    "version_code": True
+                },
+                "sources": [],
+                "documents": [{"id": "doc"}]
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "version_code must be an integer"):
+                build_database.build(records, root / "output")
+
     def test_failed_validation_preserves_previous_database(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
