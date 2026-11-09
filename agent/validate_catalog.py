@@ -15,9 +15,15 @@ def validate_catalog(catalog: dict, registry: dict) -> None:
     ids = [item.get("id") for item in documents]
     if not documents or len(ids) != len(set(ids)) or any(not value for value in ids):
         raise ValueError("Catalog document IDs must be present, unique and non-empty")
-    for source_id in catalog.get("sources", []):
+    catalog_sources = catalog.get("sources", [])
+    for source_id in catalog_sources:
         if source_id not in source_ids:
             raise ValueError(f"Catalog references an unknown source: {source_id}")
+    registry_by_id = {item["id"]: item for item in registry.get("sources", [])}
+    if len({registry_by_id[key].get("system_id") for key in catalog_sources}) < 3:
+        raise ValueError("Catalog must include at least three state information systems")
+    if len({registry_by_id[key].get("operator_id") for key in catalog_sources}) < 2:
+        raise ValueError("Catalog must include at least two state operators")
     for item in documents:
         if item.get("content_status") != "not_imported":
             raise ValueError(f"{item.get('id')}: catalog metadata must not imply imported legal text")
