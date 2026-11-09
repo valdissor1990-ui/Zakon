@@ -15,7 +15,9 @@
         "amendment_acts",
         "entry_into_force_metadata"
       ],
-      "state_operated": true
+      "state_operated": true,
+      "system_id": "official_publication_portal",
+      "operator_id": "gspi"
     },
     {
       "id": "pravo_law_bank",
@@ -29,7 +31,9 @@
         "document_metadata",
         "current_revision"
       ],
-      "state_operated": true
+      "state_operated": true,
+      "system_id": "integrated_law_bank",
+      "operator_id": "gspi"
     },
     {
       "id": "minjust_npa",
@@ -43,7 +47,9 @@
         "systematized_text_cross_check",
         "registration_metadata"
       ],
-      "state_operated": true
+      "state_operated": true,
+      "system_id": "minjust_npa_portal",
+      "operator_id": "minjust"
     }
   ],
   "publication_rule": {
@@ -51,6 +57,8 @@
     "minimum_state_operated_sources": 3,
     "mismatch_action": "block_release",
     "missing_source_action": "manual_review",
-    "never_generate_missing_legal_text": true
+    "never_generate_missing_legal_text": true,
+    "minimum_distinct_systems": 3,
+    "minimum_distinct_operators": 2
   }
 }
