@@ -9,6 +9,18 @@
     "sha256": "TO_BE_GENERATED",
     "download_url": "https://github.com/OWNER/REPOSITORY/releases/download/content-1.0.0/zakon-content.sqlite"
   },
+  "signature": {
+    "algorithm": "SHA256withRSA",
+    "file": "manifest.sig",
+    "download_url": "https://github.com/OWNER/REPOSITORY/releases/download/content-1.0.0/manifest.sig"
+  },
+  "delta": {
+    "file": "zakon-content.delta.json",
+    "sha256": "OPTIONAL_SHA256",
+    "from_version_code": 7,
+    "to_version_code": 8,
+    "download_url": "https://github.com/OWNER/REPOSITORY/releases/download/content-1.0.0/zakon-content.delta.json"
+  },
   "validation": {
     "status": "draft",
     "documents": 0,
