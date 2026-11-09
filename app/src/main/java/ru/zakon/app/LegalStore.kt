@@ -268,6 +268,103 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         }
     }
 
+    /**
+     * Applies a signed/hashed version-bound row delta in one transaction.
+     * The caller verifies the downloaded patch checksum/signature before invoking this method.
+     */
+    fun applyDatabaseDelta(json: String, label: String): Int {
+        val root = org.json.JSONObject(json)
+        require(root.optInt("schema_version", 0) == 1) { "Неподдерживаемый формат обновления базы" }
+        val fromVersion = root.getInt("from_version_code")
+        val toVersion = root.getInt("to_version_code")
+        require(fromVersion == installedPackVersion()) {
+            "Обновление рассчитано для базы v$fromVersion, установлена v${installedPackVersion()}. Нужна полная база."
+        }
+        require(toVersion > fromVersion) { "Версия обновления должна быть новее установленной" }
+
+        val tables = linkedMapOf(
+            "sources" to "id",
+            "documents" to "id",
+            "articles" to "id",
+            "document_source_checks" to "id",
+            "cross_references" to "id",
+            "legal_status_history" to "id",
+            "content_release" to "id"
+        )
+        val deleteOrder = listOf(
+            "cross_references", "document_source_checks", "legal_status_history",
+            "articles", "documents", "sources", "content_release"
+        )
+        val upsertOrder = listOf(
+            "sources", "documents", "articles", "document_source_checks",
+            "cross_references", "legal_status_history", "content_release"
+        )
+        val operations = root.getJSONObject("operations")
+        val db = writableDatabase
+
+        // A delta is valid only for the full content schema, never for the legacy lightweight DB.
+        for (table in tables.keys) {
+            db.rawQuery(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                arrayOf(table)
+            ).use { cursor ->
+                require(cursor.moveToFirst()) { "Установленная база не поддерживает обновления-дельты; нужна полная база." }
+            }
+        }
+
+        db.beginTransaction()
+        try {
+            for (table in deleteOrder) {
+                val operation = operations.optJSONObject(table) ?: continue
+                val deletes = operation.optJSONArray("delete") ?: org.json.JSONArray()
+                for (index in 0 until deletes.length()) {
+                    val key = deletes.getJSONArray(index)
+                    require(key.length() == 1) { "Некорректный ключ удаления в таблице $table" }
+                    db.delete(table, "${tables.getValue(table)}=?", arrayOf(key.get(0).toString()))
+                }
+            }
+
+            for (table in upsertOrder) {
+                val operation = operations.optJSONObject(table) ?: continue
+                val rows = operation.optJSONArray("upsert") ?: org.json.JSONArray()
+                for (index in 0 until rows.length()) {
+                    val row = rows.getJSONObject(index)
+                    val values = android.content.ContentValues()
+                    val iterator = row.keys()
+                    while (iterator.hasNext()) {
+                        val column = iterator.next()
+                        when (val value = row.get(column)) {
+                            org.json.JSONObject.NULL -> values.putNull(column)
+                            is String -> values.put(column, value)
+                            is Int -> values.put(column, value)
+                            is Long -> values.put(column, value)
+                            is Double -> values.put(column, value)
+                            is Float -> values.put(column, value)
+                            is Boolean -> values.put(column, if (value) 1 else 0)
+                            else -> error("Недопустимый тип значения $column в таблице $table")
+                        }
+                    }
+                    val primaryKey = tables.getValue(table)
+                    require(row.has(primaryKey) && !row.isNull(primaryKey)) {
+                        "В обновлении отсутствует ключ $primaryKey для таблицы $table"
+                    }
+                    val keyValue = row.get(primaryKey).toString()
+                    val updated = db.update(table, values, "$primaryKey=?", arrayOf(keyValue))
+                    if (updated == 0) db.insertOrThrow(table, null, values)
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+
+        check(metaPrefs.edit().putInt("pack_version", toVersion)
+            .putString("pack_label", label).commit()) {
+            "База обновлена, но не удалось сохранить номер версии. Повторите проверку обновлений."
+        }
+        return toVersion
+    }
+
     fun importPackJson(json: String, requireNewer: Boolean = false): PackImportResult {
         val db = writableDatabase
         return importPackJsonInto(db, json, requireNewer)
