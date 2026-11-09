@@ -26,7 +26,7 @@ def validate_iso_date(value: str | None, label: str, required: bool = False) -> 
         if required:
             raise ValueError(f"{label} is required")
         return
-    if not isinstance(value, str) or not re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", value):
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\\d{2}-\\d{2}", value):
         raise ValueError(f"{label} must use YYYY-MM-DD")
     from datetime import date
     try:
@@ -99,7 +99,7 @@ def build(records_path: Path, output_dir: Path) -> None:
         raise ValueError("Release version, created_at and effective_as_of are required")
     validate_iso_date(release.get("effective_as_of"), "release.effective_as_of", required=True)
     if not isinstance(release.get("created_at"), str) or not re.fullmatch(
-        r"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", release["created_at"]
+        r"\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", release["created_at"]
     ):
         raise ValueError("release.created_at must be UTC ISO-8601 with seconds and Z")
     version_code = release.get("version_code")
