@@ -316,11 +316,22 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 if (c.moveToFirst()) c.getString(0) else "no result"
             }
             require(integrity == "ok") { "Проверка целостности SQLite не пройдена: $integrity" }
-            for (table in listOf("documents", "articles", "articles_fts", "content_metadata")) {
+            val requiredTables = listOf(
+                "sources", "documents", "articles", "articles_fts",
+                "document_source_checks", "cross_references",
+                "legal_status_history", "content_release", "content_metadata"
+            )
+            for (table in requiredTables) {
                 db.rawQuery(
                     "SELECT 1 FROM sqlite_master WHERE type IN ('table','view') AND name=?",
                     arrayOf(table)
                 ).use { c -> require(c.moveToFirst()) { "В базе отсутствует таблица $table" } }
+            }
+            db.rawQuery("PRAGMA foreign_key_check", null).use { c ->
+                require(!c.moveToFirst()) { "В базе нарушены связи между правовыми документами" }
+            }
+            db.rawQuery("SELECT 1 FROM content_release WHERE status='validated' LIMIT 1", null).use { c ->
+                require(c.moveToFirst()) { "В базе нет проверенного выпуска правового контента" }
             }
             val requiredDocumentColumns = setOf("id", "title", "document_type", "number", "legal_status", "verification_status")
             val actualDocumentColumns = db.rawQuery("PRAGMA table_info(documents)", null).use { c ->
