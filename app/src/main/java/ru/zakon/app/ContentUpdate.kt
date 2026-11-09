@@ -121,6 +121,10 @@ private fun ContentUpdateSection(store: LegalStore) {
                 val resultMsg = withContext(Dispatchers.IO) {
                     val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL)
                     val manifest = JSONObject(String(manifestBytes, Charsets.UTF_8))
+                    val validation = manifest.optJSONObject("validation")
+                    if (validation != null && validation.optString("status") != "validated") {
+                        error("Новый выпуск правовой базы ещё не прошёл проверку и не опубликован. Локальные данные сохранены.")
+                    }
                     val database = manifest.optJSONObject("database")
                     val version = manifest.optInt(
                         "version",
