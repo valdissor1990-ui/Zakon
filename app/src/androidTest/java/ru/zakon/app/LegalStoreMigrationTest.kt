@@ -71,6 +71,71 @@ class LegalStoreMigrationTest {
     }
 
     @Test
+    fun validatedFullDatabaseCanReplaceContentWithoutTouchingLegacyFile() {
+        val store = LegalStore(context)
+        val candidate = File(context.cacheDir, "validated-content-candidate.sqlite")
+        try {
+            assertNotNull(store.getDocument("legacy-doc"))
+            createValidatedCandidateDatabase(candidate)
+            val installed = store.installDatabaseFile(candidate, 7, "7.0-test")
+            assertEquals(7, installed)
+            assertEquals(7, store.installedPackVersion())
+            assertEquals("7.0-test", store.installedPackLabel())
+            assertNotNull("Newly installed legal document must be readable", store.getDocument("new-doc"))
+            assertTrue("Legacy DB must remain as a non-destructive migration backup", legacyFile.isFile)
+        } finally {
+            candidate.delete()
+            store.close()
+        }
+    }
+
+    private fun createValidatedCandidateDatabase(file: File) {
+        val db = SQLiteDatabase.openOrCreateDatabase(file, null)
+        try {
+            db.execSQL("CREATE TABLE content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+            db.execSQL("""CREATE TABLE content_release (
+                id INTEGER PRIMARY KEY, version TEXT NOT NULL, created_at TEXT NOT NULL,
+                effective_as_of TEXT NOT NULL, manifest_sha256 TEXT NOT NULL, status TEXT NOT NULL
+            )""")
+            db.execSQL("""CREATE TABLE sources (id INTEGER PRIMARY KEY, name TEXT)""")
+            db.execSQL("""CREATE TABLE documents (
+                id TEXT PRIMARY KEY, title TEXT NOT NULL, document_type TEXT NOT NULL,
+                number TEXT, legal_status TEXT NOT NULL, verification_status TEXT NOT NULL
+            )""")
+            db.execSQL("""CREATE TABLE articles (
+                id TEXT PRIMARY KEY, document_id TEXT NOT NULL, ordinal INTEGER NOT NULL,
+                number TEXT NOT NULL, title TEXT, body TEXT NOT NULL
+            )""")
+            db.execSQL("CREATE TABLE document_source_checks (id INTEGER PRIMARY KEY)")
+            db.execSQL("CREATE TABLE cross_references (id INTEGER PRIMARY KEY)")
+            db.execSQL("CREATE TABLE legal_status_history (id INTEGER PRIMARY KEY)")
+            db.execSQL("""CREATE VIRTUAL TABLE articles_fts USING fts4(
+                article_id UNINDEXED, document_title, article_number, article_title, body,
+                tokenize=unicode61
+            )""")
+            db.execSQL(
+                "INSERT INTO content_release VALUES(1,?,?,?,?,?)",
+                arrayOf("7.0-test", "2026-11-09T12:00:00Z", "2026-11-09", "a".repeat(64), "validated")
+            )
+            db.execSQL(
+                "INSERT INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
+                arrayOf("new-doc", "Новая проверенная база", "code", "2", "действует", "approved")
+            )
+            db.execSQL(
+                "INSERT INTO articles(id,document_id,ordinal,number,title,body) VALUES(?,?,?,?,?,?)",
+                arrayOf("new-article", "new-doc", 1, "1", "Статья 1", "Текст новой базы")
+            )
+            db.execSQL(
+                "INSERT INTO articles_fts(article_id,document_title,article_number,article_title,body) VALUES(?,?,?,?,?)",
+                arrayOf("new-article", "Новая проверенная база", "1", "Статья 1", "Текст новой базы")
+            )
+            db.version = 1
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun invalidReplacementDoesNotDamageMigratedDatabaseOrLegacyCopy() {
         val store = LegalStore(context)
         val invalid = File(context.cacheDir, "invalid-legal-content.sqlite")
