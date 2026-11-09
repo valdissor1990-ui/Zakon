@@ -80,7 +80,6 @@ private fun ZakonApp(store: LegalStore) {
     var cabinetBackHandler by remember { mutableStateOf<(() -> Boolean)?>(null) }
     val activity = LocalContext.current as? android.app.Activity
 
-    // Block screenshots on cabinet screens
     SideEffect {
         val win = activity?.window
         if (win != null) {
@@ -271,7 +270,7 @@ private fun CodeBookCard(
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFF0E8D8))
             )
-                       Box(
+            Box(
                 Modifier
                     .matchParentSize()
                     .shadow(6.dp, RoundedCornerShape(10.dp))
@@ -354,7 +353,7 @@ private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: P
                 Box(
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(LightCard).border(1.dp, LightBorder, RoundedCornerShape(10.dp)).clickable { onArticle(a.id) }.padding(12.dp)
                 ) {
-                    Text(a.title, color = TextOnLight, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(a.title ?: a.number, color = TextOnLight, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
