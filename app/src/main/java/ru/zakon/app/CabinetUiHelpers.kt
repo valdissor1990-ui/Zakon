@@ -1,8 +1,5 @@
 package ru.zakon.app
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,14 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 private val OnCab = Color(0xFF1A2332)
 private val MutedGray = Color(0xFF5A6577)
 private val LineGray = Color(0xFFD0D7E2)
 private val AccentGold = Color(0xFF8B6914)
-private val SoftBg = Color(0xFFF3F5F8)
 
 @Composable
 internal fun HubUI(
@@ -254,5 +249,15 @@ internal fun AboutScreen(padding: PaddingValues) {
         Text("О приложении", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Text("ЗаконЪ — офлайн-справочник кодексов РФ и личный кабинет для дел.", color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp)
         Text("Данные кабинета хранятся только на устройстве и защищены паролем.", color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp)
+        Text("Тексты носят справочный характер. Сверяйте с официальными источниками.", color = MutedGray, fontSize = 13.sp, lineHeight = 18.sp)
+        Text("Версия 0.1 offline", color = AccentGold, fontSize = 12.sp)
+    }
+}
+
+@Composable
+internal fun ConstructorScreen(padding: PaddingValues) {
+    Column(Modifier.fillMaxSize().padding(padding).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Конструктор документов", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text("Шаблоны заявлений появятся в следующих обновлениях.", color = MutedGray, fontSize = 14.sp, lineHeight = 20.sp)
     }
 }
