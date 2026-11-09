@@ -54,7 +54,17 @@ def diff(old_path: Path, new_path: Path, from_version: int, to_version: int) -> 
         for table, pk in TABLES.items():
             before = rows_by_key(old, table, pk)
             after = rows_by_key(new, table, pk)
-            deletes = [list(key) for key in before.keys() - after.keys()]
+            deleted_keys = list(before.keys() - after.keys())
+            if table == "articles":
+                by_id = {row["id"]: row for row in before.values()}
+                def depth(article_id, seen=None):
+                    seen = seen or set()
+                    if article_id in seen:
+                        raise ValueError("Cycle detected in article parent hierarchy")
+                    parent = by_id[article_id].get("parent_id")
+                    return 0 if not parent or parent not in by_id else 1 + depth(parent, seen | {article_id})
+                deleted_keys.sort(key=lambda key: depth(key[0]), reverse=True)
+            deletes = [list(key) for key in deleted_keys]
             changed = [
                 after[key] for key in after
                 if key not in before or before[key] != after[key]
