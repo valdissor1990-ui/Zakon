@@ -21,6 +21,20 @@ def require_hash(value: str, label: str) -> None:
     if not isinstance(value, str) or not HEX64.fullmatch(value.lower()):
         raise ValueError(f"{label} must be a 64-character SHA-256 hex string")
 
+def validate_iso_date(value: str | None, label: str, required: bool = False) -> None:
+    if value in (None, ""):
+        if required:
+            raise ValueError(f"{label} is required")
+        return
+    if not isinstance(value, str) or not re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", value):
+        raise ValueError(f"{label} must use YYYY-MM-DD")
+    from datetime import date
+    try:
+        date.fromisoformat(value)
+    except ValueError as error:
+        raise ValueError(f"{label} is not a valid calendar date") from error
+
+
 def validate_source_evidence(source: dict, registry_source: dict) -> str:
     """Require the exact captured original and its provenance metadata before a source can enter a release."""
     key = source.get("key")
@@ -83,9 +97,20 @@ def build(records_path: Path, output_dir: Path) -> None:
         raise ValueError("No legal documents supplied; refusing to create an empty release")
     if not release.get("version") or not release.get("created_at") or not release.get("effective_as_of"):
         raise ValueError("Release version, created_at and effective_as_of are required")
+    validate_iso_date(release.get("effective_as_of"), "release.effective_as_of", required=True)
+    if not isinstance(release.get("created_at"), str) or not re.fullmatch(
+        r"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", release["created_at"]
+    ):
+        raise ValueError("release.created_at must be UTC ISO-8601 with seconds and Z")
     version_code = release.get("version_code")
     if isinstance(version_code, bool) or not isinstance(version_code, int) or version_code < 7:
         raise ValueError("release.version_code must be an integer >= 7 for the first SQLite release, then increase monotonically (legacy JSON versions reached 6)")
+    current_manifest = ROOT / "content" / "updates" / "manifest.json"
+    if current_manifest.is_file():
+        current = json.loads(current_manifest.read_text(encoding="utf-8"))
+        previous_code = current.get("version_code", current.get("version", 0))
+        if isinstance(previous_code, int) and version_code <= previous_code:
+            raise ValueError(f"release.version_code must be greater than the currently published version {previous_code}")
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = output_dir / "zakon-content.sqlite"
     working_db_path = output_dir / ".zakon-content.sqlite.tmp"
@@ -106,8 +131,8 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"Duplicate source capture key: {key}")
         if registry_id not in registry_sources:
             raise ValueError(f"Source registry_id is not in approved registry: {registry_id}")
-        if not source.get("retrieved_at"):
-            raise ValueError(f"Source {key} is missing retrieval time")
+        if not all(source.get(field) for field in ("name", "publisher", "official_url", "source_type", "retrieved_at")):
+            raise ValueError(f"Source {key} is missing required provenance fields")
         source_hashes[key] = validate_source_evidence(source, registry_sources[registry_id])
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
@@ -153,19 +178,35 @@ def build(records_path: Path, output_dir: Path) -> None:
                 raise ValueError(f"{doc_id}: source check retrieved_at does not match the captured evidence")
         if doc.get("verification_status") != "approved":
             raise ValueError(f"{doc_id}: document must be manually approved before database build")
+        if not doc.get("title") or not doc.get("document_type") or not doc.get("legal_status"):
+            raise ValueError(f"{doc_id}: title, document_type and legal_status are required")
+        for field in ("adopted_at", "published_at", "effective_from", "effective_to"):
+            validate_iso_date(doc.get(field), f"{doc_id}.{field}")
+        validate_iso_date(doc.get("verified_at"), f"{doc_id}.verified_at", required=True)
+        if doc.get("effective_from") and doc.get("effective_to") and doc["effective_to"] < doc["effective_from"]:
+            raise ValueError(f"{doc_id}: effective_to precedes effective_from")
         articles = sorted(doc.get("articles", []), key=lambda a: int(a.get("ordinal", 0)))
         if not articles:
             raise ValueError(f"{doc_id}: document has no articles")
         seen_article_ids = set()
+        seen_ordinals = set()
         for article in articles:
             article_id = article.get("id")
             article_number = article.get("number")
             body = article.get("body")
+            ordinal = article.get("ordinal")
             if not article_id or article_id in seen_article_ids:
                 raise ValueError(f"{doc_id}: every article needs a unique, non-empty id")
+            if isinstance(ordinal, bool) or not isinstance(ordinal, int) or ordinal < 1 or ordinal in seen_ordinals:
+                raise ValueError(f"{doc_id}: article {article_id} needs a unique positive ordinal")
             seen_article_ids.add(article_id)
+            seen_ordinals.add(ordinal)
             if not article_number or not isinstance(body, str) or not body.strip():
                 raise ValueError(f"{doc_id}: article {article_id} needs a number and non-empty legal text")
+            validate_iso_date(article.get("effective_from"), f"{doc_id}.{article_id}.effective_from")
+            validate_iso_date(article.get("effective_to"), f"{doc_id}.{article_id}.effective_to")
+            if article.get("effective_from") and article.get("effective_to") and article["effective_to"] < article["effective_from"]:
+                raise ValueError(f"{doc_id}: article {article_id} effective_to precedes effective_from")
         text_digest = sha256("\n".join(a.get("body", "") for a in articles).encode("utf-8"))
         if doc.get("text_sha256") != text_digest:
             raise ValueError(f"{doc_id}: text_sha256 does not match article bodies")
@@ -197,12 +238,38 @@ def build(records_path: Path, output_dir: Path) -> None:
                  article["number"], article.get("title"), article["body"],
                  article.get("effective_from"), article.get("effective_to"))
             )
+        article_by_id = {article["id"]: article for article in articles}
         for ref in doc.get("cross_references", []):
+            from_id = ref.get("from_article_id")
+            target_doc = ref.get("to_document_id")
+            resolved_id = ref.get("resolved_article_id")
+            status = ref.get("resolution_status")
+            if from_id not in article_by_id:
+                raise ValueError(f"{doc_id}: cross-reference origin must belong to this document")
+            if not ref.get("to_article_number") or not ref.get("reference_text"):
+                raise ValueError(f"{doc_id}: cross-reference needs target article number and reference text")
+            if status not in {"resolved", "ambiguous", "unresolved"}:
+                raise ValueError(f"{doc_id}: invalid cross-reference resolution_status")
+            if target_doc is not None and target_doc not in {item["id"] for item in documents}:
+                raise ValueError(f"{doc_id}: cross-reference target document is absent from this release")
+            if status == "resolved":
+                if not resolved_id:
+                    raise ValueError(f"{doc_id}: resolved cross-reference has no resolved_article_id")
+                target_article = db.execute(
+                    "SELECT document_id, number FROM articles WHERE id=?", (resolved_id,)
+                ).fetchone()
+                if target_article is None:
+                    raise ValueError(f"{doc_id}: resolved cross-reference target article does not exist")
+                if target_doc is not None and target_article[0] != target_doc:
+                    raise ValueError(f"{doc_id}: resolved cross-reference points outside to_document_id")
+                if target_article[1] != ref["to_article_number"]:
+                    raise ValueError(f"{doc_id}: resolved cross-reference article number does not match target")
+            elif resolved_id is not None:
+                raise ValueError(f"{doc_id}: only resolved cross-references may set resolved_article_id")
             db.execute(
                 """INSERT INTO cross_references(from_article_id,to_document_id,to_article_number,
                    reference_text,resolved_article_id,resolution_status) VALUES(?,?,?,?,?,?)""",
-                (ref["from_article_id"], ref.get("to_document_id"), ref["to_article_number"],
-                 ref["reference_text"], ref.get("resolved_article_id"), ref["resolution_status"])
+                (from_id, target_doc, ref["to_article_number"], ref["reference_text"], resolved_id, status)
             )
 
     db.execute(
