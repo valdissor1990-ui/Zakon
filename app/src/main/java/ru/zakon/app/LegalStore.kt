@@ -39,7 +39,7 @@ data class PackImportResult(
     val articlesUpserted: Int
 )
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-content.db", null, 9) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-content.db", null, 10) {
 
     private val appContext = context.applicationContext
     private val metaPrefs = appContext.getSharedPreferences("zakon_content_meta", Context.MODE_PRIVATE)
@@ -74,11 +74,15 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 SELECT a.id,d.title,a.number,COALESCE(a.title,''),a.body FROM articles a JOIN documents d ON d.id=a.document_id""".trimIndent()
             )
         }
+        if (oldVersion < 10) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        }
         // Schema upgrades must never seed or overwrite legal content.
         // Content is delivered independently as a verified SQLite release.
     }
 
     private fun createSchema(db: SQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
         db.execSQL(
             """CREATE TABLE IF NOT EXISTS documents (
             id TEXT PRIMARY KEY, title TEXT NOT NULL, document_type TEXT NOT NULL DEFAULT '',
@@ -122,11 +126,32 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         )
     }
 
-    fun installedPackVersion(): Int = metaPrefs.getInt("pack_version", 0)
+    // The database is the source of truth: version and legal rows move atomically.
+    // SharedPreferences remains a compatibility fallback for databases created by older builds.
+    fun installedPackVersion(): Int = readContentMetadata("pack_version")?.toIntOrNull()
+        ?: metaPrefs.getInt("pack_version", 0)
 
-    fun installedPackLabel(): String = metaPrefs.getString("pack_label", "не загружена") ?: "не загружена"
+    fun installedPackLabel(): String = readContentMetadata("pack_label")
+        ?: (metaPrefs.getString("pack_label", "не загружена") ?: "не загружена")
+
+    private fun readContentMetadata(key: String): String? = try {
+        readableDatabase.rawQuery("SELECT value FROM content_metadata WHERE key=?", arrayOf(key)).use { c ->
+            if (c.moveToFirst()) c.getString(0) else null
+        }
+    } catch (_: SQLiteException) { null }
+
+    private fun writeContentMetadata(db: SQLiteDatabase, version: Int, label: String) {
+        db.execSQL("INSERT OR REPLACE INTO content_metadata(key,value) VALUES('pack_version',?)", arrayOf(version.toString()))
+        db.execSQL("INSERT OR REPLACE INTO content_metadata(key,value) VALUES('pack_label',?)", arrayOf(label))
+    }
 
     private fun setInstalledPack(version: Int, label: String) {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            writeContentMetadata(db, version, label)
+            db.setTransactionSuccessful()
+        } finally { db.endTransaction() }
         metaPrefs.edit().putInt("pack_version", version).putString("pack_label", label).apply()
     }
 
@@ -210,6 +235,17 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val backup = java.io.File(target.parentFile, "zakon-content.db.backup")
         target.parentFile?.mkdirs()
         source.copyTo(staged, overwrite = true)
+        // Stamp release metadata before the staged database can replace the active file.
+        val stagedDb = SQLiteDatabase.openDatabase(staged.absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
+        try {
+            stagedDb.beginTransaction()
+            try {
+                stagedDb.execSQL("CREATE TABLE IF NOT EXISTS content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+                writeContentMetadata(stagedDb, version, label)
+                stagedDb.setTransactionSuccessful()
+            } finally { stagedDb.endTransaction() }
+        } finally { stagedDb.close() }
+        validateContentDatabase(staged)
         close()
         try {
             java.io.File(target.path + "-wal").delete()
@@ -362,6 +398,8 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                     }
                 }
 
+                // Commit content rows and their version marker in the same SQLite transaction.
+                writeContentMetadata(db, toVersion, label)
                 db.rawQuery("PRAGMA foreign_key_check", null).use { cursor ->
                     require(!cursor.moveToFirst()) {
                         "Обновление нарушает связи между правовыми документами"
@@ -375,10 +413,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             db.setForeignKeyConstraintsEnabled(true)
         }
 
-        check(metaPrefs.edit().putInt("pack_version", toVersion)
-            .putString("pack_label", label).commit()) {
-            "База обновлена, но не удалось сохранить номер версии. Повторите проверку обновлений."
-        }
+        metaPrefs.edit().putInt("pack_version", toVersion).putString("pack_label", label).apply()
         return toVersion
     }
 
