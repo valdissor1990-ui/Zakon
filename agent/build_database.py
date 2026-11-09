@@ -46,6 +46,7 @@ def build(records_path: Path, output_dir: Path) -> None:
     db.execute("PRAGMA user_version=1")
 
     source_ids = {}
+    source_hashes = {}
     for source in source_rows:
         key = source["key"]
         if key in source_ids:
@@ -67,6 +68,7 @@ def build(records_path: Path, output_dir: Path) -> None:
              source["retrieved_at"], source.get("source_document_id"), source["sha256"], source.get("notes"))
         )
         source_ids[key] = cur.lastrowid
+        source_hashes[key] = source["sha256"].lower()
 
     for doc in documents:
         doc_id = doc["id"]
@@ -92,6 +94,8 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: every source check needs retrieved_at")
         for item in checks:
             require_hash(item.get("sha256"), f"{doc_id} source check sha256")
+            if item["sha256"].lower() != source_hashes[item["source_key"]]:
+                raise ValueError(f"{doc_id}: source check hash does not match the captured source record")
         if doc.get("verification_status") != "approved":
             raise ValueError(f"{doc_id}: document must be manually approved before database build")
         articles = sorted(doc.get("articles", []), key=lambda a: int(a.get("ordinal", 0)))
