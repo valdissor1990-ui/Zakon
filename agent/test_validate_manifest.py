@@ -147,6 +147,12 @@ class ManifestValidationTests(unittest.TestCase):
             root = Path(temporary)
             path, manifest, public_key, _ = self._fixture(root)
             manifest["content_version"] = "tampered"
+            with sqlite3.connect(root / "zakon-content.sqlite") as db:
+                db.execute("UPDATE content_release SET version='tampered' WHERE id=1")
+            manifest["database"]["sha256"] = hashlib.sha256(
+                (root / "zakon-content.sqlite").read_bytes()
+            ).hexdigest()
+            # Do not re-sign: the changed manifest must fail the detached signature check.
             path.write_text(json.dumps(manifest), encoding="utf-8")
             result = self._validate(path, public_key)
             self.assertNotEqual(result.returncode, 0)
