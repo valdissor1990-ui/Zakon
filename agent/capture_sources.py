@@ -72,8 +72,8 @@ def main() -> int:
     for source in sources:
         key = source["key"]
         registry_id = source.get("registry_id", key)
-        if not isinstance(key, str) or not key or "/" in key or "\\" in key or key in {".", ".."}:
-            raise SystemExit("Each capture key must be a safe, non-empty path segment")
+        if not isinstance(key, str) or not __import__("re").fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
+            raise SystemExit("Each capture key must use lowercase letters, digits, '_' or '-' (max 101 characters)")
         hosts = allowed_hosts(registry, registry_id)
         url = source["official_url"]
         validate_url(url, hosts)
