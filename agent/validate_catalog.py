@@ -3,6 +3,7 @@
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "content" / "catalog" / "core-federal-acts.json"
@@ -33,6 +34,13 @@ def validate_catalog(catalog: dict, registry: dict) -> None:
             raise ValueError(f"{item.get('id')}: title, type and source search terms are required")
         if not isinstance(item.get("priority"), int) or item["priority"] not in (1, 2, 3):
             raise ValueError(f"{item.get('id')}: priority must be 1, 2 or 3")
+        if item.get("metadata_status") not in {"provisional", "source_reference_verified"}:
+            raise ValueError(f"{item.get('id')}: metadata_status must disclose verification level")
+        reference_url = item.get("official_reference_url")
+        if item["metadata_status"] == "source_reference_verified":
+            parsed = urlparse(reference_url or "")
+            if parsed.scheme != "https" or not parsed.netloc:
+                raise ValueError(f"{item.get('id')}: verified metadata needs an HTTPS official reference URL")
 
 
 def main() -> int:
