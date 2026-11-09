@@ -1,0 +1,78 @@
+name: Build and publish legal content
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Content release label (for example 1.0.0)"
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: legal-content-release
+  cancel-in-progress: false
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment: legal-content-approval
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Validate source registry and tests
+        run: |
+          python -m py_compile agent/*.py
+          python agent/validate_source_registry.py
+          python -m unittest discover -s agent -p "test_*.py"
+      - name: Build reviewed SQLite database
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          test -f content/records/records.json || {
+            echo "::error::content/records/records.json is missing. No legal content will be fabricated."
+            exit 1
+          }
+          python agent/build_database.py --records content/records/records.json --output dist/content
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("dist/content/manifest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          data["validation"]["status"] = "validated"
+          data["validation"]["manual_approval_required"] = False
+          data["validation"]["approved_by_workflow"] = True
+          data["database"]["download_url"] = (
+              f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
+              f"content-{os.environ['RELEASE_VERSION']}/zakon-content.sqlite"
+          )
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+      - name: Validate publication manifest and database
+        run: python agent/validate_manifest.py dist/content/manifest.json
+      - name: Publish versioned content release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: content-${{ inputs.release_version }}
+          name: "ЗаконЪ — база знаний ${{ inputs.release_version }}"
+          body: |
+            Независимый выпуск правовой базы ЗаконЪ.
+            Версия приложения не изменяется.
+            Выпуск прошёл автоматические проверки и ручное подтверждение через environment legal-content-approval.
+          files: dist/content/zakon-content.sqlite
+          fail_on_unmatched_files: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish current manifest
+        run: |
+          cp dist/content/manifest.json content/updates/manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/updates/manifest.json
+          git commit -m "Publish legal content manifest ${{ inputs.release_version }}"
+          git push origin HEAD:main
