@@ -14,7 +14,8 @@
         "official_text",
         "amendment_acts",
         "entry_into_force_metadata"
-      ]
+      ],
+      "state_operated": true
     },
     {
       "id": "pravo_law_bank",
@@ -27,7 +28,8 @@
         "consolidated_text",
         "document_metadata",
         "current_revision"
-      ]
+      ],
+      "state_operated": true
     },
     {
       "id": "minjust_npa",
@@ -40,7 +42,8 @@
         "federal_and_regional_npa_cross_check",
         "systematized_text_cross_check",
         "registration_metadata"
-      ]
+      ],
+      "state_operated": true
     }
   ],
   "publication_rule": {
