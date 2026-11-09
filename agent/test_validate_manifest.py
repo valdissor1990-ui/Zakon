@@ -25,7 +25,7 @@ class ManifestValidationTests(unittest.TestCase):
             """)
         manifest = {
             "schema_version": 1,
-            "version_code": 1,
+            "version_code": 7,
             "content_version": "1.0.0",
             "created_at": "2026-11-09T00:00:00Z",
             "effective_as_of": "2026-11-09",
