@@ -1,6 +1,6 @@
 {
   "registry_version": 1,
-  "policy": "Each legal text candidate must be checked against three state-operated sources where the act is available. A mismatch blocks publication and requires manual review.",
+  "policy": "Each legal text candidate must be checked against three distinct state-operated information systems representing at least two operators where the act is available. A mismatch blocks publication and requires manual review.",
   "sources": [
     {
       "id": "pravo_official_publication",
