@@ -51,7 +51,7 @@ def main() -> int:
         tables = {row[0] for row in db.execute(
             "SELECT name FROM sqlite_master WHERE type IN ('table','view')"
         )}
-        missing_tables = {"documents", "articles", "articles_fts", "content_metadata"} - tables
+        missing_tables = {"documents", "articles", "articles_fts", "content_metadata", "content_release"} - tables
         if missing_tables:
             raise SystemExit(f"SQLite database is missing tables: {', '.join(sorted(missing_tables))}")
         documents = db.execute("SELECT count(*) FROM documents").fetchone()[0]
@@ -61,6 +61,16 @@ def main() -> int:
         metadata = dict(db.execute("SELECT key,value FROM content_metadata"))
         if metadata.get("pack_version") != str(data["version_code"]):
             raise SystemExit("SQLite content_metadata version does not match manifest version_code")
+        if not metadata.get("pack_label"):
+            raise SystemExit("SQLite content_metadata is missing pack_label")
+        release_row = db.execute(
+            "SELECT status FROM content_release WHERE version=?",
+            (data["content_version"],)
+        ).fetchone()
+        if release_row is None or release_row[0] != "validated":
+            raise SystemExit(
+                "SQLite content_release must contain this content_version with status='validated'"
+            )
 
     delta_info = data.get("delta")
     if delta_info is not None:
