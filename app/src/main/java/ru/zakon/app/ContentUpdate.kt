@@ -45,6 +45,7 @@ private fun verifyManifestSignature(manifestBytes: ByteArray, signatureBytes: By
     verifier.update(manifestBytes)
     require(verifier.verify(signatureBytes)) { "Цифровая подпись правовой базы недействительна" }
 }
+
 private fun sha256Hex(bytes: ByteArray): String {
     val dig = MessageDigest.getInstance("SHA-256").digest(bytes)
     return dig.joinToString("") { "%02x".format(it) }
@@ -150,7 +151,8 @@ private fun ContentUpdateSection(store: LegalStore) {
                         val signatureUrl = signature.optString("download_url", "")
                         require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
                         verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl))
-                    }                    val version = manifest.optInt(
+                    }
+                    val version = manifest.optInt(
                         "version",
                         manifest.optInt(
                             "version_code",
