@@ -121,21 +121,62 @@ private fun ContentUpdateSection(store: LegalStore) {
                 val resultMsg = withContext(Dispatchers.IO) {
                     val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL)
                     val manifest = JSONObject(String(manifestBytes, Charsets.UTF_8))
-                    val remoteVer = manifest.getInt("version")
-                    val label = manifest.optString("label", "")
-                    val packUrl = manifest.getString("pack_url")
-                    val expectedSha = manifest.optString("sha256", "").lowercase()
-                    remoteInfo = "Сервер: v$remoteVer · $label"
-                    if (!force && remoteVer <= store.installedPackVersion()) {
+                    val database = manifest.optJSONObject("database")
+                    val version = manifest.optInt(
+                        "version",
+                        manifest.optString("content_version").toIntOrNull() ?: 0
+                    )
+                    require(version > 0) { "В manifest отсутствует корректная версия контента" }
+                    val label = manifest.optString("label", manifest.optString("effective_as_of", ""))
+                    val databaseUrl = database?.optString("download_url")
+                        ?.takeIf { it.isNotBlank() }
+                        ?: database?.optString("url")?.takeIf { it.isNotBlank() }
+                    val legacyPackUrl = manifest.optString("pack_url", "")
+                    val expectedSha = (
+                        database?.optString("sha256")?.takeIf { it.isNotBlank() }
+                            ?: manifest.optString("sha256", "")
+                        ).lowercase()
+                    remoteInfo = "Сервер: v$version · $label"
+                    if (!force && version <= store.installedPackVersion()) {
                         return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
                     }
-                    val packBytes = httpGetBytes(packUrl)
-                    if (expectedSha.isNotBlank()) {
-                        val actual = sha256Hex(packBytes)
-                        if (actual != expectedSha) error("SHA-256 не совпал")
+
+                    if (!databaseUrl.isNullOrBlank()) {
+                        val downloaded = httpGetBytes(databaseUrl)
+                        require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
+                        require(sha256Hex(downloaded) == expectedSha) { "SHA-256 базы не совпал" }
+                        val rawFile = java.io.File(context.cacheDir, "zakon-content-download.tmp")
+                        val sqliteFile = java.io.File(context.cacheDir, "zakon-content-install.sqlite")
+                        rawFile.writeBytes(downloaded)
+                        try {
+                            val isGzip = downloaded.size >= 2 &&
+                                downloaded[0] == 0x1f.toByte() && downloaded[1] == 0x8b.toByte()
+                            if (isGzip) {
+                                java.util.zip.GZIPInputStream(rawFile.inputStream()).use { input ->
+                                    sqliteFile.outputStream().use { output -> input.copyTo(output) }
+                                }
+                            } else {
+                                downloaded.inputStream().use { input ->
+                                    sqliteFile.outputStream().use { output -> input.copyTo(output) }
+                                }
+                            }
+                            store.installDatabaseFile(sqliteFile, version, label)
+                            "Правовая база установлена: v$version."
+                        } finally {
+                            rawFile.delete()
+                            sqliteFile.delete()
+                        }
+                    } else if (legacyPackUrl.isNotBlank()) {
+                        // Backward compatibility for the previous JSON pack format.
+                        val packBytes = httpGetBytes(legacyPackUrl)
+                        if (expectedSha.isNotBlank()) {
+                            require(sha256Hex(packBytes) == expectedSha) { "SHA-256 пакета не совпал" }
+                        }
+                        val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
+                        "Обновлено из совместимого JSON-пакета: v${imported.version}. Статей: ${imported.articlesUpserted}"
+                    } else {
+                        error("В manifest не указан адрес SQLite-базы")
                     }
-                    val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
-                    "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
                 }
                 status = resultMsg
             } catch (e: Exception) {
