@@ -247,6 +247,23 @@ def build(records_path: Path, output_dir: Path) -> None:
                  article["number"], article.get("title"), article["body"],
                  article.get("effective_from"), article.get("effective_to"))
             )
+        for history in doc.get("status_history", []):
+            source_key = history.get("source_key")
+            if source_key not in source_ids:
+                raise ValueError(f"{doc_id}: status history must cite a captured source")
+            if not history.get("status") or not history.get("recorded_at"):
+                raise ValueError(f"{doc_id}: status history needs status and recorded_at")
+            validate_iso_date(history.get("valid_from"), f"{doc_id}.status_history.valid_from")
+            validate_iso_date(history.get("valid_to"), f"{doc_id}.status_history.valid_to")
+            validate_iso_date(history.get("recorded_at"), f"{doc_id}.status_history.recorded_at", required=True)
+            if history.get("valid_from") and history.get("valid_to") and history["valid_to"] < history["valid_from"]:
+                raise ValueError(f"{doc_id}: status history valid_to precedes valid_from")
+            db.execute(
+                """INSERT INTO legal_status_history(document_id,status,valid_from,valid_to,
+                   source_id,recorded_at,explanation) VALUES(?,?,?,?,?,?,?)""",
+                (doc_id, history["status"], history.get("valid_from"), history.get("valid_to"),
+                 source_ids[source_key], history["recorded_at"], history.get("explanation"))
+            )
 
 
     document_ids = {item["id"] for item in documents}
@@ -295,6 +312,10 @@ def build(records_path: Path, output_dir: Path) -> None:
         [("pack_version", str(version_code)), ("pack_label", release["version"])]
     )
     db.commit()
+    foreign_key_errors = db.execute("PRAGMA foreign_key_check").fetchall()
+    if foreign_key_errors:
+        db.close()
+        raise ValueError(f"SQLite foreign-key check failed: {foreign_key_errors[:3]}")
     integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
     if integrity != "ok":
         db.close()
