@@ -1,15 +1,17 @@
 {
   "schema_version": 1,
-  "content_version": "0.0.0-draft",
+  "version_code": 1,
+  "content_version": "1.0.0",
   "created_at": "YYYY-MM-DDTHH:MM:SSZ",
   "effective_as_of": "YYYY-MM-DD",
   "database": {
     "file": "zakon-content.sqlite",
-    "sha256": "TO_BE_GENERATED"
+    "sha256": "TO_BE_GENERATED",
+    "download_url": "https://github.com/OWNER/REPOSITORY/releases/download/content-1.0.0/zakon-content.sqlite"
   },
   "validation": {
     "status": "draft",
-    "official_sources_checked": 0,
-    "unresolved_references": null
+    "documents": 0,
+    "manual_approval_required": true
   }
 }
