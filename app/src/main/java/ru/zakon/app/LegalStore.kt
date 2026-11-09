@@ -272,7 +272,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
      * Applies a signed/hashed version-bound row delta in one transaction.
      * The caller verifies the downloaded patch checksum/signature before invoking this method.
      */
-    fun applyDatabaseDelta(json: String, label: String): Int {
+    fun applyDatabaseDelta(json: String, label: String, expectedVersion: Int): Int {
         val root = org.json.JSONObject(json)
         require(root.optInt("schema_version", 0) == 1) { "Неподдерживаемый формат обновления базы" }
         val fromVersion = root.getInt("from_version_code")
@@ -281,6 +281,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             "Обновление рассчитано для базы v$fromVersion, установлена v${installedPackVersion()}. Нужна полная база."
         }
         require(toVersion > fromVersion) { "Версия обновления должна быть новее установленной" }
+        require(toVersion == expectedVersion) { "Пакет обновления не соответствует версии из манифеста" }
 
         val tables = linkedMapOf(
             "sources" to "id",
