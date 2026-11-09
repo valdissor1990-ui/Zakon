@@ -301,9 +301,13 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             "cross_references", "legal_status_history", "content_release"
         )
         val operations = root.getJSONObject("operations")
+        val operationKeys = operations.keys()
+        while (operationKeys.hasNext()) {
+            require(tables.containsKey(operationKeys.next())) { "Обновление содержит неизвестную таблицу" }
+        }
         val db = writableDatabase
 
-        // A delta is valid only for the full content schema, never for the legacy lightweight DB.
+        // A delta is accepted only for the complete content schema, not the legacy lightweight DB.
         for (table in tables.keys) {
             db.rawQuery(
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
@@ -313,50 +317,51 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             }
         }
 
-        // Defer FK enforcement while the patch is being applied; validate the final graph before commit.
+        // Defer FK enforcement during row changes, then validate the final relational graph.
         db.setForeignKeyConstraintsEnabled(false)
         try {
             db.beginTransaction()
             try {
                 for (table in deleteOrder) {
                     val operation = operations.optJSONObject(table) ?: continue
-                val deletes = operation.optJSONArray("delete") ?: org.json.JSONArray()
-                for (index in 0 until deletes.length()) {
-                    val key = deletes.getJSONArray(index)
-                    require(key.length() == 1) { "Некорректный ключ удаления в таблице $table" }
-                    db.delete(table, "${tables.getValue(table)}=?", arrayOf(key.get(0).toString()))
+                    val deletes = operation.optJSONArray("delete") ?: org.json.JSONArray()
+                    for (index in 0 until deletes.length()) {
+                        val key = deletes.getJSONArray(index)
+                        require(key.length() == 1 && !key.isNull(0)) { "Некорректный ключ удаления в таблице $table" }
+                        db.delete(table, "${tables.getValue(table)}=?", arrayOf(key.get(0).toString()))
+                    }
                 }
-            }
 
-            for (table in upsertOrder) {
-                val operation = operations.optJSONObject(table) ?: continue
-                val rows = operation.optJSONArray("upsert") ?: org.json.JSONArray()
-                for (index in 0 until rows.length()) {
-                    val row = rows.getJSONObject(index)
-                    val values = android.content.ContentValues()
-                    val iterator = row.keys()
-                    while (iterator.hasNext()) {
-                        val column = iterator.next()
-                        when (val value = row.get(column)) {
-                            org.json.JSONObject.NULL -> values.putNull(column)
-                            is String -> values.put(column, value)
-                            is Int -> values.put(column, value)
-                            is Long -> values.put(column, value)
-                            is Double -> values.put(column, value)
-                            is Float -> values.put(column, value)
-                            is Boolean -> values.put(column, if (value) 1 else 0)
-                            else -> error("Недопустимый тип значения $column в таблице $table")
+                for (table in upsertOrder) {
+                    val operation = operations.optJSONObject(table) ?: continue
+                    val rows = operation.optJSONArray("upsert") ?: org.json.JSONArray()
+                    for (index in 0 until rows.length()) {
+                        val row = rows.getJSONObject(index)
+                        val values = android.content.ContentValues()
+                        val iterator = row.keys()
+                        while (iterator.hasNext()) {
+                            val column = iterator.next()
+                            when (val value = row.get(column)) {
+                                org.json.JSONObject.NULL -> values.putNull(column)
+                                is String -> values.put(column, value)
+                                is Int -> values.put(column, value)
+                                is Long -> values.put(column, value)
+                                is Double -> values.put(column, value)
+                                is Float -> values.put(column, value)
+                                is Boolean -> values.put(column, if (value) 1 else 0)
+                                else -> error("Недопустимый тип значения $column в таблице $table")
+                            }
                         }
+                        val primaryKey = tables.getValue(table)
+                        require(row.has(primaryKey) && !row.isNull(primaryKey)) {
+                            "В обновлении отсутствует ключ $primaryKey для таблицы $table"
+                        }
+                        val keyValue = row.get(primaryKey).toString()
+                        val updated = db.update(table, values, "$primaryKey=?", arrayOf(keyValue))
+                        if (updated == 0) db.insertOrThrow(table, null, values)
                     }
-                    val primaryKey = tables.getValue(table)
-                    require(row.has(primaryKey) && !row.isNull(primaryKey)) {
-                        "В обновлении отсутствует ключ $primaryKey для таблицы $table"
-                    }
-                    val keyValue = row.get(primaryKey).toString()
-                    val updated = db.update(table, values, "$primaryKey=?", arrayOf(keyValue))
-                    if (updated == 0) db.insertOrThrow(table, null, values)
                 }
-                }
+
                 db.rawQuery("PRAGMA foreign_key_check", null).use { cursor ->
                     require(!cursor.moveToFirst()) {
                         "Обновление нарушает связи между правовыми документами"
