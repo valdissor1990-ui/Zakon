@@ -148,6 +148,30 @@ private fun ContentUpdateSection(store: LegalStore) {
                         return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
                     }
 
+                    val delta = manifest.optJSONObject("delta")
+                    if (delta != null && store.installedPackVersion() > 0 &&
+                        delta.optInt("from_version_code", -1) == store.installedPackVersion()
+                    ) {
+                        val deltaUrl = delta.optString("download_url", "")
+                        val deltaSha = delta.optString("sha256", "").lowercase()
+                        if (deltaUrl.isNotBlank() && deltaSha.isNotBlank()) {
+                            try {
+                                val deltaBytes = httpGetBytes(deltaUrl)
+                                require(sha256Hex(deltaBytes) == deltaSha) { "SHA-256 обновления-дельты не совпал" }
+                                val patchBytes = if (deltaBytes.size >= 2 &&
+                                    deltaBytes[0] == 0x1f.toByte() && deltaBytes[1] == 0x8b.toByte()
+                                ) {
+                                    java.util.zip.GZIPInputStream(deltaBytes.inputStream()).use { it.readBytes() }
+                                } else deltaBytes
+                                store.applyDatabaseDelta(String(patchBytes, Charsets.UTF_8), label)
+                                return@withContext "Правовая база обновлена небольшим пакетом: v$version."
+                            } catch (_: Exception) {
+                                // A failed delta is rolled back; retry with the verified full DB below.
+                                remoteInfo = "Дельта не подошла; загружается полная база."
+                            }
+                        }
+                    }
+
                     if (!databaseUrl.isNullOrBlank()) {
                         val downloaded = httpGetBytes(databaseUrl)
                         require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
