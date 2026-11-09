@@ -176,7 +176,14 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
                         "title": "Статья 1",
                         "body": article_body
                     }],
-                    "cross_references": []
+                    "cross_references": [],
+                    "status_history": [{
+                        "status": "действует",
+                        "valid_from": "2020-01-01",
+                        "recorded_at": "2026-11-09",
+                        "source_key": source_checks[document_id][0]["source_key"],
+                        "explanation": "Проверено по сохранённому официальному источнику"
+                    }]
                 })
             documents[0]["cross_references"] = [{
                 "from_article_id": "doc-a-article-1",
@@ -205,6 +212,10 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
                     "SELECT to_document_id, resolved_article_id, resolution_status FROM cross_references"
                 ).fetchone()
                 self.assertEqual(row, ("doc-b", "doc-b-article-1", "resolved"))
+                history = db.execute(
+                    "SELECT status, valid_from FROM legal_status_history WHERE document_id='doc-b'"
+                ).fetchone()
+                self.assertEqual(history, ("действует", "2020-01-01"))
                 self.assertEqual(db.execute("PRAGMA foreign_key_check").fetchall(), [])
 
     def test_boolean_is_not_a_valid_release_version(self):
