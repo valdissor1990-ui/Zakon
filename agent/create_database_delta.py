@@ -20,6 +20,7 @@ TABLES = {
     "legal_status_history": ("id",),
     "content_release": ("id",),
 }
+REQUIRED_TABLES = set(TABLES) | {"content_metadata", "articles_fts"}
 
 
 def schema_signature(db):
@@ -36,9 +37,9 @@ def validate_database(db, label):
     if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
         raise ValueError(f"{label} SQLite database failed integrity_check")
 
-    missing = set(TABLES) - {
+    missing = REQUIRED_TABLES - {
         row[0] for row in db.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
+            "SELECT name FROM sqlite_master WHERE type IN ('table', 'view')"
         )
     }
     if missing:
@@ -77,6 +78,21 @@ def diff(old_path: Path, new_path: Path, from_version: int, to_version: int) -> 
     try:
         for label, db in (("base", old), ("target", new)):
             validate_database(db, label)
+
+        old_metadata = dict(old.execute("SELECT key, value FROM content_metadata"))
+        new_metadata = dict(new.execute("SELECT key, value FROM content_metadata"))
+        if old_metadata.get("pack_version") != str(from_version):
+            raise ValueError(
+                f"Base database metadata version {old_metadata.get('pack_version')!r} "
+                f"does not match requested from_version {from_version}"
+            )
+        if new_metadata.get("pack_version") != str(to_version):
+            raise ValueError(
+                f"Target database metadata version {new_metadata.get('pack_version')!r} "
+                f"does not match requested to_version {to_version}"
+            )
+        if not old_metadata.get("pack_label") or not new_metadata.get("pack_label"):
+            raise ValueError("Base and target databases must contain pack_label metadata")
 
         old_schema = schema_signature(old)
         new_schema = schema_signature(new)
