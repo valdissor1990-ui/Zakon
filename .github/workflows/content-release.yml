@@ -48,10 +48,15 @@ jobs:
           data["validation"]["status"] = "validated"
           data["validation"]["manual_approval_required"] = False
           data["validation"]["approved_by_workflow"] = True
-          data["database"]["download_url"] = (
+          release_base = (
               f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
-              f"content-{os.environ['RELEASE_VERSION']}/zakon-content.sqlite"
+              f"content-{os.environ['RELEASE_VERSION']}"
           )
+          data["database"]["download_url"] = f"{release_base}/zakon-content.sqlite"
+          data["signature"] = {
+              "algorithm": "SHA256withRSA",
+              "download_url": f"{release_base}/manifest.sig"
+          }
           path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
       - name: Generate version-bound delta when a previous approved release exists
@@ -104,6 +109,22 @@ jobs:
           }
           manifest_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
+      - name: Sign content manifest
+        env:
+          LEGAL_CONTENT_SIGNING_PRIVATE_KEY: ${{ secrets.LEGAL_CONTENT_SIGNING_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$LEGAL_CONTENT_SIGNING_PRIVATE_KEY" || {
+            echo "::error::Repository secret LEGAL_CONTENT_SIGNING_PRIVATE_KEY is not configured."
+            exit 1
+          }
+          printf '%s' "$LEGAL_CONTENT_SIGNING_PRIVATE_KEY" > "$RUNNER_TEMP/legal-content-private.pem"
+          chmod 600 "$RUNNER_TEMP/legal-content-private.pem"
+          openssl dgst -sha256 -sign "$RUNNER_TEMP/legal-content-private.pem" \
+            -out dist/content/manifest.sig dist/content/manifest.json
+          openssl dgst -sha256 -verify content/signing/public.pem \
+            -signature dist/content/manifest.sig dist/content/manifest.json
+          rm -f "$RUNNER_TEMP/legal-content-private.pem"
       - name: Validate publication manifest and database
         run: python agent/validate_manifest.py dist/content/manifest.json
       - name: Publish versioned content release
