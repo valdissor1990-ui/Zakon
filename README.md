@@ -36,7 +36,9 @@ Android APK и правовая база выпускаются отдельно
 - content-release.yml — ручная публикация отдельного Content Release после approval.
 - android-build.yml — независимая сборка APK.
 
-Перед использованием release workflow необходимо настроить GitHub Environment legal-content-approval с обязательными проверяющими.
+Перед использованием release workflow необходимо:
+- настроить GitHub Environment `legal-content-approval` с обязательными проверяющими;
+- добавить секрет `LEGAL_CONTENT_SIGNING_PRIVATE_KEY` в Settings → Secrets and variables → Actions. Приватный ключ нельзя коммитить в репозиторий.
 
 ## Сборка Android
 
