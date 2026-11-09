@@ -91,14 +91,14 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
     val canBio = remember(ctx) { bioOk(ctx) }
 
     fun popCabinet(): Boolean {
+        // true = handled inside cabinet; false = leave cabinet to previous screen
         if (setPin) {
             if (st.hasVerifier()) {
                 setPin = false
                 pin = ""; pin2 = ""; error = null
                 return true
             }
-            pin = ""; pin2 = ""; error = null
-            return true
+            return false
         }
         if (!unlocked) return false
         return when (val r = route) {
@@ -109,10 +109,11 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
             }
             is CabRoute.KView -> { route = CabRoute.Cases; true }
             CabRoute.Clients, CabRoute.Cases -> { route = CabRoute.Hub; true }
+            CabRoute.Hub -> false
             else -> false
         }
     }
-    LaunchedEffect(route, unlocked, setPin) {
+    SideEffect {
         onProvideBack?.invoke { popCabinet() }
     }
     DisposableEffect(Unit) {
