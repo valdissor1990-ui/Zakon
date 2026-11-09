@@ -107,12 +107,16 @@ jobs:
             echo "::warning::Previous database asset does not match its approved manifest; publishing full database only."
             exit 0
           fi
-          python agent/create_database_delta.py \
+          if ! python agent/create_database_delta.py \
             --base dist/previous/zakon-content.sqlite \
             --target dist/content/zakon-content.sqlite \
             --from-version "$PREVIOUS_CODE" \
             --to-version "$(python -c "import json; print(json.load(open('dist/content/manifest.json'))['version_code'])")" \
-            --output dist/content/zakon-content.delta.json
+            --output dist/content/zakon-content.delta.json; then
+            echo "::warning::Delta could not be generated safely; publishing the validated full database only."
+            rm -f dist/content/zakon-content.delta.json
+            exit 0
+          fi
           PREVIOUS_VERSION_CODE="$PREVIOUS_CODE" python - <<'PY'
           import hashlib
           import json
