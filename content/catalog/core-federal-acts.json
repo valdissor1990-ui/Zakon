@@ -162,6 +162,32 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 05.08.2000 117-ФЗ Налоговый кодекс часть вторая"
+    },
+    {
+      "id": "ru-advocacy-law",
+      "title": "Федеральный закон «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+      "document_type": "federal_law",
+      "number": "63-ФЗ",
+      "adopted_at": "2002-05-31",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон от 31.05.2002 № 63-ФЗ Об адвокатской деятельности и адвокатуре",
+      "official_reference_url": "https://minjust.gov.ru/ru/documents/7647/",
+      "notes": "Реквизиты и название сверены по странице официального сайта Минюста; действующая редакция и полный текст ещё не импортированы."
+    },
+    {
+      "id": "ru-free-legal-aid-law",
+      "title": "Федеральный закон «О бесплатной юридической помощи в Российской Федерации»",
+      "document_type": "federal_law",
+      "number": "324-ФЗ",
+      "adopted_at": "2011-11-21",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон от 21.11.2011 № 324-ФЗ О бесплатной юридической помощи в Российской Федерации",
+      "official_reference_url": "https://minjust.gov.ru/ru/pages/besplatnaya-yuridicheskaya-pomosh/",
+      "notes": "Дата, номер и наименование подтверждены справочной страницей Минюста; ссылка ведёт на разъяснительную страницу, не на официальный текст закона."
     }
   ]
 }
