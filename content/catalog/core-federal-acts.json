@@ -18,7 +18,8 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Конституция Российской Федерации текст с изменениями 2020",
-      "notes": "Дата принятия указана как дата всенародного голосования; не трактовать как номер федерального закона."
+      "notes": "Дата принятия указана как дата всенародного голосования; не трактовать как номер федерального закона.",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-civil-code-part-1",
@@ -29,7 +30,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 30.11.1994 51-ФЗ Гражданский кодекс часть первая"
+      "source_search_terms": "Федеральный закон 30.11.1994 51-ФЗ Гражданский кодекс часть первая",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-civil-code-part-2",
@@ -40,7 +42,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 26.01.1996 14-ФЗ Гражданский кодекс часть вторая"
+      "source_search_terms": "Федеральный закон 26.01.1996 14-ФЗ Гражданский кодекс часть вторая",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-civil-code-part-3",
@@ -51,7 +54,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 26.11.2001 146-ФЗ Гражданский кодекс часть третья"
+      "source_search_terms": "Федеральный закон 26.11.2001 146-ФЗ Гражданский кодекс часть третья",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-civil-code-part-4",
@@ -62,7 +66,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 18.12.2006 230-ФЗ Гражданский кодекс часть четвертая"
+      "source_search_terms": "Федеральный закон 18.12.2006 230-ФЗ Гражданский кодекс часть четвертая",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-criminal-code",
@@ -73,7 +78,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 13.06.1996 63-ФЗ Уголовный кодекс Российской Федерации"
+      "source_search_terms": "Федеральный закон 13.06.1996 63-ФЗ Уголовный кодекс Российской Федерации",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-code-of-administrative-offences",
@@ -84,7 +90,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 30.12.2001 195-ФЗ КоАП РФ"
+      "source_search_terms": "Федеральный закон 30.12.2001 195-ФЗ КоАП РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-criminal-procedure-code",
@@ -95,7 +102,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 18.12.2001 174-ФЗ УПК РФ"
+      "source_search_terms": "Федеральный закон 18.12.2001 174-ФЗ УПК РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-civil-procedure-code",
@@ -106,7 +114,8 @@
       "priority": 1,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 14.11.2002 138-ФЗ ГПК РФ"
+      "source_search_terms": "Федеральный закон 14.11.2002 138-ФЗ ГПК РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-arbitration-procedure-code",
@@ -117,7 +126,8 @@
       "priority": 2,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 24.07.2002 95-ФЗ АПК РФ"
+      "source_search_terms": "Федеральный закон 24.07.2002 95-ФЗ АПК РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-labour-code",
@@ -128,7 +138,8 @@
       "priority": 2,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 30.12.2001 197-ФЗ Трудовой кодекс РФ"
+      "source_search_terms": "Федеральный закон 30.12.2001 197-ФЗ Трудовой кодекс РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-family-code",
@@ -139,7 +150,8 @@
       "priority": 2,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 29.12.1995 223-ФЗ Семейный кодекс РФ"
+      "source_search_terms": "Федеральный закон 29.12.1995 223-ФЗ Семейный кодекс РФ",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-tax-code-part-1",
@@ -150,7 +162,8 @@
       "priority": 2,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 31.07.1998 146-ФЗ Налоговый кодекс часть первая"
+      "source_search_terms": "Федеральный закон 31.07.1998 146-ФЗ Налоговый кодекс часть первая",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-tax-code-part-2",
@@ -161,7 +174,8 @@
       "priority": 2,
       "content_status": "not_imported",
       "verification_status": "not_started",
-      "source_search_terms": "Федеральный закон 05.08.2000 117-ФЗ Налоговый кодекс часть вторая"
+      "source_search_terms": "Федеральный закон 05.08.2000 117-ФЗ Налоговый кодекс часть вторая",
+      "metadata_status": "provisional"
     },
     {
       "id": "ru-advocacy-law",
@@ -174,7 +188,8 @@
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон от 31.05.2002 № 63-ФЗ Об адвокатской деятельности и адвокатуре",
       "official_reference_url": "https://minjust.gov.ru/ru/documents/7647/",
-      "notes": "Реквизиты и название сверены по странице официального сайта Минюста; действующая редакция и полный текст ещё не импортированы."
+      "notes": "Реквизиты и название сверены по странице официального сайта Минюста; действующая редакция и полный текст ещё не импортированы.",
+      "metadata_status": "source_reference_verified"
     },
     {
       "id": "ru-free-legal-aid-law",
@@ -187,7 +202,8 @@
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон от 21.11.2011 № 324-ФЗ О бесплатной юридической помощи в Российской Федерации",
       "official_reference_url": "https://minjust.gov.ru/ru/pages/besplatnaya-yuridicheskaya-pomosh/",
-      "notes": "Дата, номер и наименование подтверждены справочной страницей Минюста; ссылка ведёт на разъяснительную страницу, не на официальный текст закона."
+      "notes": "Дата, номер и наименование подтверждены справочной страницей Минюста; ссылка ведёт на разъяснительную страницу, не на официальный текст закона.",
+      "metadata_status": "source_reference_verified"
     }
   ]
 }
