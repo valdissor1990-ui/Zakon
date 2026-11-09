@@ -38,8 +38,8 @@ def validate_iso_date(value: str | None, label: str, required: bool = False) -> 
 def validate_source_evidence(source: dict, registry_source: dict) -> str:
     """Require the exact captured original and its provenance metadata before a source can enter a release."""
     key = source.get("key")
-    if not isinstance(key, str) or not key:
-        raise ValueError("Every source needs a non-empty key")
+    if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
+        raise ValueError("Every source needs a safe capture key using lowercase letters, digits, '_' or '-'")
     digest = source.get("sha256")
     require_hash(digest, f"source {key} sha256")
     digest = digest.lower()
