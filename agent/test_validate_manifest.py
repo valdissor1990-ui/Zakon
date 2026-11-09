@@ -20,9 +20,18 @@ class ManifestValidationTests(unittest.TestCase):
                 CREATE TABLE documents(id TEXT PRIMARY KEY, title TEXT NOT NULL);
                 CREATE TABLE articles(id TEXT PRIMARY KEY, document_id TEXT, body TEXT);
                 CREATE TABLE content_metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                CREATE TABLE content_release(
+                    id INTEGER PRIMARY KEY, version TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL, effective_as_of TEXT NOT NULL,
+                    manifest_sha256 TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('draft','validated','published','withdrawn'))
+                );
                 CREATE VIRTUAL TABLE articles_fts USING fts4(article_id, body);
                 INSERT INTO content_metadata VALUES('pack_version', '7');
                 INSERT INTO content_metadata VALUES('pack_label', '1.0.0');
+                INSERT INTO content_release VALUES(1, '1.0.0', '2026-11-09T00:00:00Z',
+                    '2026-11-09', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                    'validated');
                 INSERT INTO documents VALUES('doc', 'Тестовый документ');
                 INSERT INTO articles VALUES('article', 'doc', 'Тестовая статья');
             """)
