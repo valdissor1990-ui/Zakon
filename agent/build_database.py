@@ -82,7 +82,7 @@ def build(records_path: Path, output_dir: Path) -> None:
     if not release.get("version") or not release.get("created_at") or not release.get("effective_as_of"):
         raise ValueError("Release version, created_at and effective_as_of are required")
     version_code = release.get("version_code")
-    if not isinstance(version_code, int) or version_code < 7:
+    if isinstance(version_code, bool) or not isinstance(version_code, int) or version_code < 7:
         raise ValueError("release.version_code must be an integer >= 7 for the first SQLite release, then increase monotonically (legacy JSON versions reached 6)")
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = output_dir / "zakon-content.sqlite"
