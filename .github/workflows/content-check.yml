@@ -1,9 +1,9 @@
 name: Content checks
 on:
   push:
-    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml", ".github/workflows/content-release.yml"]
   pull_request:
-    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml", ".github/workflows/content-release.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check Python syntax
-        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py agent/build_database.py
+        run: python -m py_compile agent/*.py
       - name: Check content tooling
         run: |
           python agent/validate_source_registry.py
