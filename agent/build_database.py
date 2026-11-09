@@ -56,8 +56,10 @@ def validate_source_evidence(source: dict, registry_source: dict) -> str:
     final_url = urlparse(metadata.get("final_url", ""))
     if final_url.scheme != "https" or final_url.username or final_url.password or final_url.netloc.lower() not in allowed_hosts:
         raise ValueError(f"Source {key}: captured final URL is not an allowlisted HTTPS address")
-    if metadata.get("source_key") != key or metadata.get("sha256", "").lower() != digest:
-        raise ValueError(f"Source {key}: capture metadata does not match the source record")
+    if metadata.get("source_key") != key or metadata.get("registry_id") != source.get("registry_id", key):
+        raise ValueError(f"Source {key}: capture metadata source identity does not match records.json")
+    if metadata.get("sha256", "").lower() != digest:
+        raise ValueError(f"Source {key}: capture metadata SHA-256 does not match the source record")
     if metadata.get("requested_url") != requested_url:
         raise ValueError(f"Source {key}: captured request URL differs from records.json")
     if metadata.get("evidence_file") != evidence_path.name or metadata.get("byte_length") != len(payload):
@@ -99,13 +101,14 @@ def build(records_path: Path, output_dir: Path) -> None:
     source_hashes = {}
     for source in source_rows:
         key = source["key"]
+        registry_id = source.get("registry_id", key)
         if key in source_ids:
-            raise ValueError(f"Duplicate source key: {key}")
-        if key not in registry_sources:
-            raise ValueError(f"Source key is not in approved registry: {key}")
+            raise ValueError(f"Duplicate source capture key: {key}")
+        if registry_id not in registry_sources:
+            raise ValueError(f"Source registry_id is not in approved registry: {registry_id}")
         if not source.get("retrieved_at"):
             raise ValueError(f"Source {key} is missing retrieval time")
-        source_hashes[key] = validate_source_evidence(source, registry_sources[key])
+        source_hashes[key] = validate_source_evidence(source, registry_sources[registry_id])
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
                source_document_id,sha256,notes) VALUES(?,?,?,?,?,?,?,?)""",
@@ -127,10 +130,13 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: at least three distinct source checks are required")
         if primary_key not in checked_keys:
             raise ValueError(f"{doc_id}: primary source must be included in source_checks")
-        if any(key not in source_ids or key not in registry_sources for key in checked_keys):
-            raise ValueError(f"{doc_id}: a checked source is not registered or not captured")
+        if any(key not in source_ids for key in checked_keys):
+            raise ValueError(f"{doc_id}: a checked source is not captured")
         source_by_key = {source["key"]: source for source in source_rows}
         hosts = {urlparse(source_by_key[key]["official_url"]).netloc.lower() for key in checked_keys}
+        registry_ids = {source_by_key[key].get("registry_id", key) for key in checked_keys}
+        if len(registry_ids) < 3:
+            raise ValueError(f"{doc_id}: checks must use three distinct registered state sources")
         if len(hosts) < 3:
             raise ValueError(f"{doc_id}: checks must cover three distinct source hosts")
         if any(item.get("status") != "match" for item in checks):
