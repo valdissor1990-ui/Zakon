@@ -96,6 +96,12 @@ jobs:
             echo "::warning::Previous database asset is unavailable; publishing full database only."
             exit 0
           fi
+          EXPECTED_PREVIOUS_SHA=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST'))['database']['sha256'])")
+          ACTUAL_PREVIOUS_SHA=$(sha256sum dist/previous/zakon-content.sqlite | cut -d ' ' -f 1)
+          if [ "$ACTUAL_PREVIOUS_SHA" != "$EXPECTED_PREVIOUS_SHA" ]; then
+            echo "::warning::Previous database asset does not match its approved manifest; publishing full database only."
+            exit 0
+          fi
           python agent/create_database_delta.py \
             --base dist/previous/zakon-content.sqlite \
             --target dist/content/zakon-content.sqlite \
