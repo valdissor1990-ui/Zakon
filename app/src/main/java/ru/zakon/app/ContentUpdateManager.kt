@@ -1,7 +1,6 @@
 package ru.zakon.app
 
 import android.content.Context
-import android.database.sqlite.SQLiteException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
