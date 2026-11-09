@@ -37,14 +37,29 @@ jobs:
           }
           python agent/build_database.py --records content/records/records.json --output dist/content
           python - <<'PY'
+          import hashlib
           import json
           import os
+          import sqlite3
           from pathlib import Path
 
           path = Path("dist/content/manifest.json")
           data = json.loads(path.read_text(encoding="utf-8"))
           if data["content_version"] != os.environ["RELEASE_VERSION"]:
               raise SystemExit("workflow release_version must match records.release.version")
+
+          # The job runs only after the required GitHub Environment reviewers approve it.
+          # Keep the approval state consistent inside SQLite and in the signed manifest.
+          database_path = path.parent / data["database"]["file"]
+          with sqlite3.connect(database_path) as db:
+              cursor = db.execute(
+                  "UPDATE content_release SET status='validated' WHERE version=? AND status='draft'",
+                  (data["content_version"],)
+              )
+              if cursor.rowcount != 1:
+                  raise SystemExit("Expected exactly one draft content_release row for this version")
+              db.commit()
+          data["database"]["sha256"] = hashlib.sha256(database_path.read_bytes()).hexdigest()
           data["validation"]["status"] = "validated"
           data["validation"]["manual_approval_required"] = False
           data["validation"]["approved_by_workflow"] = True
