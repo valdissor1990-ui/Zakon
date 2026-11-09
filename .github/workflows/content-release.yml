@@ -54,6 +54,56 @@ jobs:
           )
           path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
+      - name: Generate version-bound delta when a previous approved release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PREVIOUS_MANIFEST="content/updates/manifest.json"
+          if [ ! -f "$PREVIOUS_MANIFEST" ]; then
+            echo "No previous manifest; this will be a full database release."
+            exit 0
+          fi
+          PREVIOUS_STATUS=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')) .get('validation',{}).get('status','draft'))")
+          PREVIOUS_VERSION=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('content_version',''))")
+          PREVIOUS_CODE=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('version_code',0))")
+          if [ "$PREVIOUS_STATUS" != "validated" ] || [ -z "$PREVIOUS_VERSION" ] || [ "$PREVIOUS_CODE" -le 0 ]; then
+            echo "No previous validated release; publishing full database only."
+            exit 0
+          fi
+          mkdir -p dist/previous
+          if ! gh release download "content-$PREVIOUS_VERSION" --pattern "zakon-content.sqlite" --dir dist/previous; then
+            echo "::warning::Previous database asset is unavailable; publishing full database only."
+            exit 0
+          fi
+          python agent/create_database_delta.py \
+            --base dist/previous/zakon-content.sqlite \
+            --target dist/content/zakon-content.sqlite \
+            --from-version "$PREVIOUS_CODE" \
+            --to-version "$(python -c "import json; print(json.load(open('dist/content/manifest.json'))['version_code'])")" \
+            --output dist/content/zakon-content.delta.json
+          PREVIOUS_VERSION_CODE="$PREVIOUS_CODE" python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("dist/content")
+          manifest_path = root / "manifest.json"
+          patch_path = root / "zakon-content.delta.json"
+          data = json.loads(manifest_path.read_text(encoding="utf-8"))
+          data["delta"] = {
+              "file": patch_path.name,
+              "sha256": hashlib.sha256(patch_path.read_bytes()).hexdigest(),
+              "from_version_code": int(os.environ["PREVIOUS_VERSION_CODE"]),
+              "to_version_code": data["version_code"],
+              "download_url": (
+                  f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
+                  f"content-{data['content_version']}/zakon-content.delta.json"
+              )
+          }
+          manifest_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
       - name: Validate publication manifest and database
         run: python agent/validate_manifest.py dist/content/manifest.json
       - name: Publish versioned content release
@@ -65,7 +115,8 @@ jobs:
             Независимый выпуск правовой базы ЗаконЪ.
             Версия приложения не изменяется.
             Выпуск прошёл автоматические проверки и ручное подтверждение через environment legal-content-approval.
-          files: dist/content/zakon-content.sqlite
+            Если предыдущая база доступна, в выпуск также включён пакет обновления-дельты.
+          files: dist/content/*
           fail_on_unmatched_files: true
           make_latest: false
         env:
