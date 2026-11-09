@@ -35,6 +35,35 @@ def validate_iso_date(value: str | None, label: str, required: bool = False) -> 
         raise ValueError(f"{label} is not a valid calendar date") from error
 
 
+def validate_article_hierarchy(document_id: str, articles: list[dict]) -> None:
+    article_ids = {item.get("id") for item in articles}
+    parents = {}
+    for article in articles:
+        article_id = article.get("id")
+        parent_id = article.get("parent_id")
+        if parent_id is not None and parent_id not in article_ids:
+            raise ValueError(f"{document_id}: article {article_id} parent must belong to the same document")
+        parents[article_id] = parent_id
+
+    visiting = set()
+    visited = set()
+
+    def visit(article_id: str) -> None:
+        if article_id in visiting:
+            raise ValueError(f"{document_id}: cyclic article parent hierarchy")
+        if article_id in visited:
+            return
+        visiting.add(article_id)
+        parent_id = parents[article_id]
+        if parent_id is not None:
+            visit(parent_id)
+        visiting.remove(article_id)
+        visited.add(article_id)
+
+    for article_id in parents:
+        visit(article_id)
+
+
 def validate_source_evidence(source: dict, registry_source: dict) -> str:
     """Require the exact captured original and its provenance metadata before a source can enter a release."""
     key = source.get("key")
@@ -216,6 +245,7 @@ def build(records_path: Path, output_dir: Path) -> None:
             validate_iso_date(article.get("effective_to"), f"{doc_id}.{article_id}.effective_to")
             if article.get("effective_from") and article.get("effective_to") and article["effective_to"] < article["effective_from"]:
                 raise ValueError(f"{doc_id}: article {article_id} effective_to precedes effective_from")
+        validate_article_hierarchy(doc_id, articles)
         text_digest = sha256("\n".join(a.get("body", "") for a in articles).encode("utf-8"))
         if doc.get("text_sha256") != text_digest:
             raise ValueError(f"{doc_id}: text_sha256 does not match article bodies")
