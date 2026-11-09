@@ -405,7 +405,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                         "Обновление нарушает связи между правовыми документами"
                     }
                 }
-                if (version > 0) writeContentMetadata(db, version, label)
+                writeContentMetadata(db, toVersion, label)
                 db.setTransactionSuccessful()
             } finally {
                 db.endTransaction()
@@ -490,6 +490,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 }
                 artCount++
             }
+            if (version > 0) writeContentMetadata(db, version, label)
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
