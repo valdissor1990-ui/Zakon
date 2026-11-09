@@ -35,7 +35,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
-    implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
