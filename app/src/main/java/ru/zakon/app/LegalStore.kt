@@ -40,6 +40,11 @@ data class PackImportResult(
 )
 
 class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-content.db", null, 10) {
+    companion object {
+        // Serialize installs even if more than one screen requests an update at the same time.
+        private val databaseInstallLock = Any()
+    }
+
 
     private val appContext = context.applicationContext
     private val metaPrefs = appContext.getSharedPreferences("zakon_content_meta", Context.MODE_PRIVATE)
@@ -263,50 +268,140 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
      * Atomically installs a prebuilt content SQLite database.
      * The caller must verify the downloaded SHA-256 before calling this method.
      */
-    fun installDatabaseFile(source: java.io.File, version: Int, label: String): Int {
-        require(source.isFile && source.length() > 0L) { "Файл базы пуст или отсутствует" }
-        validateContentDatabase(source)
+    fun installDatabaseFile(source: java.io.File, version: Int, label: String): Int =
+        synchronized(databaseInstallLock) {
+            require(source.isFile && source.length() > 0L) { "Файл базы пуст или отсутствует" }
 
-        val target = appContext.getDatabasePath("zakon-content.db")
-        val staged = java.io.File(target.parentFile, "zakon-content.db.staged")
-        val backup = java.io.File(target.parentFile, "zakon-content.db.backup")
-        target.parentFile?.mkdirs()
-        source.copyTo(staged, overwrite = true)
-        // Stamp release metadata before the staged database can replace the active file.
-        val stagedDb = SQLiteDatabase.openDatabase(staged.absolutePath, null, SQLiteDatabase.OPEN_READWRITE)
-        try {
-            stagedDb.beginTransaction()
+            val target = appContext.getDatabasePath("zakon-content.db")
+            val parent = requireNotNull(target.parentFile) { "Не удалось определить каталог базы данных" }
+            check(parent.exists() || parent.mkdirs()) { "Не удалось создать каталог базы данных" }
+            val staged = java.io.File(parent, "zakon-content.db.staged")
+            val backup = java.io.File(parent, "zakon-content.db.backup")
+
+            // Recover an interrupted previous swap before considering another update.
+            if (!target.exists() && backup.exists()) {
+                check(backup.renameTo(target)) {
+                    "Не удалось восстановить резервную базу; файл сохранён: ${backup.absolutePath}"
+                }
+                try {
+                    validateContentDatabase(target)
+                } catch (failure: Exception) {
+                    if (!target.renameTo(backup)) {
+                        throw IllegalStateException(
+                            "Резервная база не прошла проверку и не может быть возвращена на место; файл сохранён: ${target.absolutePath}",
+                            failure
+                        )
+                    }
+                    throw IllegalStateException("Резервная база не прошла проверку целостности", failure)
+                }
+            } else if (target.exists() && backup.exists()) {
+                // A valid target means the previous install completed and only backup cleanup was interrupted.
+                try {
+                    validateContentDatabase(target)
+                    check(backup.delete()) {
+                        "Не удалось удалить устаревшую резервную копию: ${backup.absolutePath}"
+                    }
+                } catch (targetFailure: Exception) {
+                    if (target.exists() && !target.delete()) {
+                        throw IllegalStateException(
+                            "Текущая база повреждена, но её не удалось убрать; резервная копия сохранена: ${backup.absolutePath}",
+                            targetFailure
+                        )
+                    }
+                    if (!backup.renameTo(target)) {
+                        throw IllegalStateException(
+                            "Не удалось восстановить резервную базу; файл сохранён: ${backup.absolutePath}",
+                            targetFailure
+                        )
+                    }
+                    try {
+                        validateContentDatabase(target)
+                    } catch (backupFailure: Exception) {
+                        if (!target.renameTo(backup)) {
+                            backupFailure.addSuppressed(
+                                IllegalStateException("Не удалось вернуть резервный файл по пути ${backup.absolutePath}")
+                            )
+                        }
+                        throw IllegalStateException("Резервная копия также не прошла проверку", backupFailure)
+                    }
+                }
+            }
+
+            val installedVersion = installedPackVersion()
+            require(version >= installedVersion) {
+                "Установка более старой базы запрещена: установлена v$installedVersion, получена v$version"
+            }
+            validateContentDatabase(source)
+
+            source.copyTo(staged, overwrite = true)
             try {
-                stagedDb.execSQL("CREATE TABLE IF NOT EXISTS content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-                writeContentMetadata(stagedDb, version, label)
-                stagedDb.setTransactionSuccessful()
-            } finally { stagedDb.endTransaction() }
-        } finally { stagedDb.close() }
-        validateContentDatabase(staged)
-        close()
-        try {
-            java.io.File(target.path + "-wal").delete()
-            java.io.File(target.path + "-shm").delete()
-            backup.delete()
-            if (target.exists() && !target.renameTo(backup)) {
-                error("Не удалось сохранить предыдущую базу")
+                // Stamp release metadata before the staged database can replace the active file.
+                val stagedDb = SQLiteDatabase.openDatabase(
+                    staged.absolutePath, null, SQLiteDatabase.OPEN_READWRITE
+                )
+                try {
+                    stagedDb.beginTransaction()
+                    try {
+                        stagedDb.execSQL(
+                            "CREATE TABLE IF NOT EXISTS content_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
+                        )
+                        writeContentMetadata(stagedDb, version, label)
+                        stagedDb.setTransactionSuccessful()
+                    } finally {
+                        stagedDb.endTransaction()
+                    }
+                } finally {
+                    stagedDb.close()
+                }
+                validateContentDatabase(staged)
+
+                // Close this helper before swapping files so SQLite has checkpointed its own handles.
+                close()
+                java.io.File(target.path + "-wal").delete()
+                java.io.File(target.path + "-shm").delete()
+
+                if (target.exists() && !target.renameTo(backup)) {
+                    error("Не удалось сохранить предыдущую базу; действующая база не изменена")
+                }
+
+                var newDatabaseInstalled = false
+                try {
+                    if (!staged.renameTo(target)) {
+                        if (backup.exists() && !backup.renameTo(target)) {
+                            error("Не удалось установить новую базу или восстановить резервную; резервный файл сохранён: ${backup.absolutePath}")
+                        }
+                        error("Не удалось установить новую базу; предыдущая база восстановлена")
+                    }
+                    newDatabaseInstalled = true
+
+                    // Validate the database at its final path before deleting the previous good copy.
+                    validateContentDatabase(target)
+                    writeInstalledPackCache(version, label)
+                    if (backup.exists()) backup.delete()
+                    version
+                } catch (failure: Exception) {
+                    if (newDatabaseInstalled && target.exists() && !target.delete()) {
+                        throw IllegalStateException(
+                            "Новая база не прошла проверку, но её не удалось убрать; резервная копия сохранена: ${backup.absolutePath}",
+                            failure
+                        )
+                    }
+                    if (backup.exists() && !backup.renameTo(target)) {
+                        throw IllegalStateException(
+                            "Не удалось восстановить предыдущую базу; резервный файл сохранён: ${backup.absolutePath}",
+                            failure
+                        )
+                    }
+                    throw failure
+                }
+            } finally {
+                staged.delete()
             }
-            if (!staged.renameTo(target)) {
-                if (backup.exists()) backup.renameTo(target)
-                error("Не удалось установить новую базу")
-            }
-            validateContentDatabase(target)
-            metaPrefs.edit().putInt("pack_version", version)
-                .putString("pack_label", label).commit()
-            backup.delete()
-            return version
-        } catch (failure: Exception) {
-            target.delete()
-            if (backup.exists()) backup.renameTo(target)
-            throw failure
-        } finally {
-            staged.delete()
         }
+
+    private fun writeInstalledPackCache(version: Int, label: String) {
+        // SQLite content_metadata is authoritative; preferences are only a compatibility cache.
+        metaPrefs.edit().putInt("pack_version", version).putString("pack_label", label).apply()
     }
 
     private fun validateContentDatabase(file: java.io.File) {
