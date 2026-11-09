@@ -21,6 +21,54 @@ def require_hash(value: str, label: str) -> None:
     if not isinstance(value, str) or not HEX64.fullmatch(value.lower()):
         raise ValueError(f"{label} must be a 64-character SHA-256 hex string")
 
+def validate_source_evidence(source: dict, registry_source: dict) -> str:
+    """Require the exact captured original and its provenance metadata before a source can enter a release."""
+    key = source.get("key")
+    if not isinstance(key, str) or not key:
+        raise ValueError("Every source needs a non-empty key")
+    digest = source.get("sha256")
+    require_hash(digest, f"source {key} sha256")
+    digest = digest.lower()
+
+    allowed_hosts = {
+        urlparse(value).netloc.lower()
+        for value in (registry_source.get("url", ""), registry_source.get("access_url", ""))
+        if urlparse(value).scheme == "https" and urlparse(value).netloc
+    }
+    requested_url = source.get("official_url", "")
+    parsed = urlparse(requested_url)
+    if parsed.scheme != "https" or parsed.username or parsed.password or parsed.netloc.lower() not in allowed_hosts:
+        raise ValueError(f"Source {key}: official_url must use an allowlisted credential-free HTTPS host")
+
+    evidence_dir = ROOT / "content" / "evidence" / key
+    evidence_path = evidence_dir / f"{digest}.source"
+    metadata_path = evidence_dir / f"{digest}.json"
+    if not evidence_path.is_file() or not metadata_path.is_file():
+        raise ValueError(
+            f"Source {key}: captured original or metadata is missing; run agent/capture_sources.py "
+            "and commit content/evidence before building"
+        )
+
+    payload = evidence_path.read_bytes()
+    if sha256(payload) != digest:
+        raise ValueError(f"Source {key}: saved original does not match its SHA-256")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    final_url = urlparse(metadata.get("final_url", ""))
+    if final_url.scheme != "https" or final_url.username or final_url.password or final_url.netloc.lower() not in allowed_hosts:
+        raise ValueError(f"Source {key}: captured final URL is not an allowlisted HTTPS address")
+    if metadata.get("source_key") != key or metadata.get("sha256", "").lower() != digest:
+        raise ValueError(f"Source {key}: capture metadata does not match the source record")
+    if metadata.get("requested_url") != requested_url:
+        raise ValueError(f"Source {key}: captured request URL differs from records.json")
+    if metadata.get("evidence_file") != evidence_path.name or metadata.get("byte_length") != len(payload):
+        raise ValueError(f"Source {key}: capture metadata does not describe the saved original")
+    if metadata.get("retrieved_at") != source.get("retrieved_at"):
+        raise ValueError(f"Source {key}: retrieved_at must match the captured evidence metadata")
+    if metadata.get("legal_text_extraction_performed") is not False:
+        raise ValueError(f"Source {key}: raw evidence metadata must confirm no automatic legal-text extraction")
+    return digest
+
+
 def build(records_path: Path, output_dir: Path) -> None:
     raw = records_path.read_bytes()
     data = json.loads(raw)
@@ -55,14 +103,9 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"Duplicate source key: {key}")
         if key not in registry_sources:
             raise ValueError(f"Source key is not in approved registry: {key}")
-        require_hash(source.get("sha256"), f"source {key} sha256")
-        if not source.get("retrieved_at") or not source.get("official_url"):
-            raise ValueError(f"Source {key} is missing retrieval time or URL")
-        expected_hosts = {urlparse(registry_sources[key]["url"]).netloc.lower()}
-        if registry_sources[key].get("access_url"):
-            expected_hosts.add(urlparse(registry_sources[key]["access_url"]).netloc.lower())
-        if urlparse(source["official_url"]).netloc.lower() not in expected_hosts:
-            raise ValueError(f"Source {key}: captured URL host is not in the approved registry")
+        if not source.get("retrieved_at"):
+            raise ValueError(f"Source {key} is missing retrieval time")
+        source_hashes[key] = validate_source_evidence(source, registry_sources[key])
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
                source_document_id,sha256,notes) VALUES(?,?,?,?,?,?,?,?)""",
@@ -70,7 +113,6 @@ def build(records_path: Path, output_dir: Path) -> None:
              source["retrieved_at"], source.get("source_document_id"), source["sha256"], source.get("notes"))
         )
         source_ids[key] = cur.lastrowid
-        source_hashes[key] = source["sha256"].lower()
 
     for doc in documents:
         doc_id = doc["id"]
@@ -98,6 +140,10 @@ def build(records_path: Path, output_dir: Path) -> None:
             require_hash(item.get("sha256"), f"{doc_id} source check sha256")
             if item["sha256"].lower() != source_hashes[item["source_key"]]:
                 raise ValueError(f"{doc_id}: source check hash does not match the captured source record")
+            if item["retrieved_at"] != next(
+                source["retrieved_at"] for source in source_rows if source["key"] == item["source_key"]
+            ):
+                raise ValueError(f"{doc_id}: source check retrieved_at does not match the captured evidence")
         if doc.get("verification_status") != "approved":
             raise ValueError(f"{doc_id}: document must be manually approved before database build")
         articles = sorted(doc.get("articles", []), key=lambda a: int(a.get("ordinal", 0)))
