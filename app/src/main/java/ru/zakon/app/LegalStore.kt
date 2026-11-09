@@ -296,13 +296,12 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 }
             } else if (target.exists() && backup.exists()) {
                 // A valid target means the previous install completed and only backup cleanup was interrupted.
+                var targetIsValid = true
                 try {
                     validateContentDatabase(target)
-                    check(backup.delete()) {
-                        "Не удалось удалить устаревшую резервную копию: ${backup.absolutePath}"
-                    }
                 } catch (targetFailure: Exception) {
-                    if (target.exists() && !target.delete()) {
+                    targetIsValid = false
+                    if (!target.delete()) {
                         throw IllegalStateException(
                             "Текущая база повреждена, но её не удалось убрать; резервная копия сохранена: ${backup.absolutePath}",
                             targetFailure
@@ -323,6 +322,12 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                             )
                         }
                         throw IllegalStateException("Резервная копия также не прошла проверку", backupFailure)
+                    }
+                }
+                if (targetIsValid) {
+                    // Never roll back a valid installed database merely because stale-backup cleanup failed.
+                    check(backup.delete()) {
+                        "Текущая база исправна, но не удалось удалить устаревшую резервную копию: ${backup.absolutePath}"
                     }
                 }
             }
