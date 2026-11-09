@@ -43,7 +43,7 @@ def make_db(path, title, version, include_second=False):
         db.execute("INSERT INTO content_release VALUES(1,?)", (title,))
 
 
-def apply_patch(db, patch):
+def apply_patch(db, patch, label):
     delete_order = (
         "cross_references", "document_source_checks", "legal_status_history",
         "articles", "documents", "sources", "content_release"
@@ -72,6 +72,7 @@ def apply_patch(db, patch):
                 )
         db.execute("UPDATE content_metadata SET value=? WHERE key='pack_version'",
                    (str(patch["to_version_code"]),))
+        db.execute("UPDATE content_metadata SET value=? WHERE key='pack_label'", (label,))
         db.execute("PRAGMA foreign_key_check")
 
 
@@ -110,7 +111,7 @@ class DeltaTests(unittest.TestCase):
                 db.execute("INSERT INTO legal_status_history VALUES(1,'law')")
             patch = diff(old, new, 7, 8)
             with sqlite3.connect(old) as actual, sqlite3.connect(new) as expected:
-                apply_patch(actual, patch)
+                apply_patch(actual, patch, 'New')
                 for table in TABLES:
                     self.assertEqual(rows(actual, table), rows(expected, table), table)
                 self.assertEqual(
