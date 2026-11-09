@@ -22,12 +22,18 @@ class LegalCatalogTests(unittest.TestCase):
                 "priority": 1,
                 "content_status": "not_imported",
                 "verification_status": "not_started",
+                "metadata_status": "provisional",
                 "source_search_terms": "поиск тестового акта"
             }]
         }
 
     def test_accepts_unimported_catalog_metadata(self):
         validate_catalog(self.catalog, self.registry)
+
+    def test_verified_metadata_requires_official_reference_url(self):
+        self.catalog["documents"][0]["metadata_status"] = "source_reference_verified"
+        with self.assertRaisesRegex(ValueError, "HTTPS official reference"):
+            validate_catalog(self.catalog, self.registry)
 
     def test_rejects_catalog_that_claims_unverified_text_is_imported(self):
         self.catalog["documents"][0]["content_status"] = "imported"
