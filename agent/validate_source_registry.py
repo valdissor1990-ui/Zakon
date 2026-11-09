@@ -42,7 +42,7 @@ def validate_registry(data: dict) -> None:
     if len(systems) < required_systems:
         raise SystemExit(f"Need at least {required_systems} distinct state-operated information systems")
     if len(operators) < required_operators:
-        raise SystemExit(f"Need at least {required_operators} distinct state operators")
+        raise ValueError(f"Need at least {required_operators} distinct state operators")
     if len(hosts) < required:
         raise SystemExit("Sources must use distinct hostnames for separate system endpoints")
     if rule.get("mismatch_action") != "block_release":
