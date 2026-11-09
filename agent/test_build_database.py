@@ -102,9 +102,9 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
             root = Path(temporary)
             registry_path = root / "registry.json"
             registry_sources = [
-                {"id": "official", "url": "https://publication.example.gov/"},
-                {"id": "bank", "url": "https://lawbank.example.gov/"},
-                {"id": "minjust", "url": "https://minjust.example.gov/"}
+                {"id": "official", "url": "https://publication.example.gov/", "system_id": "publication", "operator_id": "gspi"},
+                {"id": "bank", "url": "https://lawbank.example.gov/", "system_id": "law-bank", "operator_id": "gspi"},
+                {"id": "minjust", "url": "https://minjust.example.gov/", "system_id": "minjust", "operator_id": "minjust"}
             ]
             registry_path.write_text(json.dumps({"sources": registry_sources}), encoding="utf-8")
             records_sources = []
