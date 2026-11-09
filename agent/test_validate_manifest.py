@@ -19,7 +19,10 @@ class ManifestValidationTests(unittest.TestCase):
             db.executescript("""
                 CREATE TABLE documents(id TEXT PRIMARY KEY, title TEXT NOT NULL);
                 CREATE TABLE articles(id TEXT PRIMARY KEY, document_id TEXT, body TEXT);
+                CREATE TABLE content_metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
                 CREATE VIRTUAL TABLE articles_fts USING fts4(article_id, body);
+                INSERT INTO content_metadata VALUES('pack_version', '7');
+                INSERT INTO content_metadata VALUES('pack_label', '1.0.0');
                 INSERT INTO documents VALUES('doc', 'Тестовый документ');
                 INSERT INTO articles VALUES('article', 'doc', 'Тестовая статья');
             """)
@@ -83,6 +86,9 @@ class ManifestValidationTests(unittest.TestCase):
             delta_path = root / "zakon-content.delta.json"
             delta_path.write_text(json.dumps(patch), encoding="utf-8")
             manifest["version_code"] = 8
+            with sqlite3.connect(root / "zakon-content.sqlite") as db:
+                db.execute("UPDATE content_metadata SET value='8' WHERE key='pack_version'")
+            manifest["database"]["sha256"] = hashlib.sha256((root / "zakon-content.sqlite").read_bytes()).hexdigest()
             manifest["delta"] = {
                 "file": delta_path.name,
                 "sha256": hashlib.sha256(delta_path.read_bytes()).hexdigest(),
