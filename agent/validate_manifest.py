@@ -56,6 +56,32 @@ def main() -> int:
         if documents < 1 or articles < 1:
             raise SystemExit("Refusing to publish an empty legal database")
 
+    delta_info = data.get("delta")
+    if delta_info is not None:
+        if not isinstance(delta_info, dict):
+            raise SystemExit("Manifest delta must be an object")
+        delta_file = delta_info.get("file")
+        delta_hash = delta_info.get("sha256")
+        delta_url = urlparse(delta_info.get("download_url", ""))
+        if not delta_file or Path(delta_file).name != str(delta_file):
+            raise SystemExit("Delta file must be a filename inside the manifest directory")
+        if delta_url.scheme != "https" or not delta_url.netloc:
+            raise SystemExit("Manifest delta.download_url must be an HTTPS URL")
+        delta_path = manifest_path.parent / delta_file
+        if not delta_path.is_file():
+            raise SystemExit(f"Delta file not found: {delta_path}")
+        if hashlib.sha256(delta_path.read_bytes()).hexdigest() != delta_hash:
+            raise SystemExit("Delta SHA-256 does not match manifest")
+        patch = json.loads(delta_path.read_text(encoding="utf-8"))
+        if patch.get("schema_version") != 1:
+            raise SystemExit("Unsupported delta schema_version")
+        if patch.get("from_version_code") != delta_info.get("from_version_code"):
+            raise SystemExit("Delta base version does not match manifest")
+        if patch.get("to_version_code") != data["version_code"] or delta_info.get("to_version_code") != data["version_code"]:
+            raise SystemExit("Delta target version does not match manifest version_code")
+        if not isinstance(patch.get("operations"), dict):
+            raise SystemExit("Delta operations must be an object")
+
     print(f"Manifest and SQLite database are valid: {documents} documents, {articles} articles.")
     return 0
 
