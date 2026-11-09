@@ -238,31 +238,36 @@ def build(records_path: Path, output_dir: Path) -> None:
                  article["number"], article.get("title"), article["body"],
                  article.get("effective_from"), article.get("effective_to"))
             )
-        article_by_id = {article["id"]: article for article in articles}
+
+
+    document_ids = {item["id"] for item in documents}
+    article_records = {
+        article["id"]: (document["id"], article["number"])
+        for document in documents for article in document.get("articles", [])
+    }
+    for doc in documents:
+        doc_id = doc["id"]
+        own_article_ids = {article["id"] for article in doc.get("articles", [])}
         for ref in doc.get("cross_references", []):
             from_id = ref.get("from_article_id")
             target_doc = ref.get("to_document_id")
             resolved_id = ref.get("resolved_article_id")
             status = ref.get("resolution_status")
-            if from_id not in article_by_id:
+            if from_id not in own_article_ids:
                 raise ValueError(f"{doc_id}: cross-reference origin must belong to this document")
             if not ref.get("to_article_number") or not ref.get("reference_text"):
                 raise ValueError(f"{doc_id}: cross-reference needs target article number and reference text")
             if status not in {"resolved", "ambiguous", "unresolved"}:
                 raise ValueError(f"{doc_id}: invalid cross-reference resolution_status")
-            if target_doc is not None and target_doc not in {item["id"] for item in documents}:
+            if target_doc is not None and target_doc not in document_ids:
                 raise ValueError(f"{doc_id}: cross-reference target document is absent from this release")
             if status == "resolved":
-                if not resolved_id:
-                    raise ValueError(f"{doc_id}: resolved cross-reference has no resolved_article_id")
-                target_article = db.execute(
-                    "SELECT document_id, number FROM articles WHERE id=?", (resolved_id,)
-                ).fetchone()
-                if target_article is None:
+                if not resolved_id or resolved_id not in article_records:
                     raise ValueError(f"{doc_id}: resolved cross-reference target article does not exist")
-                if target_doc is not None and target_article[0] != target_doc:
+                resolved_doc, resolved_number = article_records[resolved_id]
+                if target_doc is not None and resolved_doc != target_doc:
                     raise ValueError(f"{doc_id}: resolved cross-reference points outside to_document_id")
-                if target_article[1] != ref["to_article_number"]:
+                if resolved_number != ref["to_article_number"]:
                     raise ValueError(f"{doc_id}: resolved cross-reference article number does not match target")
             elif resolved_id is not None:
                 raise ValueError(f"{doc_id}: only resolved cross-references may set resolved_article_id")
