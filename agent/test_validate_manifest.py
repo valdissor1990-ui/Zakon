@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Regression tests for approved content release manifests."""
+import base64
 import hashlib
+import re
 import json
 import sqlite3
 import subprocess
@@ -86,6 +88,17 @@ class ManifestValidationTests(unittest.TestCase):
             path, _, public_key, _ = self._fixture(Path(temporary))
             result = self._validate(path, public_key)
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+    def test_android_embedded_key_matches_publisher_public_pem(self):
+        root = Path(__file__).resolve().parents[1]
+        app_source = (root / "app/src/main/java/ru/zakon/app/ContentUpdate.kt").read_text(encoding="utf-8")
+        match = re.search(r'CONTENT_SIGNING_PUBLIC_KEY_BASE64\s*=\s*"([^"]+)"', app_source)
+        self.assertIsNotNone(match, "Android publisher public key constant was not found")
+        public_der = subprocess.run(
+            ["openssl", "pkey", "-pubin", "-in", str(root / "content/signing/public.pem"), "-outform", "DER"],
+            capture_output=True, check=True
+        ).stdout
+        self.assertEqual(base64.b64decode(match.group(1)), public_der)
 
     def test_accepts_version_bound_delta(self):
         with tempfile.TemporaryDirectory() as temporary:
