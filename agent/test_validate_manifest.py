@@ -83,6 +83,26 @@ class ManifestValidationTests(unittest.TestCase):
             capture_output=True, text=True, check=False
         )
 
+    def test_rejects_boolean_version_code(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path, manifest, public_key, private_key = self._fixture(root)
+            manifest["version_code"] = True
+            self._write_and_sign(path, manifest, private_key)
+            result = self._validate(path, public_key)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("version_code", result.stderr)
+
+    def test_rejects_boolean_schema_version(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path, manifest, public_key, private_key = self._fixture(root)
+            manifest["schema_version"] = True
+            self._write_and_sign(path, manifest, private_key)
+            result = self._validate(path, public_key)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("schema_version", result.stderr)
+
     def test_accepts_valid_manifest_and_sqlite(self):
         with tempfile.TemporaryDirectory() as temporary:
             path, _, public_key, _ = self._fixture(Path(temporary))
