@@ -1,0 +1,167 @@
+{
+  "catalog_version": 1,
+  "jurisdiction": "RU",
+  "scope": "Federal foundational legislation for the first staged content releases",
+  "content_policy": "Catalog metadata is not legal text. No item may enter the SQLite release until its current official text, revision history, effective dates and source evidence have been captured and manually approved.",
+  "sources": [
+    "pravo_official_publication",
+    "pravo_law_bank",
+    "minjust_npa"
+  ],
+  "documents": [
+    {
+      "id": "ru-constitution-1993",
+      "title": "Конституция Российской Федерации",
+      "document_type": "constitution",
+      "adopted_at": "1993-12-12",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Конституция Российской Федерации текст с изменениями 2020",
+      "notes": "Дата принятия указана как дата всенародного голосования; не трактовать как номер федерального закона."
+    },
+    {
+      "id": "ru-civil-code-part-1",
+      "title": "Гражданский кодекс Российской Федерации. Часть первая",
+      "document_type": "code",
+      "number": "51-ФЗ",
+      "adopted_at": "1994-11-30",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 30.11.1994 51-ФЗ Гражданский кодекс часть первая"
+    },
+    {
+      "id": "ru-civil-code-part-2",
+      "title": "Гражданский кодекс Российской Федерации. Часть вторая",
+      "document_type": "code",
+      "number": "14-ФЗ",
+      "adopted_at": "1996-01-26",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 26.01.1996 14-ФЗ Гражданский кодекс часть вторая"
+    },
+    {
+      "id": "ru-civil-code-part-3",
+      "title": "Гражданский кодекс Российской Федерации. Часть третья",
+      "document_type": "code",
+      "number": "146-ФЗ",
+      "adopted_at": "2001-11-26",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 26.11.2001 146-ФЗ Гражданский кодекс часть третья"
+    },
+    {
+      "id": "ru-civil-code-part-4",
+      "title": "Гражданский кодекс Российской Федерации. Часть четвертая",
+      "document_type": "code",
+      "number": "230-ФЗ",
+      "adopted_at": "2006-12-18",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 18.12.2006 230-ФЗ Гражданский кодекс часть четвертая"
+    },
+    {
+      "id": "ru-criminal-code",
+      "title": "Уголовный кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "63-ФЗ",
+      "adopted_at": "1996-06-13",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 13.06.1996 63-ФЗ Уголовный кодекс Российской Федерации"
+    },
+    {
+      "id": "ru-code-of-administrative-offences",
+      "title": "Кодекс Российской Федерации об административных правонарушениях",
+      "document_type": "code",
+      "number": "195-ФЗ",
+      "adopted_at": "2001-12-30",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 30.12.2001 195-ФЗ КоАП РФ"
+    },
+    {
+      "id": "ru-criminal-procedure-code",
+      "title": "Уголовно-процессуальный кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "174-ФЗ",
+      "adopted_at": "2001-12-18",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 18.12.2001 174-ФЗ УПК РФ"
+    },
+    {
+      "id": "ru-civil-procedure-code",
+      "title": "Гражданский процессуальный кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "138-ФЗ",
+      "adopted_at": "2002-11-14",
+      "priority": 1,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 14.11.2002 138-ФЗ ГПК РФ"
+    },
+    {
+      "id": "ru-arbitration-procedure-code",
+      "title": "Арбитражный процессуальный кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "95-ФЗ",
+      "adopted_at": "2002-07-24",
+      "priority": 2,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 24.07.2002 95-ФЗ АПК РФ"
+    },
+    {
+      "id": "ru-labour-code",
+      "title": "Трудовой кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "197-ФЗ",
+      "adopted_at": "2001-12-30",
+      "priority": 2,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 30.12.2001 197-ФЗ Трудовой кодекс РФ"
+    },
+    {
+      "id": "ru-family-code",
+      "title": "Семейный кодекс Российской Федерации",
+      "document_type": "code",
+      "number": "223-ФЗ",
+      "adopted_at": "1995-12-29",
+      "priority": 2,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 29.12.1995 223-ФЗ Семейный кодекс РФ"
+    },
+    {
+      "id": "ru-tax-code-part-1",
+      "title": "Налоговый кодекс Российской Федерации. Часть первая",
+      "document_type": "code",
+      "number": "146-ФЗ",
+      "adopted_at": "1998-07-31",
+      "priority": 2,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 31.07.1998 146-ФЗ Налоговый кодекс часть первая"
+    },
+    {
+      "id": "ru-tax-code-part-2",
+      "title": "Налоговый кодекс Российской Федерации. Часть вторая",
+      "document_type": "code",
+      "number": "117-ФЗ",
+      "adopted_at": "2000-08-05",
+      "priority": 2,
+      "content_status": "not_imported",
+      "verification_status": "not_started",
+      "source_search_terms": "Федеральный закон 05.08.2000 117-ФЗ Налоговый кодекс часть вторая"
+    }
+  ]
+}
