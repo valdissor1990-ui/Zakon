@@ -68,6 +68,80 @@ private fun readBounded(input: java.io.InputStream, maxBytes: Int): ByteArray {
 private fun gunzipBounded(bytes: ByteArray, maxBytes: Int): ByteArray =
     java.util.zip.GZIPInputStream(bytes.inputStream()).use { readBounded(it, maxBytes) }
 
+private fun httpDownloadToFile(
+    url: String,
+    target: java.io.File,
+    maxBytes: Long,
+    expectedSha256: String
+) {
+    var current = URL(url)
+    require(current.protocol.equals("https", ignoreCase = true)) {
+        "Загрузка правовой базы разрешена только по HTTPS"
+    }
+    require(expectedSha256.matches(Regex("^[0-9a-fA-F]{64}$"))) {
+        "В manifest указан некорректный SHA-256 базы"
+    }
+    val parent = requireNotNull(target.parentFile) { "Не удалось определить каталог загрузки" }
+    check(parent.exists() || parent.mkdirs()) { "Не удалось создать каталог загрузки" }
+    val temporary = java.io.File(parent, target.name + ".part")
+    try {
+        repeat(6) { redirectCount ->
+            val conn = (current.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 20_000
+                readTimeout = 60_000
+                requestMethod = "GET"
+                instanceFollowRedirects = false
+            }
+            try {
+                val code = conn.responseCode
+                if (code in 300..399) {
+                    require(redirectCount < 5) { "Слишком много перенаправлений при загрузке базы" }
+                    val location = conn.getHeaderField("Location")
+                        ?: error("Сервер вернул перенаправление без адреса")
+                    val next = URL(current, location)
+                    require(next.protocol.equals("https", ignoreCase = true) &&
+                        next.userInfo == null
+                    ) { "Запрещено перенаправление загрузки правовой базы на небезопасный адрес" }
+                    current = next
+                } else {
+                    if (code !in 200..299) error("HTTP $code")
+                    val contentLength = conn.contentLengthLong
+                    require(contentLength < 0L || contentLength <= maxBytes) {
+                        "Загружаемый файл превышает допустимый размер"
+                    }
+                    val digest = MessageDigest.getInstance("SHA-256")
+                    var total = 0L
+                    conn.inputStream.use { input ->
+                        temporary.outputStream().buffered().use { output ->
+                            val buffer = ByteArray(64 * 1024)
+                            while (true) {
+                                val count = input.read(buffer)
+                                if (count < 0) break
+                                total += count
+                                require(total <= maxBytes) { "Загружаемый файл превышает допустимый размер" }
+                                digest.update(buffer, 0, count)
+                                output.write(buffer, 0, count)
+                            }
+                        }
+                    }
+                    val actualSha = digest.digest().joinToString("") { "%02x".format(it) }
+                    require(actualSha.equals(expectedSha256, ignoreCase = true)) {
+                        "SHA-256 базы не совпал"
+                    }
+                    if (target.exists()) check(target.delete()) { "Не удалось заменить временный файл базы" }
+                    check(temporary.renameTo(target)) { "Не удалось сохранить загруженный файл базы" }
+                    return
+                }
+            } finally {
+                conn.disconnect()
+            }
+        }
+        error("Не удалось завершить перенаправление загрузки")
+    } finally {
+        temporary.delete()
+    }
+}
+
 private fun copyBounded(input: java.io.InputStream, output: java.io.OutputStream, maxBytes: Long) {
     val buffer = ByteArray(8192)
     var total = 0L
@@ -254,25 +328,31 @@ private fun ContentUpdateSection(store: LegalStore) {
                     }
 
                     if (!databaseUrl.isNullOrBlank()) {
-                        val downloaded = httpGetBytes(databaseUrl, 256 * 1024 * 1024)
                         require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
-                        require(sha256Hex(downloaded) == expectedSha) { "SHA-256 базы не совпал" }
+                        val downloadedFile = java.io.File(context.cacheDir, "zakon-content-download.bin")
                         val sqliteFile = java.io.File(context.cacheDir, "zakon-content-install.sqlite")
                         try {
-                            val isGzip = downloaded.size >= 2 &&
-                                downloaded[0] == 0x1f.toByte() && downloaded[1] == 0x8b.toByte()
-                            if (isGzip) {
-                                java.util.zip.GZIPInputStream(downloaded.inputStream()).use { input ->
-                                    sqliteFile.outputStream().use { output ->
-                                        copyBounded(input, output, 512L * 1024 * 1024)
+                            httpDownloadToFile(
+                                databaseUrl,
+                                downloadedFile,
+                                256L * 1024 * 1024,
+                                expectedSha
+                            )
+                            java.io.BufferedInputStream(downloadedFile.inputStream()).use { buffered ->
+                                buffered.mark(2)
+                                val isGzip = buffered.read() == 0x1f && buffered.read() == 0x8b
+                                buffered.reset()
+                                val input = if (isGzip) java.util.zip.GZIPInputStream(buffered) else buffered
+                                input.use {
+                                    sqliteFile.outputStream().buffered().use { output ->
+                                        copyBounded(it, output, 512L * 1024 * 1024)
                                     }
                                 }
-                            } else {
-                                sqliteFile.outputStream().use { output -> output.write(downloaded) }
                             }
                             store.installDatabaseFile(sqliteFile, version, label)
                             "Правовая база установлена: v$version."
                         } finally {
+                            downloadedFile.delete()
                             sqliteFile.delete()
                         }
                     } else {
