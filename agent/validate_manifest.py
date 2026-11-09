@@ -19,8 +19,8 @@ def main() -> int:
         raise SystemExit(f"Manifest is missing fields: {', '.join(missing)}")
     if data["schema_version"] != 1:
         raise SystemExit("Unsupported manifest schema_version")
-    if not isinstance(data["version_code"], int) or data["version_code"] < 1:
-        raise SystemExit("version_code must be a positive integer")
+    if not isinstance(data["version_code"], int) or data["version_code"] < 7:
+        raise SystemExit("version_code must be >= 7 for migration from legacy JSON packs")
     db_info = data["database"]
     if not isinstance(db_info, dict) or not db_info.get("file") or not db_info.get("sha256"):
         raise SystemExit("Manifest database.file and database.sha256 are required")
