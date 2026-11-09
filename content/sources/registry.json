@@ -32,17 +32,15 @@
     {
       "id": "minjust_npa",
       "name": "Портал Минюста России «Нормативные правовые акты в Российской Федерации»",
-      "url": "https://minjust.gov.ru/ru/appeals/faq/605/",
+      "url": "https://pravo.minjust.ru/",
       "publisher": "Министерство юстиции Российской Федерации",
       "role": "independent_state_cross_check",
-      "authority": "state_reference_database",
+      "authority": "official_minjust_state_portal",
       "use_for": [
-        "document_metadata",
+        "federal_and_regional_npa_cross_check",
         "systematized_text_cross_check",
         "registration_metadata"
-      ],
-      "access_url": "http://pravo-minjust.ru/",
-      "access_note": "Адрес портала указан на официальном сайте Минюста; веб-доступ к самому порталу может быть нестабильным. HTTPS-страница Минюста используется как подтверждение источника."
+      ]
     }
   ],
   "publication_rule": {
