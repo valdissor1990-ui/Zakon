@@ -473,7 +473,7 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ответственность по ${code.shortName}", color = TextOnLight, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         if (code.liabilityItems.isEmpty()) {
-            Text("Раздел в подготовке.", color = TextMutedOnLight)
+            Text("Материалы будут доступны после публикации и загрузки проверенной правовой базы.", color = TextMutedOnLight)
         } else {
             code.liabilityItems.forEach { item ->
                 Column(
