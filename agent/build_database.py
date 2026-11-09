@@ -129,7 +129,8 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: primary source must be included in source_checks")
         if any(key not in source_ids or key not in registry_sources for key in checked_keys):
             raise ValueError(f"{doc_id}: a checked source is not registered or not captured")
-        hosts = {urlparse(registry_sources[key]["url"]).netloc.lower() for key in checked_keys}
+        source_by_key = {source["key"]: source for source in source_rows}
+        hosts = {urlparse(source_by_key[key]["official_url"]).netloc.lower() for key in checked_keys}
         if len(hosts) < 3:
             raise ValueError(f"{doc_id}: checks must cover three distinct source hosts")
         if any(item.get("status") != "match" for item in checks):
