@@ -13,15 +13,20 @@ class SourceRegistryPolicyTests(unittest.TestCase):
         self.registry = {
             "sources": [
                 {"id": "a", "url": "https://a.gov.ru/", "publisher": "State A",
-                 "authority": "official", "role": "publication", "state_operated": True},
+                 "authority": "official", "role": "publication", "state_operated": True,
+                 "system_id": "publication", "operator_id": "gspi"},
                 {"id": "b", "url": "https://b.gov.ru/", "publisher": "State B",
-                 "authority": "official", "role": "consolidated", "state_operated": True},
+                 "authority": "official", "role": "consolidated", "state_operated": True,
+                 "system_id": "law-bank", "operator_id": "gspi"},
                 {"id": "c", "url": "https://c.gov.ru/", "publisher": "State C",
-                 "authority": "official", "role": "cross-check", "state_operated": True},
+                 "authority": "official", "role": "cross-check", "state_operated": True,
+                 "system_id": "minjust", "operator_id": "minjust"},
             ],
             "publication_rule": {
                 "minimum_distinct_sources": 3,
                 "minimum_state_operated_sources": 3,
+                "minimum_distinct_systems": 3,
+                "minimum_distinct_operators": 2,
                 "mismatch_action": "block_release",
                 "never_generate_missing_legal_text": True,
             },
@@ -38,6 +43,11 @@ class SourceRegistryPolicyTests(unittest.TestCase):
     def test_rejects_duplicate_hostnames(self):
         self.registry["sources"][2]["url"] = "https://a.gov.ru/other"
         with self.assertRaisesRegex(SystemExit, "distinct hostnames"):
+            validate_registry(self.registry)
+
+    def test_rejects_sources_from_too_few_operators(self):
+        self.registry["sources"][2]["operator_id"] = "gspi"
+        with self.assertRaisesRegex(ValueError, "distinct state operators"):
             validate_registry(self.registry)
 
     def test_rejects_policy_that_allows_generated_text(self):
