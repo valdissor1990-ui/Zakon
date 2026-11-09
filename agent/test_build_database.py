@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Regression tests for safe content database generation."""
 import json
+import sqlite3
 import sys
 import tempfile
 import unittest
