@@ -77,12 +77,22 @@ def main() -> int:
         patch = json.loads(delta_path.read_text(encoding="utf-8"))
         if patch.get("schema_version") != 1:
             raise SystemExit("Unsupported delta schema_version")
-        if patch.get("from_version_code") != delta_info.get("from_version_code"):
+        from_code = patch.get("from_version_code")
+        to_code = patch.get("to_version_code")
+        if not isinstance(from_code, int) or from_code <= 0 or from_code >= data["version_code"]:
+            raise SystemExit("Delta base version must be positive and lower than target version")
+        if from_code != delta_info.get("from_version_code"):
             raise SystemExit("Delta base version does not match manifest")
-        if patch.get("to_version_code") != data["version_code"] or delta_info.get("to_version_code") != data["version_code"]:
+        if to_code != data["version_code"] or delta_info.get("to_version_code") != data["version_code"]:
             raise SystemExit("Delta target version does not match manifest version_code")
-        if not isinstance(patch.get("operations"), dict):
-            raise SystemExit("Delta operations must be an object")
+        operations = patch.get("operations")
+        allowed_tables = {"sources", "documents", "articles", "document_source_checks",
+                           "cross_references", "legal_status_history", "content_release"}
+        if not isinstance(operations, dict) or not set(operations).issubset(allowed_tables):
+            raise SystemExit("Delta operations contain an invalid table")
+        for table, change in operations.items():
+            if not isinstance(change, dict) or not isinstance(change.get("delete", []), list) or not isinstance(change.get("upsert", []), list):
+                raise SystemExit(f"Delta operations for {table} have an invalid shape")
 
     signature_info = data.get("signature")
     if data["validation"].get("status") == "validated":
