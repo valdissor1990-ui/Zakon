@@ -279,7 +279,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 if (c.moveToFirst()) c.getString(0) else "no result"
             }
             require(integrity == "ok") { "Проверка целостности SQLite не пройдена: $integrity" }
-            for (table in listOf("documents", "articles", "articles_fts")) {
+            for (table in listOf("documents", "articles", "articles_fts", "content_metadata")) {
                 db.rawQuery(
                     "SELECT 1 FROM sqlite_master WHERE type IN ('table','view') AND name=?",
                     arrayOf(table)
@@ -344,7 +344,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val db = writableDatabase
 
         // A delta is accepted only for the complete content schema, not the legacy lightweight DB.
-        for (table in tables.keys) {
+        for (table in tables.keys + "content_metadata") {
             db.rawQuery(
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
                 arrayOf(table)
@@ -405,6 +405,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                         "Обновление нарушает связи между правовыми документами"
                     }
                 }
+                if (version > 0) writeContentMetadata(db, version, label)
                 db.setTransactionSuccessful()
             } finally {
                 db.endTransaction()
@@ -494,7 +495,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             db.endTransaction()
         }
 
-        if (version > 0) setInstalledPack(version, label)
+        if (version > 0) metaPrefs.edit().putInt("pack_version", version).putString("pack_label", label).apply()
         return PackImportResult(version, label, docCount, artCount)
     }
 }
