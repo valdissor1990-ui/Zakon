@@ -281,7 +281,10 @@ private fun ContentUpdateSection(store: LegalStore) {
                         )
                     )
                     require(version > 0) { "В manifest отсутствует корректная версия контента" }
-                    val label = manifest.optString("label", manifest.optString("effective_as_of", ""))
+                    val label = manifest.optString(
+                        "content_version",
+                        manifest.optString("label", manifest.optString("effective_as_of", ""))
+                    )
                     val databaseUrl = database?.optString("download_url")
                         ?.takeIf { it.isNotBlank() }
                         ?: database?.optString("url")?.takeIf { it.isNotBlank() }
