@@ -42,7 +42,7 @@ data class PackImportResult(
     val articlesUpserted: Int
 )
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-local.db", null, 7) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-local.db", null, 8) {
 
     private val appContext = context.applicationContext
     private val metaPrefs = appContext.getSharedPreferences("zakon_content_meta", Context.MODE_PRIVATE)
@@ -69,6 +69,11 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             )
         }
         if (oldVersion < 7) {
+            seedFromAssetsOrFallback(db)
+        }
+        if (oldVersion < 8) {
+            db.execSQL("DELETE FROM articles WHERE document_id IN ('koap','const')")
+            db.execSQL("DELETE FROM documents WHERE id IN ('koap','const')")
             seedFromAssetsOrFallback(db)
         }
     }
