@@ -20,9 +20,9 @@ def main() -> int:
     missing = [key for key in REQUIRED if key not in data]
     if missing:
         raise SystemExit(f"Manifest is missing fields: {', '.join(missing)}")
-    if data["schema_version"] != 1:
+    if isinstance(data["schema_version"], bool) or data["schema_version"] != 1:
         raise SystemExit("Unsupported manifest schema_version")
-    if not isinstance(data["version_code"], int) or data["version_code"] < 7:
+    if isinstance(data["version_code"], bool) or not isinstance(data["version_code"], int) or data["version_code"] < 7:
         raise SystemExit("version_code must be >= 7 for migration from legacy JSON packs")
     db_info = data["database"]
     if not isinstance(db_info, dict) or not db_info.get("file") or not db_info.get("sha256"):
@@ -93,11 +93,11 @@ def main() -> int:
             raise SystemExit("Unsupported delta schema_version")
         from_code = patch.get("from_version_code")
         to_code = patch.get("to_version_code")
-        if not isinstance(from_code, int) or from_code <= 0 or from_code >= data["version_code"]:
+        if isinstance(from_code, bool) or not isinstance(from_code, int) or from_code <= 0 or from_code >= data["version_code"]:
             raise SystemExit("Delta base version must be positive and lower than target version")
         if from_code != delta_info.get("from_version_code"):
             raise SystemExit("Delta base version does not match manifest")
-        if to_code != data["version_code"] or delta_info.get("to_version_code") != data["version_code"]:
+        if isinstance(to_code, bool) or not isinstance(to_code, int) or to_code != data["version_code"] or isinstance(delta_info.get("to_version_code"), bool) or delta_info.get("to_version_code") != data["version_code"]:
             raise SystemExit("Delta target version does not match manifest version_code")
         operations = patch.get("operations")
         allowed_tables = {"sources", "documents", "articles", "document_source_checks",
