@@ -405,7 +405,6 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                         "Обновление нарушает связи между правовыми документами"
                     }
                 }
-                writeContentMetadata(db, toVersion, label)
                 db.setTransactionSuccessful()
             } finally {
                 db.endTransaction()
