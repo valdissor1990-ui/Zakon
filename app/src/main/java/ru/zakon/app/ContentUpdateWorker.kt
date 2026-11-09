@@ -27,8 +27,6 @@ class ContentUpdateWorker(
             Result.success()
         } catch (_: IOException) {
             Result.retry()
-        } catch (_: java.net.SocketTimeoutException) {
-            Result.retry()
         } catch (_: Exception) {
             // Invalid signatures, malformed releases and incompatible content must not be retried endlessly.
             Result.failure()
