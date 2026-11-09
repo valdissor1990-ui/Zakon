@@ -12,12 +12,16 @@ def validate_registry(data: dict) -> None:
     rule = data.get("publication_rule", {})
     required = int(rule.get("minimum_distinct_sources", 3))
     required_state = int(rule.get("minimum_state_operated_sources", required))
+    required_systems = int(rule.get("minimum_distinct_systems", required))
+    required_operators = int(rule.get("minimum_distinct_operators", 2))
     if len(sources) < required:
         raise ValueError(f"Need at least {required} registered sources")
     ids = [item.get("id") for item in sources]
     if len(set(ids)) != len(ids) or any(not value for value in ids):
         raise SystemExit("Source IDs must be present and unique")
     hosts = set()
+    systems = set()
+    operators = set()
     state_sources = 0
     for item in sources:
         parsed = urlparse(item.get("url", ""))
@@ -27,12 +31,20 @@ def validate_registry(data: dict) -> None:
             raise ValueError(f"Source {item.get('id')} is missing provenance metadata")
         if item.get("state_operated") is not True:
             raise ValueError(f"Source {item.get('id')} is not explicitly marked as state-operated")
+        if not item.get("system_id") or not item.get("operator_id"):
+            raise ValueError(f"Source {item.get('id')} is missing system_id/operator_id provenance")
         state_sources += 1
+        systems.add(item["system_id"])
+        operators.add(item["operator_id"])
         hosts.add(parsed.netloc.lower())
     if state_sources < required_state:
         raise ValueError(f"Need at least {required_state} state-operated sources")
+    if len(systems) < required_systems:
+        raise SystemExit(f"Need at least {required_systems} distinct state-operated information systems")
+    if len(operators) < required_operators:
+        raise SystemExit(f"Need at least {required_operators} distinct state operators")
     if len(hosts) < required:
-        raise SystemExit("Sources must use distinct hostnames to provide independent cross-checks")
+        raise SystemExit("Sources must use distinct hostnames for separate system endpoints")
     if rule.get("mismatch_action") != "block_release":
         raise SystemExit("A source mismatch must block publication")
     if rule.get("never_generate_missing_legal_text") is not True:
