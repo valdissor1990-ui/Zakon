@@ -3,6 +3,7 @@
 import hashlib
 import json
 import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
@@ -13,7 +14,8 @@ REQUIRED = ("schema_version", "version_code", "content_version", "created_at",
 
 def main() -> int:
     manifest_path = Path(sys.argv[1] if len(sys.argv) > 1 else "../content/manifest.example.json")
-    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    default_key = Path(__file__).resolve().parents[1] / "content" / "signing" / "public.pem"
+    public_key_path = Path(sys.argv[2]) if len(sys.argv) > 2 else default_key    data = json.loads(manifest_path.read_text(encoding="utf-8"))
     missing = [key for key in REQUIRED if key not in data]
     if missing:
         raise SystemExit(f"Manifest is missing fields: {', '.join(missing)}")
@@ -81,6 +83,31 @@ def main() -> int:
             raise SystemExit("Delta target version does not match manifest version_code")
         if not isinstance(patch.get("operations"), dict):
             raise SystemExit("Delta operations must be an object")
+
+    signature_info = data.get("signature")
+    if data["validation"].get("status") == "validated":
+        if not isinstance(signature_info, dict):
+            raise SystemExit("A validated manifest must contain a publisher signature")
+        if signature_info.get("algorithm") != "SHA256withRSA":
+            raise SystemExit("Unsupported publisher signature algorithm")
+        signature_file = signature_info.get("file", "manifest.sig")
+        if Path(signature_file).name != str(signature_file):
+            raise SystemExit("Signature file must be inside the manifest directory")
+        signature_url = urlparse(signature_info.get("download_url", ""))
+        if signature_url.scheme != "https" or not signature_url.netloc:
+            raise SystemExit("Manifest signature.download_url must be an HTTPS URL")
+        signature_path = manifest_path.parent / signature_file
+        if not signature_path.is_file():
+            raise SystemExit(f"Manifest signature file not found: {signature_path}")
+        if not public_key_path.is_file():
+            raise SystemExit(f"Publisher public key not found: {public_key_path}")
+        verification = subprocess.run(
+            ["openssl", "dgst", "-sha256", "-verify", str(public_key_path),
+             "-signature", str(signature_path), str(manifest_path)],
+            capture_output=True, text=True, check=False
+        )
+        if verification.returncode != 0:
+            raise SystemExit("Publisher signature verification failed: " + verification.stderr.strip())
 
     print(f"Manifest and SQLite database are valid: {documents} documents, {articles} articles.")
     return 0
