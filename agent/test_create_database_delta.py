@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import sqlite3
 import tempfile
 import unittest
@@ -17,6 +16,7 @@ CREATE TABLE legal_status_history(id INTEGER PRIMARY KEY, document_id TEXT REFER
 CREATE TABLE content_release(id INTEGER PRIMARY KEY, version TEXT UNIQUE);
 """
 
+
 def make_db(path, title, include_second=False):
     with sqlite3.connect(path) as db:
         db.executescript(SCHEMA)
@@ -26,6 +26,7 @@ def make_db(path, title, include_second=False):
         if include_second:
             db.execute("INSERT INTO articles VALUES('a2','law','a1',2,'Text two')")
         db.execute("INSERT INTO content_release VALUES(1,?)", (title,))
+
 
 class DeltaTests(unittest.TestCase):
     def test_delta_contains_only_changed_rows_and_versions(self):
@@ -49,6 +50,29 @@ class DeltaTests(unittest.TestCase):
             make_db(new, "New")
             with self.assertRaises(ValueError):
                 diff(old, new, 8, 8)
+
+    def test_rejects_schema_change_and_requires_full_database(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            old, new = root / "old.db", root / "new.db"
+            make_db(old, "Old")
+            make_db(new, "New")
+            with sqlite3.connect(new) as db:
+                db.execute("ALTER TABLE articles ADD COLUMN new_field TEXT")
+            with self.assertRaisesRegex(ValueError, "different SQLite schemas"):
+                diff(old, new, 7, 8)
+
+    def test_rejects_foreign_key_corruption(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            old, new = root / "old.db", root / "new.db"
+            make_db(old, "Old")
+            make_db(new, "New")
+            with sqlite3.connect(new) as db:
+                db.execute("INSERT INTO articles VALUES('broken','missing',NULL,2,'bad')")
+            with self.assertRaisesRegex(ValueError, "foreign-key violations"):
+                diff(old, new, 7, 8)
+
 
 if __name__ == "__main__":
     unittest.main()
