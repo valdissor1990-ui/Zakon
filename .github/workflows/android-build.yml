@@ -29,6 +29,13 @@ jobs:
           gradle-version: "8.13"
       - name: Run Android tests, lint and build
         run: gradle testDebugUnitTest lintDebug assembleDebug
+      - name: Run database migration tests on Android 8 (API 26)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 26
+          arch: x86_64
+          profile: pixel_2
+          script: gradle connectedDebugAndroidTest
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk Zakon-debug.apk
       - uses: actions/upload-artifact@v7
