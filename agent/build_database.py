@@ -162,6 +162,12 @@ def build(records_path: Path, output_dir: Path) -> None:
         registry_ids = {source_by_key[key].get("registry_id", key) for key in checked_keys}
         if len(registry_ids) < 3:
             raise ValueError(f"{doc_id}: checks must use three distinct registered state sources")
+        system_ids = {registry_sources[source_id].get("system_id") for source_id in registry_ids}
+        operator_ids = {registry_sources[source_id].get("operator_id") for source_id in registry_ids}
+        if None in system_ids or len(system_ids) < 3:
+            raise ValueError(f"{doc_id}: checks must cover three distinct state-operated information systems")
+        if None in operator_ids or len(operator_ids) < 2:
+            raise ValueError(f"{doc_id}: checks must cover at least two distinct state operators")
         if len(hosts) < 3:
             raise ValueError(f"{doc_id}: checks must cover three distinct source hosts")
         if any(item.get("status") != "match" for item in checks):
