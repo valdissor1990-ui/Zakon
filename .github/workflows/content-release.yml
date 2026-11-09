@@ -7,14 +7,15 @@ on:
         required: true
         type: string
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: legal-content-release
   cancel-in-progress: false
+
 jobs:
-  build-and-publish:
+  prepare-candidate:
+    name: Build and validate release candidate
     runs-on: ubuntu-latest
-    environment: legal-content-approval
     steps:
       - uses: actions/checkout@v7
         with:
@@ -22,20 +23,76 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Validate source registry and tests
+      - name: Validate source registry, catalog and tests
         run: |
+          set -euo pipefail
           python -m py_compile agent/*.py
           python agent/validate_source_registry.py
+          python agent/validate_catalog.py
           python -m unittest discover -s agent -p "test_*.py"
-      - name: Build reviewed SQLite database
+      - name: Build draft SQLite release candidate
         env:
           RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
+          set -euo pipefail
           test -f content/records/records.json || {
             echo "::error::content/records/records.json is missing. No legal content will be fabricated."
             exit 1
           }
           python agent/build_database.py --records content/records/records.json --output dist/content
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          path = Path("dist/content/manifest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          if data["content_version"] != os.environ["RELEASE_VERSION"]:
+              raise SystemExit("workflow release_version must match records.release.version")
+          if data["validation"]["status"] != "draft":
+              raise SystemExit("Candidate must remain draft until environment approval")
+          print("Candidate prepared:", data["content_version"], "version_code", data["version_code"])
+          PY
+      - name: Upload immutable release candidate for reviewer inspection
+        uses: actions/upload-artifact@v7
+        with:
+          name: legal-content-candidate
+          path: dist/content/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Add reviewer instructions
+        run: |
+          {
+            echo "## Правовая база — кандидат выпуска"
+            echo ""
+            echo "Сформирован черновой SQLite-пакет. Он ещё не опубликован и не имеет статуса validated."
+            echo "Перед одобрением проверьте артефакт **legal-content-candidate** в этом запуске Actions."
+            echo "После этого отдельная job ожидает подтверждения в GitHub Environment legal-content-approval."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  approve-and-publish:
+    name: Approve, sign and publish
+    needs: prepare-candidate
+    runs-on: ubuntu-latest
+    environment: legal-content-approval
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v7
+        with:
+          name: legal-content-candidate
+          path: dist/content
+      - name: Validate candidate identity and mark reviewed database
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
           python - <<'PY'
           import hashlib
           import json
@@ -46,11 +103,12 @@ jobs:
           path = Path("dist/content/manifest.json")
           data = json.loads(path.read_text(encoding="utf-8"))
           if data["content_version"] != os.environ["RELEASE_VERSION"]:
-              raise SystemExit("workflow release_version must match records.release.version")
-
-          # The job runs only after the required GitHub Environment reviewers approve it.
-          # Keep the approval state consistent inside SQLite and in the signed manifest.
+              raise SystemExit("Candidate content_version does not match requested release")
+          if data["validation"].get("status") != "draft":
+              raise SystemExit("Only a draft candidate can enter the approval/publish job")
           database_path = path.parent / data["database"]["file"]
+          if hashlib.sha256(database_path.read_bytes()).hexdigest() != data["database"]["sha256"]:
+              raise SystemExit("Candidate SQLite SHA-256 changed after preparation")
           with sqlite3.connect(database_path) as db:
               cursor = db.execute(
                   "UPDATE content_release SET status='validated' WHERE version=? AND status='draft'",
@@ -84,9 +142,9 @@ jobs:
             echo "No previous manifest; this will be a full database release."
             exit 0
           fi
-          PREVIOUS_STATUS=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')) .get('validation',{}).get('status','draft'))")
+          PREVIOUS_STATUS=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('validation',{}).get('status','draft'))")
           PREVIOUS_VERSION=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('content_version',''))")
-          PREVIOUS_CODE=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('version_code',0))")
+          PREVIOUS_CODE=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('version_code',json.load(open('$PREVIOUS_MANIFEST')).get('version',0)))")
           if [ "$PREVIOUS_STATUS" != "validated" ] || [ -z "$PREVIOUS_VERSION" ] || [ "$PREVIOUS_CODE" -le 0 ]; then
             echo "No previous validated release; publishing full database only."
             exit 0
@@ -111,7 +169,7 @@ jobs:
             --base dist/previous/zakon-content.sqlite \
             --target dist/content/zakon-content.sqlite \
             --from-version "$PREVIOUS_CODE" \
-            --to-version "$(python -c "import json; print(json.load(open('dist/content/manifest.json'))['version_code'])")" \
+            --to-version "$CURRENT_CODE" \
             --output dist/content/zakon-content.delta.json; then
             echo "::warning::Delta could not be generated safely; publishing the validated full database only."
             rm -f dist/content/zakon-content.delta.json
@@ -122,7 +180,6 @@ jobs:
           import json
           import os
           from pathlib import Path
-
           root = Path("dist/content")
           manifest_path = root / "manifest.json"
           patch_path = root / "zakon-content.delta.json"
@@ -155,7 +212,7 @@ jobs:
           openssl dgst -sha256 -verify content/signing/public.pem \
             -signature dist/content/manifest.sig dist/content/manifest.json
           rm -f "$RUNNER_TEMP/legal-content-private.pem"
-      - name: Validate publication manifest and database
+      - name: Validate signed manifest and SQLite database
         run: python agent/validate_manifest.py dist/content/manifest.json
       - name: Publish versioned content release
         uses: softprops/action-gh-release@v2
@@ -165,7 +222,7 @@ jobs:
           body: |
             Независимый выпуск правовой базы ЗаконЪ.
             Версия приложения не изменяется.
-            Выпуск прошёл автоматические проверки и ручное подтверждение через environment legal-content-approval.
+            Кандидат собран и проверен до ручного approval; публикация разрешена только после подтверждения через environment legal-content-approval.
             Если предыдущая база доступна, в выпуск также включён пакет обновления-дельты.
           files: dist/content/*
           fail_on_unmatched_files: true
@@ -174,6 +231,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish current manifest
         run: |
+          set -euo pipefail
           cp dist/content/manifest.json content/updates/manifest.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
