@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContentUpdateScheduler.schedule(applicationContext)
         setContent {
             val store = remember { LegalStore(applicationContext) }
             DisposableEffect(store) { onDispose { store.close() } }
