@@ -70,8 +70,12 @@ def main() -> int:
         raise SystemExit("No source captures requested in records.sources")
 
     captured = []
+    seen_keys = set()
     for source in sources:
         key = source["key"]
+        if key in seen_keys:
+            raise SystemExit(f"Duplicate capture key: {key}")
+        seen_keys.add(key)
         registry_id = source.get("registry_id", key)
         if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
             raise SystemExit("Each capture key must use lowercase letters, digits, '_' or '-' (max 101 characters)")
