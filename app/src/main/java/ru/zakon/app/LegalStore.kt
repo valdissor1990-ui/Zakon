@@ -46,11 +46,48 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
 
     init {
         // One-time, non-destructive migration for users upgrading from the legacy combined DB.
+        // Checkpoint WAL first: copying only the main SQLite file could otherwise omit committed
+        // rows that still reside in the legacy -wal sidecar.
         val target = appContext.getDatabasePath("zakon-content.db")
         val legacy = appContext.getDatabasePath("zakon-local.db")
         if (!target.exists() && legacy.isFile) {
-            target.parentFile?.mkdirs()
-            legacy.copyTo(target, overwrite = false)
+            val parent = requireNotNull(target.parentFile) { "Не удалось определить каталог базы данных" }
+            parent.mkdirs()
+
+            val legacyDb = SQLiteDatabase.openDatabase(
+                legacy.absolutePath, null, SQLiteDatabase.OPEN_READWRITE
+            )
+            try {
+                legacyDb.rawQuery("PRAGMA wal_checkpoint(TRUNCATE)", null).use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        require(cursor.getInt(0) == 0) {
+                            "Не удалось безопасно завершить запись старой базы; миграция отложена"
+                        }
+                    }
+                }
+            } finally {
+                legacyDb.close()
+            }
+
+            val staged = java.io.File(parent, "zakon-content.db.migration")
+            try {
+                legacy.copyTo(staged, overwrite = true)
+                val stagedDb = SQLiteDatabase.openDatabase(
+                    staged.absolutePath, null, SQLiteDatabase.OPEN_READONLY
+                )
+                try {
+                    stagedDb.rawQuery("PRAGMA integrity_check", null).use { cursor ->
+                        require(cursor.moveToFirst() && cursor.getString(0) == "ok") {
+                            "Старая база повреждена; исходный файл сохранён, миграция не выполнена"
+                        }
+                    }
+                } finally {
+                    stagedDb.close()
+                }
+                require(staged.renameTo(target)) { "Не удалось завершить перенос старой базы" }
+            } finally {
+                staged.delete()
+            }
         }
     }
 
