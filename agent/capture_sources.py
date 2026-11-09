@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,7 +73,7 @@ def main() -> int:
     for source in sources:
         key = source["key"]
         registry_id = source.get("registry_id", key)
-        if not isinstance(key, str) or not __import__("re").fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
+        if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
             raise SystemExit("Each capture key must use lowercase letters, digits, '_' or '-' (max 101 characters)")
         hosts = allowed_hosts(registry, registry_id)
         url = source["official_url"]
