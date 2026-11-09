@@ -124,7 +124,10 @@ private fun ContentUpdateSection(store: LegalStore) {
                     val database = manifest.optJSONObject("database")
                     val version = manifest.optInt(
                         "version",
-                        manifest.optString("content_version").toIntOrNull() ?: 0
+                        manifest.optInt(
+                            "version_code",
+                            manifest.optString("content_version").toIntOrNull() ?: 0
+                        )
                     )
                     require(version > 0) { "В manifest отсутствует корректная версия контента" }
                     val label = manifest.optString("label", manifest.optString("effective_as_of", ""))
