@@ -157,14 +157,25 @@ def build(records_path: Path, output_dir: Path) -> None:
         raise ValueError(f"SQLite integrity check failed: {integrity}")
     db.close()
 
+    version_code = release.get("version_code")
+    if not isinstance(version_code, int) or version_code < 1:
+        raise ValueError("release.version_code must be a positive, monotonically increasing integer")
+
     manifest = {
         "schema_version": 1,
+        "version_code": version_code,
         "content_version": release["version"],
         "created_at": release["created_at"],
         "effective_as_of": release["effective_as_of"],
-        "database": {"file": db_path.name, "sha256": sha256(working_db_path.read_bytes())},
-        "validation": {"status": "draft", "documents": len(documents),
-                       "manual_approval_required": True}
+        "database": {
+            "file": db_path.name,
+            "sha256": sha256(working_db_path.read_bytes())
+        },
+        "validation": {
+            "status": "draft",
+            "documents": len(documents),
+            "manual_approval_required": True
+        }
     }
     manifest_tmp_path = output_dir / ".manifest.json.tmp"
     manifest_tmp_path.write_text(
