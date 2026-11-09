@@ -23,6 +23,7 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
             (evidence / f"{digest}.source").write_bytes(payload)
             metadata = {
                 "source_key": "official",
+                "registry_id": "official",
                 "requested_url": "https://example.gov/law",
                 "final_url": "https://example.gov/law",
                 "retrieved_at": "2026-11-09T12:00:00Z",
@@ -57,6 +58,43 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
             with patch.object(build_database, "ROOT", root):
                 with self.assertRaisesRegex(ValueError, "captured original or metadata is missing"):
                     build_database.validate_source_evidence(source, {"url": "https://example.gov/"})
+
+    def test_capture_key_can_be_distinct_from_registry_source_id(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            evidence = root / "content" / "evidence" / "constitution__pravo_bank"
+            evidence.mkdir(parents=True)
+            payload = b"official text bytes"
+            digest = hashlib.sha256(payload).hexdigest()
+            (evidence / f"{digest}.source").write_bytes(payload)
+            metadata = {
+                "source_key": "constitution__pravo_bank",
+                "registry_id": "pravo_law_bank",
+                "requested_url": "https://pravo.gov.ru/constitution",
+                "final_url": "https://pravo.gov.ru/constitution",
+                "retrieved_at": "2026-11-09T12:00:00Z",
+                "byte_length": len(payload),
+                "sha256": digest,
+                "evidence_file": f"{digest}.source",
+                "legal_text_extraction_performed": False
+            }
+            (evidence / f"{digest}.json").write_text(json.dumps(metadata), encoding="utf-8")
+            source = {
+                "key": "constitution__pravo_bank",
+                "registry_id": "pravo_law_bank",
+                "sha256": digest,
+                "official_url": metadata["requested_url"],
+                "retrieved_at": metadata["retrieved_at"]
+            }
+            registry = {"url": "https://pravo.gov.ru/"}
+            with patch.object(build_database, "ROOT", root):
+                self.assertEqual(build_database.validate_source_evidence(source, registry), digest)
+
+    def test_iso_date_validation_rejects_impossible_dates(self):
+        with self.assertRaisesRegex(ValueError, "valid calendar date"):
+            build_database.validate_iso_date("2026-02-30", "test_date")
+        with self.assertRaisesRegex(ValueError, "YYYY-MM-DD"):
+            build_database.validate_iso_date("09.11.2026", "test_date")
 
     def test_boolean_is_not_a_valid_release_version(self):
         with tempfile.TemporaryDirectory() as temporary:
