@@ -96,6 +96,116 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "YYYY-MM-DD"):
             build_database.validate_iso_date("09.11.2026", "test_date")
 
+    def test_build_resolves_cross_reference_to_later_document(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            registry_path = root / "registry.json"
+            registry_sources = [
+                {"id": "official", "url": "https://publication.example.gov/"},
+                {"id": "bank", "url": "https://lawbank.example.gov/"},
+                {"id": "minjust", "url": "https://minjust.example.gov/"}
+            ]
+            registry_path.write_text(json.dumps({"sources": registry_sources}), encoding="utf-8")
+            records_sources = []
+            source_checks = {}
+            for document_id in ("doc-a", "doc-b"):
+                checks = []
+                for registry_source in registry_sources:
+                    registry_id = registry_source["id"]
+                    key = f"{document_id}__{registry_id}"
+                    url = registry_source["url"] + document_id
+                    payload = f"captured {key}".encode()
+                    digest = hashlib.sha256(payload).hexdigest()
+                    evidence = root / "content" / "evidence" / key
+                    evidence.mkdir(parents=True)
+                    (evidence / f"{digest}.source").write_bytes(payload)
+                    retrieved_at = "2026-11-09T12:00:00Z"
+                    metadata = {
+                        "source_key": key,
+                        "registry_id": registry_id,
+                        "requested_url": url,
+                        "final_url": url,
+                        "retrieved_at": retrieved_at,
+                        "byte_length": len(payload),
+                        "sha256": digest,
+                        "evidence_file": f"{digest}.source",
+                        "legal_text_extraction_performed": False
+                    }
+                    (evidence / f"{digest}.json").write_text(json.dumps(metadata), encoding="utf-8")
+                    records_sources.append({
+                        "key": key,
+                        "registry_id": registry_id,
+                        "name": registry_id,
+                        "publisher": registry_id,
+                        "official_url": url,
+                        "source_type": "official_test",
+                        "retrieved_at": retrieved_at,
+                        "sha256": digest
+                    })
+                    checks.append({
+                        "source_key": key,
+                        "status": "match",
+                        "retrieved_at": retrieved_at,
+                        "sha256": digest
+                    })
+                source_checks[document_id] = checks
+
+            documents = []
+            for document_id, title in (("doc-a", "Документ А"), ("doc-b", "Документ Б")):
+                article_id = f"{document_id}-article-1"
+                article_body = f"Официальный текст {title}"
+                documents.append({
+                    "id": document_id,
+                    "title": title,
+                    "document_type": "test",
+                    "number": "1",
+                    "adopted_at": "2020-01-01",
+                    "effective_from": "2020-01-01",
+                    "legal_status": "действует",
+                    "verified_at": "2026-11-09",
+                    "verification_status": "approved",
+                    "primary_source_key": source_checks[document_id][0]["source_key"],
+                    "source_revision": "test revision",
+                    "text_sha256": hashlib.sha256(article_body.encode()).hexdigest(),
+                    "source_checks": source_checks[document_id],
+                    "articles": [{
+                        "id": article_id,
+                        "ordinal": 1,
+                        "number": "1",
+                        "title": "Статья 1",
+                        "body": article_body
+                    }],
+                    "cross_references": []
+                })
+            documents[0]["cross_references"] = [{
+                "from_article_id": "doc-a-article-1",
+                "to_document_id": "doc-b",
+                "to_article_number": "1",
+                "reference_text": "статья 1 документа Б",
+                "resolved_article_id": "doc-b-article-1",
+                "resolution_status": "resolved"
+            }]
+            records_path = root / "records.json"
+            records_path.write_text(json.dumps({
+                "release": {
+                    "version": "test-1",
+                    "created_at": "2026-11-09T12:00:00Z",
+                    "effective_as_of": "2026-11-09",
+                    "version_code": 7
+                },
+                "sources": records_sources,
+                "documents": documents
+            }, ensure_ascii=False), encoding="utf-8")
+            output = root / "output"
+            with patch.object(build_database, "ROOT", root), patch.object(build_database, "REGISTRY", registry_path):
+                build_database.build(records_path, output)
+            with sqlite3.connect(output / "zakon-content.sqlite") as db:
+                row = db.execute(
+                    "SELECT to_document_id, resolved_article_id, resolution_status FROM cross_references"
+                ).fetchone()
+                self.assertEqual(row, ("doc-b", "doc-b-article-1", "resolved"))
+                self.assertEqual(db.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_boolean_is_not_a_valid_release_version(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
