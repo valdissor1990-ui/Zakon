@@ -51,13 +51,16 @@ def main() -> int:
         tables = {row[0] for row in db.execute(
             "SELECT name FROM sqlite_master WHERE type IN ('table','view')"
         )}
-        missing_tables = {"documents", "articles", "articles_fts"} - tables
+        missing_tables = {"documents", "articles", "articles_fts", "content_metadata"} - tables
         if missing_tables:
             raise SystemExit(f"SQLite database is missing tables: {', '.join(sorted(missing_tables))}")
         documents = db.execute("SELECT count(*) FROM documents").fetchone()[0]
         articles = db.execute("SELECT count(*) FROM articles").fetchone()[0]
         if documents < 1 or articles < 1:
             raise SystemExit("Refusing to publish an empty legal database")
+        metadata = dict(db.execute("SELECT key,value FROM content_metadata"))
+        if metadata.get("pack_version") != str(data["version_code"]):
+            raise SystemExit("SQLite content_metadata version does not match manifest version_code")
 
     delta_info = data.get("delta")
     if delta_info is not None:
