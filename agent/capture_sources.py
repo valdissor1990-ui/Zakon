@@ -49,6 +49,9 @@ def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
         final_url = response.geturl()
         content_type = response.headers.get("Content-Type", "application/octet-stream")
         payload = response.read(MAX_BYTES + 1)
+    # Do not rely solely on the redirect handler: validate the final response URL too,
+    # including custom openers or transports that do not invoke HTTPRedirectHandler.
+    validate_url(final_url, hosts)
     if len(payload) > MAX_BYTES:
         raise ValueError(f"Source exceeds the {MAX_BYTES} byte capture limit")
     return payload, final_url, content_type
