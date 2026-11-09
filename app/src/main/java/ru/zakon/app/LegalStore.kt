@@ -6,9 +6,6 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.zip.GZIPInputStream
 
 data class LegalDocument(
     val id: String,
@@ -42,10 +39,20 @@ data class PackImportResult(
     val articlesUpserted: Int
 )
 
-class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-local.db", null, 8) {
+class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext, "zakon-content.db", null, 9) {
 
     private val appContext = context.applicationContext
     private val metaPrefs = appContext.getSharedPreferences("zakon_content_meta", Context.MODE_PRIVATE)
+
+    init {
+        // One-time, non-destructive migration for users upgrading from the legacy combined DB.
+        val target = appContext.getDatabasePath("zakon-content.db")
+        val legacy = appContext.getDatabasePath("zakon-local.db")
+        if (!target.exists() && legacy.isFile) {
+            target.parentFile?.mkdirs()
+            legacy.copyTo(target, overwrite = false)
+        }
+    }
 
     override fun onConfigure(db: SQLiteDatabase) {
         super.onConfigure(db)
@@ -54,7 +61,6 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
 
     override fun onCreate(db: SQLiteDatabase) {
         createSchema(db)
-        seedFromAssetsOrFallback(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -68,14 +74,8 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 SELECT a.id,d.title,a.number,COALESCE(a.title,''),a.body FROM articles a JOIN documents d ON d.id=a.document_id""".trimIndent()
             )
         }
-        if (oldVersion < 7) {
-            seedFromAssetsOrFallback(db)
-        }
-        if (oldVersion < 8) {
-            db.execSQL("DELETE FROM articles WHERE document_id IN ('koap','const')")
-            db.execSQL("DELETE FROM documents WHERE id IN ('koap','const')")
-            seedFromAssetsOrFallback(db)
-        }
+        // Schema upgrades must never seed or overwrite legal content.
+        // Content is delivered independently as a verified SQLite release.
     }
 
     private fun createSchema(db: SQLiteDatabase) {
@@ -120,50 +120,6 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             SELECT a.id,NEW.title,a.number,COALESCE(a.title,''),a.body FROM articles a WHERE a.document_id=NEW.id;
         END"""
         )
-    }
-
-    private fun seedFromAssetsOrFallback(db: SQLiteDatabase) {
-        val loaded = tryLoadAssetPack(db)
-        SeedData.populate(db)
-    }
-
-    private fun tryLoadAssetPack(db: SQLiteDatabase): Boolean {
-        return try {
-            val am = appContext.assets
-            val names = am.list("")?.toList().orEmpty()
-            val b64Name = names.firstOrNull { it == "content_pack_v7.b64" }
-            val gzName = names.firstOrNull { it == "content_pack_v7.json.gz" }
-            val jsonName = names.firstOrNull { it == "content_pack_v7.json" }
-            val json = when {
-                b64Name != null -> {
-                    val b64 = am.open(b64Name).use { input ->
-                        BufferedReader(InputStreamReader(input, Charsets.UTF_8)).readText()
-                            .replace("\\s".toRegex(), "")
-                    }
-                    val bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT)
-                    GZIPInputStream(bytes.inputStream()).use { gz ->
-                        BufferedReader(InputStreamReader(gz, Charsets.UTF_8)).readText()
-                    }
-                }
-                gzName != null -> {
-                    am.open(gzName).use { input ->
-                        GZIPInputStream(input).use { gz ->
-                            BufferedReader(InputStreamReader(gz, Charsets.UTF_8)).readText()
-                        }
-                    }
-                }
-                jsonName != null -> {
-                    am.open(jsonName).use { input ->
-                        BufferedReader(InputStreamReader(input, Charsets.UTF_8)).readText()
-                    }
-                }
-                else -> return false
-            }
-            val result = importPackJsonInto(db, json, requireNewer = false)
-            result.articlesUpserted > 0
-        } catch (_: Exception) {
-            false
-        }
     }
 
     fun installedPackVersion(): Int = metaPrefs.getInt("pack_version", 5)
@@ -241,6 +197,77 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         }
     }
 
+    /**
+     * Atomically installs a prebuilt content SQLite database.
+     * The caller must verify the downloaded SHA-256 before calling this method.
+     */
+    fun installDatabaseFile(source: java.io.File, version: Int, label: String): Int {
+        require(source.isFile && source.length() > 0L) { "Файл базы пуст или отсутствует" }
+        validateContentDatabase(source)
+
+        val target = appContext.getDatabasePath("zakon-content.db")
+        val staged = java.io.File(target.parentFile, "zakon-content.db.staged")
+        val backup = java.io.File(target.parentFile, "zakon-content.db.backup")
+        target.parentFile?.mkdirs()
+        source.copyTo(staged, overwrite = true)
+        close()
+        try {
+            java.io.File(target.path + "-wal").delete()
+            java.io.File(target.path + "-shm").delete()
+            backup.delete()
+            if (target.exists() && !target.renameTo(backup)) {
+                error("Не удалось сохранить предыдущую базу")
+            }
+            if (!staged.renameTo(target)) {
+                if (backup.exists()) backup.renameTo(target)
+                error("Не удалось установить новую базу")
+            }
+            validateContentDatabase(target)
+            metaPrefs.edit().putInt("pack_version", version)
+                .putString("pack_label", label).commit()
+            backup.delete()
+            return version
+        } catch (failure: Exception) {
+            target.delete()
+            if (backup.exists()) backup.renameTo(target)
+            throw failure
+        } finally {
+            staged.delete()
+        }
+    }
+
+    private fun validateContentDatabase(file: java.io.File) {
+        val db = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
+        try {
+            val integrity = db.rawQuery("PRAGMA integrity_check", null).use { c ->
+                if (c.moveToFirst()) c.getString(0) else "no result"
+            }
+            require(integrity == "ok") { "Проверка целостности SQLite не пройдена: $integrity" }
+            for (table in listOf("documents", "articles", "articles_fts")) {
+                db.rawQuery(
+                    "SELECT 1 FROM sqlite_master WHERE type IN ('table','view') AND name=?",
+                    arrayOf(table)
+                ).use { c -> require(c.moveToFirst()) { "В базе отсутствует таблица $table" } }
+            }
+            val requiredDocumentColumns = setOf("id", "title", "document_type", "number", "legal_status", "verification_status")
+            val actualDocumentColumns = db.rawQuery("PRAGMA table_info(documents)", null).use { c ->
+                buildSet { while (c.moveToNext()) add(c.getString(1)) }
+            }
+            require(actualDocumentColumns.containsAll(requiredDocumentColumns)) {
+                "Несовместимая структура таблицы documents"
+            }
+            val requiredArticleColumns = setOf("id", "document_id", "ordinal", "number", "title", "body")
+            val actualArticleColumns = db.rawQuery("PRAGMA table_info(articles)", null).use { c ->
+                buildSet { while (c.moveToNext()) add(c.getString(1)) }
+            }
+            require(actualArticleColumns.containsAll(requiredArticleColumns)) {
+                "Несовместимая структура таблицы articles"
+            }
+        } finally {
+            db.close()
+        }
+    }
+
     fun importPackJson(json: String, requireNewer: Boolean = false): PackImportResult {
         val db = writableDatabase
         return importPackJsonInto(db, json, requireNewer)
@@ -264,17 +291,26 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             for (i in 0 until docs.length()) {
                 val o = docs.getJSONObject(i)
                 val id = o.getString("id")
-                db.execSQL(
-                    """INSERT OR REPLACE INTO documents(id,title,document_type,number,legal_status,verification_status)
-                    VALUES(?,?,?,?,?,?)""".trimIndent(),
-                    arrayOf(
-                        id,
-                        o.optString("title", id),
-                        o.optString("document_type", "code"),
-                        o.optString("number", ""),
-                        o.optString("legal_status", "справочный текст"),
-                        o.optString("verification_status", "pack")
-                    )
+                val values = arrayOf(
+                    o.optString("title", id),
+                    o.optString("document_type", "code"),
+                    o.optString("number", ""),
+                    o.optString("legal_status", "справочный текст"),
+                    o.optString("verification_status", "pack")
+                )
+                val changed = db.update(
+                    "documents",
+                    android.content.ContentValues().apply {
+                        put("title", values[0]); put("document_type", values[1])
+                        put("number", values[2]); put("legal_status", values[3])
+                        put("verification_status", values[4])
+                    },
+                    "id=?",
+                    arrayOf(id)
+                )
+                if (changed == 0) db.execSQL(
+                    "INSERT INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
+                    arrayOf(id, *values)
                 )
                 docCount++
             }
@@ -290,18 +326,18 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                         )
                     }
                 }
-                db.execSQL(
-                    """INSERT OR REPLACE INTO articles(id,document_id,ordinal,number,title,body)
-                    VALUES(?,?,?,?,?,?)""".trimIndent(),
-                    arrayOf(
-                        id,
-                        documentId,
-                        o.optInt("ordinal", i),
-                        o.optString("number", ""),
-                        if (o.isNull("title")) null else o.optString("title"),
-                        o.optString("body", "")
-                    )
-                )
+                val articleValues = android.content.ContentValues().apply {
+                    put("document_id", documentId)
+                    put("ordinal", o.optInt("ordinal", i))
+                    put("number", o.optString("number", ""))
+                    if (o.isNull("title")) putNull("title") else put("title", o.optString("title"))
+                    put("body", o.optString("body", ""))
+                }
+                val changed = db.update("articles", articleValues, "id=?", arrayOf(id))
+                if (changed == 0) {
+                    articleValues.put("id", id)
+                    db.insertOrThrow("articles", null, articleValues)
+                }
                 artCount++
             }
             db.setTransactionSuccessful()
