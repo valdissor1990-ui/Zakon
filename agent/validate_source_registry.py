@@ -11,12 +11,14 @@ def validate_registry(data: dict) -> None:
     sources = data.get("sources", [])
     rule = data.get("publication_rule", {})
     required = int(rule.get("minimum_distinct_sources", 3))
+    required_state = int(rule.get("minimum_state_operated_sources", required))
     if len(sources) < required:
         raise ValueError(f"Need at least {required} registered sources")
     ids = [item.get("id") for item in sources]
     if len(set(ids)) != len(ids) or any(not value for value in ids):
         raise SystemExit("Source IDs must be present and unique")
     hosts = set()
+    state_sources = 0
     for item in sources:
         parsed = urlparse(item.get("url", ""))
         if parsed.scheme != "https" or not parsed.netloc:
@@ -25,7 +27,10 @@ def validate_registry(data: dict) -> None:
             raise ValueError(f"Source {item.get('id')} is missing provenance metadata")
         if item.get("state_operated") is not True:
             raise ValueError(f"Source {item.get('id')} is not explicitly marked as state-operated")
+        state_sources += 1
         hosts.add(parsed.netloc.lower())
+    if state_sources < required_state:
+        raise ValueError(f"Need at least {required_state} state-operated sources")
     if len(hosts) < required:
         raise SystemExit("Sources must use distinct hostnames to provide independent cross-checks")
     if rule.get("mismatch_action") != "block_release":
