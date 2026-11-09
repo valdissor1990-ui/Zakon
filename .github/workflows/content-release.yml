@@ -43,6 +43,8 @@ jobs:
 
           path = Path("dist/content/manifest.json")
           data = json.loads(path.read_text(encoding="utf-8"))
+          if data["content_version"] != os.environ["RELEASE_VERSION"]:
+              raise SystemExit("workflow release_version must match records.release.version")
           data["validation"]["status"] = "validated"
           data["validation"]["manual_approval_required"] = False
           data["validation"]["approved_by_workflow"] = True
