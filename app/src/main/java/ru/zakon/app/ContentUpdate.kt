@@ -51,7 +51,23 @@ private fun sha256Hex(bytes: ByteArray): String {
     return dig.joinToString("") { "%02x".format(it) }
 }
 
-private fun httpGetBytes(url: String): ByteArray {
+private fun readBounded(input: java.io.InputStream, maxBytes: Int): ByteArray {
+    val output = java.io.ByteArrayOutputStream(minOf(maxBytes, 8192))
+    val buffer = ByteArray(8192)
+    var total = 0
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        total += count
+        require(total <= maxBytes) { "Загружаемый файл превышает допустимый размер" }
+        output.write(buffer, 0, count)
+    }
+    return output.toByteArray()
+}
+
+private fun gunzipBounded(bytes: ByteArray, maxBytes: Int): ByteArray =
+    java.util.zip.GZIPInputStream(bytes.inputStream()).use { readBounded(it, maxBytes) }
+private fun httpGetBytes(url: String, maxBytes: Int): ByteArray {
     var current = URL(url)
     require(current.protocol.equals("https", ignoreCase = true)) {
         "Загрузка правовой базы разрешена только по HTTPS"
@@ -76,7 +92,11 @@ private fun httpGetBytes(url: String): ByteArray {
                 current = next
             } else {
                 if (code !in 200..299) error("HTTP $code")
-                return conn.inputStream.use { it.readBytes() }
+                val contentLength = conn.contentLengthLong
+                require(contentLength < 0L || contentLength <= maxBytes.toLong()) {
+                    "Загружаемый файл превышает допустимый размер"
+                }
+                return conn.inputStream.use { readBounded(it, maxBytes) }
             }
         } finally {
             conn.disconnect()
@@ -150,7 +170,7 @@ private fun ContentUpdateSection(store: LegalStore) {
         scope.launch {
             try {
                 val resultMsg = withContext(Dispatchers.IO) {
-                    val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL)
+                    val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL, 1024 * 1024)
                     val manifest = JSONObject(String(manifestBytes, Charsets.UTF_8))
                     val validation = manifest.optJSONObject("validation")
                     if (validation != null && validation.optString("status") != "validated") {
@@ -168,7 +188,7 @@ private fun ContentUpdateSection(store: LegalStore) {
                         }
                         val signatureUrl = signature.optString("download_url", "")
                         require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
-                        verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl))
+                        verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl, 16 * 1024))
                     }
                     val version = manifest.optInt(
                         "version",
@@ -191,8 +211,12 @@ private fun ContentUpdateSection(store: LegalStore) {
                             ?: manifest.optString("sha256", "")
                         ).lowercase()
                     remoteInfo = "Сервер: v$version · $label"
-                    if (!force && version <= store.installedPackVersion()) {
-                        return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
+                    val installedVersion = store.installedPackVersion()
+                    require(version >= installedVersion) {
+                        "Сервер предлагает более старую базу v$version; установлена v$installedVersion. Понижение версии запрещено."
+                    }
+                    if (!force && version == installedVersion) {
+                        return@withContext "Уже актуальная база (v$installedVersion)."
                     }
 
                     val delta = manifest.optJSONObject("delta")
@@ -205,12 +229,12 @@ private fun ContentUpdateSection(store: LegalStore) {
                             delta.optInt("to_version_code", -1) == version
                         ) {
                             try {
-                                val deltaBytes = httpGetBytes(deltaUrl)
+                                val deltaBytes = httpGetBytes(deltaUrl, 64 * 1024 * 1024)
                                 require(sha256Hex(deltaBytes) == deltaSha) { "SHA-256 обновления-дельты не совпал" }
                                 val patchBytes = if (deltaBytes.size >= 2 &&
                                     deltaBytes[0] == 0x1f.toByte() && deltaBytes[1] == 0x8b.toByte()
                                 ) {
-                                    java.util.zip.GZIPInputStream(deltaBytes.inputStream()).use { it.readBytes() }
+                                    gunzipBounded(deltaBytes, 128 * 1024 * 1024)
                                 } else deltaBytes
                                 store.applyDatabaseDelta(String(patchBytes, Charsets.UTF_8), label, version)
                                 return@withContext "Правовая база обновлена небольшим пакетом: v$version."
@@ -222,7 +246,7 @@ private fun ContentUpdateSection(store: LegalStore) {
                     }
 
                     if (!databaseUrl.isNullOrBlank()) {
-                        val downloaded = httpGetBytes(databaseUrl)
+                        val downloaded = httpGetBytes(databaseUrl, 256 * 1024 * 1024)
                         require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
                         require(sha256Hex(downloaded) == expectedSha) { "SHA-256 базы не совпал" }
                         val rawFile = java.io.File(context.cacheDir, "zakon-content-download.tmp")
@@ -232,8 +256,9 @@ private fun ContentUpdateSection(store: LegalStore) {
                             val isGzip = downloaded.size >= 2 &&
                                 downloaded[0] == 0x1f.toByte() && downloaded[1] == 0x8b.toByte()
                             if (isGzip) {
-                                java.util.zip.GZIPInputStream(rawFile.inputStream()).use { input ->
-                                    sqliteFile.outputStream().use { output -> input.copyTo(output) }
+                                rawFile.inputStream().use { input ->
+                                    val unpacked = gunzipBounded(input.readBytes(), 512 * 1024 * 1024)
+                                    sqliteFile.outputStream().use { output -> output.write(unpacked) }
                                 }
                             } else {
                                 downloaded.inputStream().use { input ->
@@ -248,7 +273,7 @@ private fun ContentUpdateSection(store: LegalStore) {
                         }
                     } else if (legacyPackUrl.isNotBlank()) {
                         // Backward compatibility for the previous JSON pack format.
-                        val packBytes = httpGetBytes(legacyPackUrl)
+                        val packBytes = httpGetBytes(legacyPackUrl, 64 * 1024 * 1024)
                         if (expectedSha.isNotBlank()) {
                             require(sha256Hex(packBytes) == expectedSha) { "SHA-256 пакета не совпал" }
                         }
