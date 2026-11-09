@@ -33,6 +33,18 @@ private val Accent = Color(0xFF8A6A1A)
 internal const val DEFAULT_CONTENT_MANIFEST_URL =
     "https://raw.githubusercontent.com/valdissor1990-ui/Zakon/main/content/updates/manifest.json"
 
+private const val CONTENT_SIGNING_PUBLIC_KEY_BASE64 =
+    "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAhyJyhnYkSl1CNWShuTslaiBZW4tfGWTko+2E1hX9V3TqQ4E7jbhZ3y5RgJ6uHy/PyQlCaanCuWwfka6C3aj7HrFXPG5jqWSS2HLsfOKDclUqtyQB2yZqAW5UZA0uSJYf4QyDHI8TLif7nVwZz0ckgYmcdrv2Q1n1mDxDPTlM3LG3kfWSpLH9LkdJmaQIdx/C+ZyEs90gBpPwFghsTw3lZNbrV4j5/2aH5EUHdxZxu3XqirkMfhAvVzyEoqnDTIXiA4AxphrHL16FPH4kC3FqeyUyVvBvwqB0zG6DeKvQJQvQydRe9ZzPUbwj4X0edo6xLoqXJ4od66kWXpyZG4LD3ifvN/0IJL8AVxAvV7vVjMcAY7Id9WdcCN9K799eqswSdC/bYTBYOzfiiFZ0P2qqvq9Kg2jgRTVmTqm8BK/pP9i7/CTlsBumZ5WC3ebfSiF0h8SHMnndPJqN0k4gp0o8fCLDZ9Ma9lCjnC59JlzC2/BvbBSLAsD8PI7wDdFGQZxtAgMBAAE="
+
+private fun verifyManifestSignature(manifestBytes: ByteArray, signatureBytes: ByteArray) {
+    val encodedKey = android.util.Base64.decode(CONTENT_SIGNING_PUBLIC_KEY_BASE64, android.util.Base64.DEFAULT)
+    val publicKey = java.security.KeyFactory.getInstance("RSA")
+        .generatePublic(java.security.spec.X509EncodedKeySpec(encodedKey))
+    val verifier = java.security.Signature.getInstance("SHA256withRSA")
+    verifier.initVerify(publicKey)
+    verifier.update(manifestBytes)
+    require(verifier.verify(signatureBytes)) { "Цифровая подпись правовой базы недействительна" }
+}
 private fun sha256Hex(bytes: ByteArray): String {
     val dig = MessageDigest.getInstance("SHA-256").digest(bytes)
     return dig.joinToString("") { "%02x".format(it) }
@@ -126,7 +138,19 @@ private fun ContentUpdateSection(store: LegalStore) {
                         error("Новый выпуск правовой базы ещё не прошёл проверку и не опубликован. Локальные данные сохранены.")
                     }
                     val database = manifest.optJSONObject("database")
-                    val version = manifest.optInt(
+                    if (database != null) {
+                        require(validation?.optString("status") == "validated") {
+                            "SQLite-выпуск не имеет подтверждённого статуса"
+                        }
+                        val signature = manifest.optJSONObject("signature")
+                            ?: error("В манифесте отсутствует цифровая подпись издателя")
+                        require(signature.optString("algorithm") == "SHA256withRSA") {
+                            "Неподдерживаемый алгоритм подписи правовой базы"
+                        }
+                        val signatureUrl = signature.optString("download_url", "")
+                        require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
+                        verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl))
+                    }                    val version = manifest.optInt(
                         "version",
                         manifest.optInt(
                             "version_code",
