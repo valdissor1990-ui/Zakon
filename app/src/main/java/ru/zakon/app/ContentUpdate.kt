@@ -185,23 +185,20 @@ private fun ContentUpdateSection(store: LegalStore) {
                     val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL, 1024 * 1024)
                     val manifest = JSONObject(String(manifestBytes, Charsets.UTF_8))
                     val validation = manifest.optJSONObject("validation")
-                    if (validation != null && validation.optString("status") != "validated") {
-                        error("Новый выпуск правовой базы ещё не прошёл проверку и не опубликован. Локальные данные сохранены.")
+                        ?: error("Серверный манифест не содержит подтверждения проверки правовой базы")
+                    require(validation.optString("status") == "validated") {
+                        "Новый выпуск правовой базы ещё не прошёл проверку и не опубликован. Локальные данные сохранены."
                     }
                     val database = manifest.optJSONObject("database")
-                    if (database != null) {
-                        require(validation?.optString("status") == "validated") {
-                            "SQLite-выпуск не имеет подтверждённого статуса"
-                        }
-                        val signature = manifest.optJSONObject("signature")
-                            ?: error("В манифесте отсутствует цифровая подпись издателя")
-                        require(signature.optString("algorithm") == "SHA256withRSA") {
-                            "Неподдерживаемый алгоритм подписи правовой базы"
-                        }
-                        val signatureUrl = signature.optString("download_url", "")
-                        require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
-                        verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl, 16 * 1024))
+                        ?: error("Удалённые JSON-пакеты больше не принимаются. Требуется подписанный SQLite-выпуск.")
+                    val signature = manifest.optJSONObject("signature")
+                        ?: error("В манифесте отсутствует цифровая подпись издателя")
+                    require(signature.optString("algorithm") == "SHA256withRSA") {
+                        "Неподдерживаемый алгоритм подписи правовой базы"
                     }
+                    val signatureUrl = signature.optString("download_url", "")
+                    require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
+                    verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl, 16 * 1024))
                     val version = manifest.optInt(
                         "version",
                         manifest.optInt(
@@ -217,7 +214,6 @@ private fun ContentUpdateSection(store: LegalStore) {
                     if (databaseUrl != null) require(databaseUrl.startsWith("https://")) {
                         "Адрес правовой базы должен использовать HTTPS"
                     }
-                    val legacyPackUrl = manifest.optString("pack_url", "")
                     val expectedSha = (
                         database?.optString("sha256")?.takeIf { it.isNotBlank() }
                             ?: manifest.optString("sha256", "")
@@ -279,16 +275,8 @@ private fun ContentUpdateSection(store: LegalStore) {
                         } finally {
                             sqliteFile.delete()
                         }
-                    } else if (legacyPackUrl.isNotBlank()) {
-                        // Backward compatibility for the previous JSON pack format.
-                        val packBytes = httpGetBytes(legacyPackUrl, 64 * 1024 * 1024)
-                        if (expectedSha.isNotBlank()) {
-                            require(sha256Hex(packBytes) == expectedSha) { "SHA-256 пакета не совпал" }
-                        }
-                        val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
-                        "Обновлено из совместимого JSON-пакета: v${imported.version}. Статей: ${imported.articlesUpserted}"
                     } else {
-                        error("В manifest не указан адрес SQLite-базы")
+                        error("В подписанном manifest не указан адрес SQLite-базы")
                     }
                 }
                 status = resultMsg
