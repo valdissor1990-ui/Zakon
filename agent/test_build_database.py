@@ -91,6 +91,17 @@ class BuildDatabaseSafetyTests(unittest.TestCase):
             with patch.object(build_database, "ROOT", root):
                 self.assertEqual(build_database.validate_source_evidence(source, registry), digest)
 
+    def test_article_hierarchy_rejects_missing_parent_and_cycles(self):
+        with self.assertRaisesRegex(ValueError, "parent must belong"):
+            build_database.validate_article_hierarchy("doc", [
+                {"id": "child", "parent_id": "missing"}
+            ])
+        with self.assertRaisesRegex(ValueError, "cyclic article parent hierarchy"):
+            build_database.validate_article_hierarchy("doc", [
+                {"id": "a", "parent_id": "b"},
+                {"id": "b", "parent_id": "a"}
+            ])
+
     def test_iso_date_validation_rejects_impossible_dates(self):
         with self.assertRaisesRegex(ValueError, "valid calendar date"):
             build_database.validate_iso_date("2026-02-30", "test_date")
