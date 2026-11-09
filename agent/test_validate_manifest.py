@@ -101,6 +101,7 @@ class ManifestValidationTests(unittest.TestCase):
             patch = {"schema_version": 1, "from_version_code": 7, "to_version_code": 8, "operations": {}}
             delta_path = root / "zakon-content.delta.json"
             delta_path.write_text(json.dumps(patch), encoding="utf-8")
+            manifest["version_code"] = 8
             manifest["delta"] = {
                 "file": delta_path.name,
                 "sha256": hashlib.sha256(delta_path.read_bytes()).hexdigest(),
