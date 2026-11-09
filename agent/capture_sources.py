@@ -30,12 +30,22 @@ def validate_url(url: str, hosts: set[str]) -> None:
     if parsed.netloc.lower() not in hosts:
         raise ValueError(f"URL host is not allowlisted: {parsed.netloc}")
 
-def capture(url: str) -> tuple[bytes, str, str]:
+class AllowlistedRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def __init__(self, hosts: set[str]):
+        super().__init__()
+        self.hosts = hosts
+
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        validate_url(new_url, self.hosts)
+        return super().redirect_request(request, response, code, message, headers, new_url)
+
+def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
     request = urllib.request.Request(
         url,
         headers={"User-Agent": "Zakon-Legal-Source-Capture/1.0", "Accept": "*/*"},
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
+    opener = urllib.request.build_opener(AllowlistedRedirectHandler(hosts))
+    with opener.open(request, timeout=30) as response:
         final_url = response.geturl()
         content_type = response.headers.get("Content-Type", "application/octet-stream")
         payload = response.read(MAX_BYTES + 1)
@@ -61,7 +71,7 @@ def main() -> int:
         hosts = allowed_hosts(registry, key)
         url = source["official_url"]
         validate_url(url, hosts)
-        payload, final_url, content_type = capture(url)
+        payload, final_url, content_type = capture(url, hosts)
         validate_url(final_url, hosts)
         digest = hashlib.sha256(payload).hexdigest()
         expected = source.get("sha256", "").lower()
