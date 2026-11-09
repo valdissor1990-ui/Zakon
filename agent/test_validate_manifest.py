@@ -108,6 +108,9 @@ class ManifestValidationTests(unittest.TestCase):
             delta_path = root / "zakon-content.delta.json"
             delta_path.write_text(json.dumps(patch), encoding="utf-8")
             manifest["version_code"] = 8
+            with sqlite3.connect(root / "zakon-content.sqlite") as db:
+                db.execute("UPDATE content_metadata SET value='8' WHERE key='pack_version'")
+            manifest["database"]["sha256"] = hashlib.sha256((root / "zakon-content.sqlite").read_bytes()).hexdigest()
             manifest["delta"] = {
                 "file": delta_path.name,
                 "sha256": hashlib.sha256(delta_path.read_bytes()).hexdigest(),
