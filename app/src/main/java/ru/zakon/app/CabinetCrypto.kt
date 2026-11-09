@@ -118,7 +118,7 @@ class CabinetCrypto(private val context: Context) {
         }
     }
 
-    fun cipherForEncrypt(key: SecretKey = getSecretKey()): Cipher {
+    fun cipherForForEncrypt(key: SecretKey = getSecretKey()): Cipher {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
         return cipher
@@ -179,6 +179,8 @@ class CabinetCrypto(private val context: Context) {
     }
 
     fun decryptFileToCache(encFileName: String, displayName: String): File {
+        // keep only the file being opened
+        clearViewCache()
         val src = File(encryptedDir(), encFileName)
         require(src.exists()) { "missing encrypted file" }
         val raw = src.readBytes()
@@ -202,7 +204,23 @@ class CabinetCrypto(private val context: Context) {
     }
 
     fun clearViewCache() {
-        cacheDir().listFiles()?.forEach { it.delete() }
+        val dir = cacheDir()
+        dir.listFiles()?.forEach { f ->
+            try {
+                if (f.isFile) {
+                    // overwrite then delete to reduce recovery chance
+                    try {
+                        java.io.RandomAccessFile(f, "rw").use { raf ->
+                            val zeros = ByteArray(minOf(f.length(), 4096L).toInt())
+                            raf.write(zeros)
+                        }
+                    } catch (_: Exception) {}
+                    f.delete()
+                } else {
+                    f.deleteRecursively()
+                }
+            } catch (_: Exception) {}
+        }
     }
 
     fun importAndEncrypt(uriStream: ByteArray, displayName: String): String =
