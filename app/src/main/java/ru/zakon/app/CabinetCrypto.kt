@@ -118,7 +118,7 @@ class CabinetCrypto(private val context: Context) {
         }
     }
 
-    fun cipherForForEncrypt(key: SecretKey = getSecretKey()): Cipher {
+    fun cipherForEncrypt(key: SecretKey = getSecretKey()): Cipher {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
         return cipher
