@@ -12,10 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "content" / "sources" / "registry.json"
 MAX_BYTES = 25 * 1024 * 1024
 
-def allowed_hosts(registry: dict, source_key: str) -> set[str]:
-    source = next((item for item in registry.get("sources", []) if item.get("id") == source_key), None)
+def allowed_hosts(registry: dict, registry_id: str) -> set[str]:
+    source = next((item for item in registry.get("sources", []) if item.get("id") == registry_id), None)
     if source is None:
-        raise ValueError(f"Source is not in the approved registry: {source_key}")
+        raise ValueError(f"Source is not in the approved registry: {registry_id}")
     urls = [source.get("url", ""), source.get("access_url", "")]
     return {
         urlparse(value).netloc.lower()
@@ -71,7 +71,10 @@ def main() -> int:
     captured = []
     for source in sources:
         key = source["key"]
-        hosts = allowed_hosts(registry, key)
+        registry_id = source.get("registry_id", key)
+        if not isinstance(key, str) or not key or "/" in key or "\\" in key or key in {".", ".."}:
+            raise SystemExit("Each capture key must be a safe, non-empty path segment")
+        hosts = allowed_hosts(registry, registry_id)
         url = source["official_url"]
         validate_url(url, hosts)
         payload, final_url, content_type = capture(url, hosts)
@@ -90,6 +93,7 @@ def main() -> int:
         (directory / filename).write_bytes(payload)
         metadata = {
             "source_key": key,
+            "registry_id": registry_id,
             "requested_url": url,
             "final_url": final_url,
             "retrieved_at": retrieved_at,
