@@ -164,6 +164,9 @@ private fun ContentUpdateSection(store: LegalStore) {
                     val databaseUrl = database?.optString("download_url")
                         ?.takeIf { it.isNotBlank() }
                         ?: database?.optString("url")?.takeIf { it.isNotBlank() }
+                    if (databaseUrl != null) require(databaseUrl.startsWith("https://")) {
+                        "Адрес правовой базы должен использовать HTTPS"
+                    }
                     val legacyPackUrl = manifest.optString("pack_url", "")
                     val expectedSha = (
                         database?.optString("sha256")?.takeIf { it.isNotBlank() }
@@ -175,12 +178,14 @@ private fun ContentUpdateSection(store: LegalStore) {
                     }
 
                     val delta = manifest.optJSONObject("delta")
-                    if (delta != null && store.installedPackVersion() > 0 &&
+                    if (!force && delta != null && store.installedPackVersion() > 0 &&
                         delta.optInt("from_version_code", -1) == store.installedPackVersion()
                     ) {
                         val deltaUrl = delta.optString("download_url", "")
                         val deltaSha = delta.optString("sha256", "").lowercase()
-                        if (deltaUrl.isNotBlank() && deltaSha.isNotBlank()) {
+                        if (deltaUrl.startsWith("https://") && deltaSha.isNotBlank() &&
+                            delta.optInt("to_version_code", -1) == version
+                        ) {
                             try {
                                 val deltaBytes = httpGetBytes(deltaUrl)
                                 require(sha256Hex(deltaBytes) == deltaSha) { "SHA-256 обновления-дельты не совпал" }
@@ -189,7 +194,7 @@ private fun ContentUpdateSection(store: LegalStore) {
                                 ) {
                                     java.util.zip.GZIPInputStream(deltaBytes.inputStream()).use { it.readBytes() }
                                 } else deltaBytes
-                                store.applyDatabaseDelta(String(patchBytes, Charsets.UTF_8), label)
+                                store.applyDatabaseDelta(String(patchBytes, Charsets.UTF_8), label, version)
                                 return@withContext "Правовая база обновлена небольшим пакетом: v$version."
                             } catch (_: Exception) {
                                 // A failed delta is rolled back; retry with the verified full DB below.
