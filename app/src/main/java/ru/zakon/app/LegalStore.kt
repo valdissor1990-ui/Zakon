@@ -122,9 +122,9 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         )
     }
 
-    fun installedPackVersion(): Int = metaPrefs.getInt("pack_version", 5)
+    fun installedPackVersion(): Int = metaPrefs.getInt("pack_version", 0)
 
-    fun installedPackLabel(): String = metaPrefs.getString("pack_label", "встроенная") ?: "встроенная"
+    fun installedPackLabel(): String = metaPrefs.getString("pack_label", "не загружена") ?: "не загружена"
 
     private fun setInstalledPack(version: Int, label: String) {
         metaPrefs.edit().putInt("pack_version", version).putString("pack_label", label).apply()
