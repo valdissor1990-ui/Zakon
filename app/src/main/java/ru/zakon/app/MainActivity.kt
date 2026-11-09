@@ -1,6 +1,7 @@
 package ru.zakon.app
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +78,19 @@ private fun ZakonApp(store: LegalStore) {
     val scope = rememberCoroutineScope()
     val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
     var cabinetBackHandler by remember { mutableStateOf<(() -> Boolean)?>(null) }
+    val activity = LocalContext.current as? android.app.Activity
+
+    // Block screenshots on cabinet screens
+    SideEffect {
+        val win = activity?.window
+        if (win != null) {
+            if (route == "cabinet") {
+                win.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+            } else {
+                win.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
+        }
+    }
 
     fun goBack() {
         if (route == "cabinet" && cabinetBackHandler?.invoke() == true) return
@@ -239,7 +254,6 @@ private fun CodeBookCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    // Компактная книга: чёткая обложка, лёгкий объём без 3D-искажений
     Column(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -250,7 +264,6 @@ private fun CodeBookCard(
                 .height(110.dp)
                 .padding(end = 2.dp, bottom = 2.dp)
         ) {
-            // слой страниц
             Box(
                 Modifier
                     .matchParentSize()
@@ -258,7 +271,7 @@ private fun CodeBookCard(
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFF0E8D8))
             )
-            Box(
+                       Box(
                 Modifier
                     .matchParentSize()
                     .shadow(6.dp, RoundedCornerShape(10.dp))
@@ -278,7 +291,6 @@ private fun CodeBookCard(
                         IconBadge(symbol, 36.dp)
                     }
                 }
-                // корешок
                 Box(
                     Modifier
                         .fillMaxHeight()
