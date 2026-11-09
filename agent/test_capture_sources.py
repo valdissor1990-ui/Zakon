@@ -6,6 +6,7 @@ from capture_sources import (
     MAX_BYTES,
     AllowlistedRedirectHandler,
     capture,
+    allowed_hosts,
     validate_url,
 )
 
@@ -43,6 +44,16 @@ class FakeOpener:
 class SourceCaptureSafetyTests(unittest.TestCase):
     def setUp(self):
         self.hosts = {"publication.pravo.gov.ru"}
+
+    def test_capture_key_resolves_registered_source_id(self):
+        registry = {"sources": [{
+            "id": "pravo_law_bank",
+            "url": "https://pravo.gov.ru/"
+        }]}
+        self.assertEqual(
+            allowed_hosts(registry, "pravo_law_bank"),
+            {"pravo.gov.ru"}
+        )
 
     def test_accepts_registered_https_host(self):
         validate_url("https://publication.pravo.gov.ru/document", self.hosts)
