@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,10 +79,11 @@ private fun ZakonApp(store: LegalStore) {
     val scope = rememberCoroutineScope()
     val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
     var cabinetBackHandler by remember { mutableStateOf<(() -> Boolean)?>(null) }
-    val activity = LocalContext.current as? android.app.Activity
+    val view = LocalView.current
 
     SideEffect {
-        val win = activity?.window
+        @Suppress("ContextCastToActivity")
+        val win = (view.context as? android.app.Activity)?.window
         if (win != null) {
             if (route == "cabinet") {
                 win.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
