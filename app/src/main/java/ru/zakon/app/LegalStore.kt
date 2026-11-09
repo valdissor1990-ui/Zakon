@@ -313,10 +313,13 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             }
         }
 
-        db.beginTransaction()
+        // Defer FK enforcement while the patch is being applied; validate the final graph before commit.
+        db.setForeignKeyConstraintsEnabled(false)
         try {
-            for (table in deleteOrder) {
-                val operation = operations.optJSONObject(table) ?: continue
+            db.beginTransaction()
+            try {
+                for (table in deleteOrder) {
+                    val operation = operations.optJSONObject(table) ?: continue
                 val deletes = operation.optJSONArray("delete") ?: org.json.JSONArray()
                 for (index in 0 until deletes.length()) {
                     val key = deletes.getJSONArray(index)
@@ -353,10 +356,18 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                     val updated = db.update(table, values, "$primaryKey=?", arrayOf(keyValue))
                     if (updated == 0) db.insertOrThrow(table, null, values)
                 }
+                }
+                db.rawQuery("PRAGMA foreign_key_check", null).use { cursor ->
+                    require(!cursor.moveToFirst()) {
+                        "Обновление нарушает связи между правовыми документами"
+                    }
+                }
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
             }
-            db.setTransactionSuccessful()
         } finally {
-            db.endTransaction()
+            db.setForeignKeyConstraintsEnabled(true)
         }
 
         check(metaPrefs.edit().putInt("pack_version", toVersion)
