@@ -67,6 +67,18 @@ private fun readBounded(input: java.io.InputStream, maxBytes: Int): ByteArray {
 
 private fun gunzipBounded(bytes: ByteArray, maxBytes: Int): ByteArray =
     java.util.zip.GZIPInputStream(bytes.inputStream()).use { readBounded(it, maxBytes) }
+
+private fun copyBounded(input: java.io.InputStream, output: java.io.OutputStream, maxBytes: Long) {
+    val buffer = ByteArray(8192)
+    var total = 0L
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        total += count
+        require(total <= maxBytes) { "Распакованная база превышает допустимый размер" }
+        output.write(buffer, 0, count)
+    }
+}
 private fun httpGetBytes(url: String, maxBytes: Int): ByteArray {
     var current = URL(url)
     require(current.protocol.equals("https", ignoreCase = true)) {
@@ -249,26 +261,22 @@ private fun ContentUpdateSection(store: LegalStore) {
                         val downloaded = httpGetBytes(databaseUrl, 256 * 1024 * 1024)
                         require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
                         require(sha256Hex(downloaded) == expectedSha) { "SHA-256 базы не совпал" }
-                        val rawFile = java.io.File(context.cacheDir, "zakon-content-download.tmp")
                         val sqliteFile = java.io.File(context.cacheDir, "zakon-content-install.sqlite")
-                        rawFile.writeBytes(downloaded)
                         try {
                             val isGzip = downloaded.size >= 2 &&
                                 downloaded[0] == 0x1f.toByte() && downloaded[1] == 0x8b.toByte()
                             if (isGzip) {
-                                rawFile.inputStream().use { input ->
-                                    val unpacked = gunzipBounded(input.readBytes(), 512 * 1024 * 1024)
-                                    sqliteFile.outputStream().use { output -> output.write(unpacked) }
+                                java.util.zip.GZIPInputStream(downloaded.inputStream()).use { input ->
+                                    sqliteFile.outputStream().use { output ->
+                                        copyBounded(input, output, 512L * 1024 * 1024)
+                                    }
                                 }
                             } else {
-                                downloaded.inputStream().use { input ->
-                                    sqliteFile.outputStream().use { output -> input.copyTo(output) }
-                                }
+                                sqliteFile.outputStream().use { output -> output.write(downloaded) }
                             }
                             store.installDatabaseFile(sqliteFile, version, label)
                             "Правовая база установлена: v$version."
                         } finally {
-                            rawFile.delete()
                             sqliteFile.delete()
                         }
                     } else if (legacyPackUrl.isNotBlank()) {
