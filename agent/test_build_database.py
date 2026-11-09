@@ -4,6 +4,8 @@ import json
 import sys
 import tempfile
 import unittest
+import hashlib
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -11,6 +13,51 @@ import build_database
 
 
 class BuildDatabaseSafetyTests(unittest.TestCase):
+    def test_source_evidence_requires_real_original_and_matching_metadata(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            evidence = root / "content" / "evidence" / "official"
+            evidence.mkdir(parents=True)
+            payload = b"Captured official source bytes"
+            digest = hashlib.sha256(payload).hexdigest()
+            (evidence / f"{digest}.source").write_bytes(payload)
+            metadata = {
+                "source_key": "official",
+                "requested_url": "https://example.gov/law",
+                "final_url": "https://example.gov/law",
+                "retrieved_at": "2026-11-09T12:00:00Z",
+                "byte_length": len(payload),
+                "sha256": digest,
+                "evidence_file": f"{digest}.source",
+                "legal_text_extraction_performed": False
+            }
+            (evidence / f"{digest}.json").write_text(json.dumps(metadata), encoding="utf-8")
+            source = {
+                "key": "official",
+                "sha256": digest,
+                "official_url": metadata["requested_url"],
+                "retrieved_at": metadata["retrieved_at"]
+            }
+            registry = {"url": "https://example.gov/"}
+            with patch.object(build_database, "ROOT", root):
+                self.assertEqual(build_database.validate_source_evidence(source, registry), digest)
+                (evidence / f"{digest}.source").write_bytes(b"tampered")
+                with self.assertRaisesRegex(ValueError, "does not match its SHA-256"):
+                    build_database.validate_source_evidence(source, registry)
+
+    def test_source_evidence_rejects_missing_capture(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = {
+                "key": "official",
+                "sha256": hashlib.sha256(b"source").hexdigest(),
+                "official_url": "https://example.gov/law",
+                "retrieved_at": "2026-11-09T12:00:00Z"
+            }
+            with patch.object(build_database, "ROOT", root):
+                with self.assertRaisesRegex(ValueError, "captured original or metadata is missing"):
+                    build_database.validate_source_evidence(source, {"url": "https://example.gov/"})
+
     def test_failed_validation_preserves_previous_database(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
