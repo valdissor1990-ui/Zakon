@@ -158,8 +158,8 @@ def build(records_path: Path, output_dir: Path) -> None:
     db.close()
 
     version_code = release.get("version_code")
-    if not isinstance(version_code, int) or version_code < 1:
-        raise ValueError("release.version_code must be a positive, monotonically increasing integer")
+    if not isinstance(version_code, int) or version_code < 7:
+        raise ValueError("release.version_code must be an integer >= 7 for the first SQLite release, then increase monotonically (legacy JSON versions reached 6)")
 
     manifest = {
         "schema_version": 1,
