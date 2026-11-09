@@ -49,6 +49,43 @@ class ManifestValidationTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
+    def test_accepts_version_bound_delta(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path, manifest = self._fixture(root)
+            patch = {"schema_version": 1, "from_version_code": 7, "to_version_code": 8, "operations": {}}
+            delta_path = root / "zakon-content.delta.json"
+            delta_path.write_text(json.dumps(patch), encoding="utf-8")
+            manifest["version_code"] = 8
+            manifest["delta"] = {
+                "file": delta_path.name,
+                "sha256": hashlib.sha256(delta_path.read_bytes()).hexdigest(),
+                "from_version_code": 7,
+                "to_version_code": 8,
+                "download_url": "https://example.org/zakon-content.delta.json"
+            }
+            path.write_text(json.dumps(manifest), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(VALIDATOR), str(path)], capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+    def test_rejects_delta_for_wrong_target_version(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path, manifest = self._fixture(root)
+            patch = {"schema_version": 1, "from_version_code": 7, "to_version_code": 8, "operations": {}}
+            delta_path = root / "zakon-content.delta.json"
+            delta_path.write_text(json.dumps(patch), encoding="utf-8")
+            manifest["delta"] = {
+                "file": delta_path.name,
+                "sha256": hashlib.sha256(delta_path.read_bytes()).hexdigest(),
+                "from_version_code": 7,
+                "to_version_code": 7,
+                "download_url": "https://example.org/zakon-content.delta.json"
+            }
+            path.write_text(json.dumps(manifest), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(VALIDATOR), str(path)], capture_output=True, text=True, check=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("target version", result.stderr)
     def test_rejects_checksum_mismatch(self):
         with tempfile.TemporaryDirectory() as temporary:
             path, manifest = self._fixture(Path(temporary))
