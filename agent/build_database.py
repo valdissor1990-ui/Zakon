@@ -98,10 +98,13 @@ def build(records_path: Path, output_dir: Path) -> None:
     if not release.get("version") or not release.get("created_at") or not release.get("effective_as_of"):
         raise ValueError("Release version, created_at and effective_as_of are required")
     validate_iso_date(release.get("effective_as_of"), "release.effective_as_of", required=True)
-    if not isinstance(release.get("created_at"), str) or not re.fullmatch(
-        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", release["created_at"]
-    ):
+    if not isinstance(release.get("created_at"), str):
         raise ValueError("release.created_at must be UTC ISO-8601 with seconds and Z")
+    from datetime import datetime
+    try:
+        datetime.strptime(release["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError as error:
+        raise ValueError("release.created_at must be a valid UTC ISO-8601 timestamp") from error
     version_code = release.get("version_code")
     if isinstance(version_code, bool) or not isinstance(version_code, int) or version_code < 7:
         raise ValueError("release.version_code must be an integer >= 7 for the first SQLite release, then increase monotonically (legacy JSON versions reached 6)")
