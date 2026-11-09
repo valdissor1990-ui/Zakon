@@ -33,7 +33,6 @@ def build(records_path: Path, output_dir: Path) -> None:
         raise ValueError("No legal documents supplied; refusing to create an empty release")
     if not release.get("version") or not release.get("created_at") or not release.get("effective_as_of"):
         raise ValueError("Release version, created_at and effective_as_of are required")
-
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = output_dir / "zakon-content.sqlite"
     working_db_path = output_dir / ".zakon-content.sqlite.tmp"
@@ -153,6 +152,10 @@ def build(records_path: Path, output_dir: Path) -> None:
     db.execute(
         "INSERT INTO content_release(version,created_at,effective_as_of,manifest_sha256,status) VALUES(?,?,?,?,?)",
         (release["version"], release["created_at"], release["effective_as_of"], sha256(raw), "draft")
+    )
+    db.executemany(
+        "INSERT INTO content_metadata(key,value) VALUES(?,?)",
+        [("pack_version", str(version_code)), ("pack_label", release["version"])]
     )
     db.commit()
     integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
