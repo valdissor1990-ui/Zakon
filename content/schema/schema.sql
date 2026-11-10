@@ -1,5 +1,11 @@
 PRAGMA foreign_keys = ON;
 
+-- Installation metadata is stored in the same transaction as content updates.
+CREATE TABLE IF NOT EXISTS content_metadata (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS content_release (
     id INTEGER PRIMARY KEY,
     version TEXT NOT NULL UNIQUE,

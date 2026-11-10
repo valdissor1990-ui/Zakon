@@ -1,9 +1,9 @@
 name: Content checks
 on:
   push:
-    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml", ".github/workflows/content-release.yml"]
   pull_request:
-    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
+    paths: ["content/**", "agent/**", ".github/workflows/content-check.yml", ".github/workflows/content-release.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,10 +19,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check Python syntax
-        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py agent/build_database.py
+        run: python -m py_compile agent/*.py
+      - name: Validate workflow YAML syntax
+        run: |
+          ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.{yml,yaml}").sort.each { |file| YAML.parse_file(file); puts "YAML OK: #{file}" }'
       - name: Check content tooling
         run: |
           python agent/validate_source_registry.py
+          python agent/validate_catalog.py
           python agent/build_database.py --help
       - name: Run content pipeline regression tests
         run: python -m unittest discover -s agent -p "test_*.py"

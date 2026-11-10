@@ -33,25 +33,162 @@ private val Accent = Color(0xFF8A6A1A)
 internal const val DEFAULT_CONTENT_MANIFEST_URL =
     "https://raw.githubusercontent.com/valdissor1990-ui/Zakon/main/content/updates/manifest.json"
 
+private const val CONTENT_SIGNING_PUBLIC_KEY_BASE64 =
+    "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAhyJyhnYkSl1CNWShuTslaiBZW4tfGWTko+2E1hX9V3TqQ4E7jbhZ3y5RgJ6uHy/PyQlCaanCuWwfka6C3aj7HrFXPG5jqWSS2HLsfOKDclUqtyQB2yZqAW5UZA0uSJYf4QyDHI8TLif7nVwZz0ckgYmcdrv2Q1n1mDxDPTlM3LG3kfWSpLH9LkdJmaQIdx/C+ZyEs90gBpPwFghsTw3lZNbrV4j5/2aH5EUHdxZxu3XqirkMfhAvVzyEoqnDTIXiA4AxphrHL16FPH4kC3FqeyUyVvBvwqB0zG6DeKvQJQvQydRe9ZzPUbwj4X0edo6xLoqXJ4od66kWXpyZG4LD3ifvN/0IJL8AVxAvV7vVjMcAY7Id9WdcCN9K799eqswSdC/bYTBYOzfiiFZ0P2qqvq9Kg2jgRTVmTqm8BK/pP9i7/CTlsBumZ5WC3ebfSiF0h8SHMnndPJqN0k4gp0o8fCLDZ9Ma9lCjnC59JlzC2/BvbBSLAsD8PI7wDdFGQZxtAgMBAAE="
+
+private fun verifyManifestSignature(manifestBytes: ByteArray, signatureBytes: ByteArray) {
+    val encodedKey = android.util.Base64.decode(CONTENT_SIGNING_PUBLIC_KEY_BASE64, android.util.Base64.DEFAULT)
+    val publicKey = java.security.KeyFactory.getInstance("RSA")
+        .generatePublic(java.security.spec.X509EncodedKeySpec(encodedKey))
+    val verifier = java.security.Signature.getInstance("SHA256withRSA")
+    verifier.initVerify(publicKey)
+    verifier.update(manifestBytes)
+    require(verifier.verify(signatureBytes)) { "Цифровая подпись правовой базы недействительна" }
+}
+
 private fun sha256Hex(bytes: ByteArray): String {
     val dig = MessageDigest.getInstance("SHA-256").digest(bytes)
     return dig.joinToString("") { "%02x".format(it) }
 }
 
-private fun httpGetBytes(url: String): ByteArray {
-    val conn = (URL(url).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 20_000
-        readTimeout = 60_000
-        requestMethod = "GET"
-        instanceFollowRedirects = true
+private fun readBounded(input: java.io.InputStream, maxBytes: Int): ByteArray {
+    val output = java.io.ByteArrayOutputStream(minOf(maxBytes, 8192))
+    val buffer = ByteArray(8192)
+    var total = 0
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        total += count
+        require(total <= maxBytes) { "Загружаемый файл превышает допустимый размер" }
+        output.write(buffer, 0, count)
     }
+    return output.toByteArray()
+}
+
+private fun gunzipBounded(bytes: ByteArray, maxBytes: Int): ByteArray =
+    java.util.zip.GZIPInputStream(bytes.inputStream()).use { readBounded(it, maxBytes) }
+
+private fun httpDownloadToFile(
+    url: String,
+    target: java.io.File,
+    maxBytes: Long,
+    expectedSha256: String
+) {
+    var current = URL(url)
+    require(current.protocol.equals("https", ignoreCase = true)) {
+        "Загрузка правовой базы разрешена только по HTTPS"
+    }
+    require(expectedSha256.matches(Regex("^[0-9a-fA-F]{64}$"))) {
+        "В manifest указан некорректный SHA-256 базы"
+    }
+    val parent = requireNotNull(target.parentFile) { "Не удалось определить каталог загрузки" }
+    check(parent.exists() || parent.mkdirs()) { "Не удалось создать каталог загрузки" }
+    val temporary = java.io.File(parent, target.name + ".part")
     try {
-        val code = conn.responseCode
-        if (code !in 200..299) error("HTTP $code")
-        return conn.inputStream.use { it.readBytes() }
+        repeat(6) { redirectCount ->
+            val conn = (current.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 20_000
+                readTimeout = 60_000
+                requestMethod = "GET"
+                instanceFollowRedirects = false
+            }
+            try {
+                val code = conn.responseCode
+                if (code in 300..399) {
+                    require(redirectCount < 5) { "Слишком много перенаправлений при загрузке базы" }
+                    val location = conn.getHeaderField("Location")
+                        ?: error("Сервер вернул перенаправление без адреса")
+                    val next = URL(current, location)
+                    require(next.protocol.equals("https", ignoreCase = true) &&
+                        next.userInfo == null
+                    ) { "Запрещено перенаправление загрузки правовой базы на небезопасный адрес" }
+                    current = next
+                } else {
+                    if (code !in 200..299) error("HTTP $code")
+                    val contentLength = conn.contentLengthLong
+                    require(contentLength < 0L || contentLength <= maxBytes) {
+                        "Загружаемый файл превышает допустимый размер"
+                    }
+                    val digest = MessageDigest.getInstance("SHA-256")
+                    var total = 0L
+                    conn.inputStream.use { input ->
+                        temporary.outputStream().buffered().use { output ->
+                            val buffer = ByteArray(64 * 1024)
+                            while (true) {
+                                val count = input.read(buffer)
+                                if (count < 0) break
+                                total += count
+                                require(total <= maxBytes) { "Загружаемый файл превышает допустимый размер" }
+                                digest.update(buffer, 0, count)
+                                output.write(buffer, 0, count)
+                            }
+                        }
+                    }
+                    val actualSha = digest.digest().joinToString("") { "%02x".format(it) }
+                    require(actualSha.equals(expectedSha256, ignoreCase = true)) {
+                        "SHA-256 базы не совпал"
+                    }
+                    if (target.exists()) check(target.delete()) { "Не удалось заменить временный файл базы" }
+                    check(temporary.renameTo(target)) { "Не удалось сохранить загруженный файл базы" }
+                    return
+                }
+            } finally {
+                conn.disconnect()
+            }
+        }
+        error("Не удалось завершить перенаправление загрузки")
     } finally {
-        conn.disconnect()
+        temporary.delete()
     }
+}
+
+private fun copyBounded(input: java.io.InputStream, output: java.io.OutputStream, maxBytes: Long) {
+    val buffer = ByteArray(8192)
+    var total = 0L
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        total += count
+        require(total <= maxBytes) { "Распакованная база превышает допустимый размер" }
+        output.write(buffer, 0, count)
+    }
+}
+private fun httpGetBytes(url: String, maxBytes: Int): ByteArray {
+    var current = URL(url)
+    require(current.protocol.equals("https", ignoreCase = true)) {
+        "Загрузка правовой базы разрешена только по HTTPS"
+    }
+    repeat(6) { redirectCount ->
+        val conn = (current.openConnection() as HttpURLConnection).apply {
+            connectTimeout = 20_000
+            readTimeout = 60_000
+            requestMethod = "GET"
+            instanceFollowRedirects = false
+        }
+        try {
+            val code = conn.responseCode
+            if (code in 300..399) {
+                require(redirectCount < 5) { "Слишком много перенаправлений при загрузке базы" }
+                val location = conn.getHeaderField("Location")
+                    ?: error("Сервер вернул перенаправление без адреса")
+                val next = URL(current, location)
+                require(next.protocol.equals("https", ignoreCase = true)) {
+                    "Запрещено перенаправление загрузки правовой базы на незащищённый HTTP"
+                }
+                current = next
+            } else {
+                if (code !in 200..299) error("HTTP $code")
+                val contentLength = conn.contentLengthLong
+                require(contentLength < 0L || contentLength <= maxBytes.toLong()) {
+                    "Загружаемый файл превышает допустимый размер"
+                }
+                return conn.inputStream.use { readBounded(it, maxBytes) }
+            }
+        } finally {
+            conn.disconnect()
+        }
+    }
+    error("Не удалось завершить перенаправление загрузки")
 }
 
 @Composable
@@ -119,23 +256,111 @@ private fun ContentUpdateSection(store: LegalStore) {
         scope.launch {
             try {
                 val resultMsg = withContext(Dispatchers.IO) {
-                    val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL)
+                    val manifestBytes = httpGetBytes(DEFAULT_CONTENT_MANIFEST_URL, 1024 * 1024)
                     val manifest = JSONObject(String(manifestBytes, Charsets.UTF_8))
-                    val remoteVer = manifest.getInt("version")
-                    val label = manifest.optString("label", "")
-                    val packUrl = manifest.getString("pack_url")
-                    val expectedSha = manifest.optString("sha256", "").lowercase()
-                    remoteInfo = "Сервер: v$remoteVer · $label"
-                    if (!force && remoteVer <= store.installedPackVersion()) {
-                        return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
+                    val validation = manifest.optJSONObject("validation")
+                        ?: error("Серверный манифест не содержит подтверждения проверки правовой базы")
+                    require(validation.optString("status") == "validated") {
+                        "Новый выпуск правовой базы ещё не прошёл проверку и не опубликован. Локальные данные сохранены."
                     }
-                    val packBytes = httpGetBytes(packUrl)
-                    if (expectedSha.isNotBlank()) {
-                        val actual = sha256Hex(packBytes)
-                        if (actual != expectedSha) error("SHA-256 не совпал")
+                    val database = manifest.optJSONObject("database")
+                        ?: error("Удалённые JSON-пакеты больше не принимаются. Требуется подписанный SQLite-выпуск.")
+                    val signature = manifest.optJSONObject("signature")
+                        ?: error("В манифесте отсутствует цифровая подпись издателя")
+                    require(signature.optString("algorithm") == "SHA256withRSA") {
+                        "Неподдерживаемый алгоритм подписи правовой базы"
                     }
-                    val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
-                    "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
+                    val signatureUrl = signature.optString("download_url", "")
+                    require(signatureUrl.startsWith("https://")) { "Адрес подписи должен использовать HTTPS" }
+                    verifyManifestSignature(manifestBytes, httpGetBytes(signatureUrl, 16 * 1024))
+                    val version = manifest.optInt(
+                        "version",
+                        manifest.optInt(
+                            "version_code",
+                            manifest.optString("content_version").toIntOrNull() ?: 0
+                        )
+                    )
+                    require(version > 0) { "В manifest отсутствует корректная версия контента" }
+                    val label = manifest.optString(
+                        "content_version",
+                        manifest.optString("label", manifest.optString("effective_as_of", ""))
+                    )
+                    val databaseUrl = database?.optString("download_url")
+                        ?.takeIf { it.isNotBlank() }
+                        ?: database?.optString("url")?.takeIf { it.isNotBlank() }
+                    if (databaseUrl != null) require(databaseUrl.startsWith("https://")) {
+                        "Адрес правовой базы должен использовать HTTPS"
+                    }
+                    val expectedSha = (
+                        database?.optString("sha256")?.takeIf { it.isNotBlank() }
+                            ?: manifest.optString("sha256", "")
+                        ).lowercase()
+                    remoteInfo = "Сервер: v$version · $label"
+                    val installedVersion = store.installedPackVersion()
+                    require(version >= installedVersion) {
+                        "Сервер предлагает более старую базу v$version; установлена v$installedVersion. Понижение версии запрещено."
+                    }
+                    if (!force && version == installedVersion) {
+                        return@withContext "Уже актуальная база (v$installedVersion)."
+                    }
+
+                    val delta = manifest.optJSONObject("delta")
+                    if (!force && delta != null && store.installedPackVersion() > 0 &&
+                        delta.optInt("from_version_code", -1) == store.installedPackVersion()
+                    ) {
+                        val deltaUrl = delta.optString("download_url", "")
+                        val deltaSha = delta.optString("sha256", "").lowercase()
+                        if (deltaUrl.startsWith("https://") && deltaSha.isNotBlank() &&
+                            delta.optInt("to_version_code", -1) == version
+                        ) {
+                            try {
+                                val deltaBytes = httpGetBytes(deltaUrl, 64 * 1024 * 1024)
+                                require(sha256Hex(deltaBytes) == deltaSha) { "SHA-256 обновления-дельты не совпал" }
+                                val patchBytes = if (deltaBytes.size >= 2 &&
+                                    deltaBytes[0] == 0x1f.toByte() && deltaBytes[1] == 0x8b.toByte()
+                                ) {
+                                    gunzipBounded(deltaBytes, 128 * 1024 * 1024)
+                                } else deltaBytes
+                                store.applyDatabaseDelta(String(patchBytes, Charsets.UTF_8), label, version)
+                                return@withContext "Правовая база обновлена небольшим пакетом: v$version."
+                            } catch (_: Exception) {
+                                // A failed delta is rolled back; retry with the verified full DB below.
+                                remoteInfo = "Дельта не подошла; загружается полная база."
+                            }
+                        }
+                    }
+
+                    if (!databaseUrl.isNullOrBlank()) {
+                        require(expectedSha.isNotBlank()) { "В manifest отсутствует SHA-256 базы" }
+                        val downloadedFile = java.io.File(context.cacheDir, "zakon-content-download.bin")
+                        val sqliteFile = java.io.File(context.cacheDir, "zakon-content-install.sqlite")
+                        try {
+                            httpDownloadToFile(
+                                databaseUrl,
+                                downloadedFile,
+                                256L * 1024 * 1024,
+                                expectedSha
+                            )
+                            java.io.BufferedInputStream(downloadedFile.inputStream()).use { buffered ->
+                                buffered.mark(2)
+                                val isGzip = buffered.read() == 0x1f && buffered.read() == 0x8b
+                                buffered.reset()
+                                val input = if (isGzip) java.util.zip.GZIPInputStream(buffered) else buffered
+                                input.use {
+                                    sqliteFile.outputStream().buffered().use { output ->
+                                        copyBounded(it, output, 512L * 1024 * 1024)
+                                    }
+                                }
+                            }
+                            store.installDatabaseFile(sqliteFile, version, label)
+                            "Правовая база установлена: v$version."
+                        } finally {
+                            downloadedFile.delete()
+                            sqliteFile.delete()
+                        }
+                    } else {
+                        error("В подписанном manifest не указан адрес SQLite-базы")
+                    }
                 }
                 status = resultMsg
             } catch (e: Exception) {

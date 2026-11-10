@@ -80,7 +80,11 @@ private fun ZakonApp(store: LegalStore) {
     val scrollIndexMap = remember { mutableStateMapOf<String, Int>() }
     var cabinetBackHandler by remember { mutableStateOf<(() -> Boolean)?>(null) }
     val view = LocalView.current
-
+    var showContentSetup by remember { mutableStateOf(false) }
+    LaunchedEffect(store) {
+        val hasContent = withContext(Dispatchers.IO) { store.getDocuments().isNotEmpty() }
+        if (!hasContent) showContentSetup = true
+    }
     SideEffect {
         @Suppress("ContextCastToActivity")
         val win = (view.context as? android.app.Activity)?.window
@@ -241,6 +245,25 @@ private fun ZakonApp(store: LegalStore) {
                     else -> PlaceholderLight("Экран в разработке", padding)
                 }
             }
+        }
+        if (showContentSetup) {
+            AlertDialog(
+                onDismissRequest = { showContentSetup = false },
+                title = { Text("База законов не загружена") },
+                text = {
+                    Text(
+                        "Правовые документы загружаются отдельно от приложения. Откройте настройки и нажмите «Проверить и обновить». После загрузки чтение и поиск будут работать без интернета."
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showContentSetup = false; navigate("settings") }) {
+                        Text("Открыть настройки")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showContentSetup = false }) { Text("Позже") }
+                }
+            )
         }
     }
 }
@@ -473,7 +496,7 @@ private fun LiabilityScreen(code: RfCode, padding: PaddingValues) {
     Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ответственность по ${code.shortName}", color = TextOnLight, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         if (code.liabilityItems.isEmpty()) {
-            Text("Раздел в подготовке.", color = TextMutedOnLight)
+            Text("Материалы будут доступны после публикации и загрузки проверенной правовой базы.", color = TextMutedOnLight)
         } else {
             code.liabilityItems.forEach { item ->
                 Column(

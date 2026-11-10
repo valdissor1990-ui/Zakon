@@ -1,0 +1,240 @@
+name: Build and publish legal content
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Content release label (for example 1.0.0)"
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: legal-content-release
+  cancel-in-progress: false
+
+jobs:
+  prepare-candidate:
+    name: Build and validate release candidate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Validate source registry, catalog and tests
+        run: |
+          set -euo pipefail
+          python -m py_compile agent/*.py
+          python agent/validate_source_registry.py
+          python agent/validate_catalog.py
+          python -m unittest discover -s agent -p "test_*.py"
+      - name: Build draft SQLite release candidate
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          test -f content/records/records.json || {
+            echo "::error::content/records/records.json is missing. No legal content will be fabricated."
+            exit 1
+          }
+          python agent/build_database.py --records content/records/records.json --output dist/content
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          path = Path("dist/content/manifest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          if data["content_version"] != os.environ["RELEASE_VERSION"]:
+              raise SystemExit("workflow release_version must match records.release.version")
+          if data["validation"]["status"] != "draft":
+              raise SystemExit("Candidate must remain draft until environment approval")
+          print("Candidate prepared:", data["content_version"], "version_code", data["version_code"])
+          PY
+      - name: Upload immutable release candidate for reviewer inspection
+        uses: actions/upload-artifact@v7
+        with:
+          name: legal-content-candidate
+          path: dist/content/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Add reviewer instructions
+        run: |
+          {
+            echo "## Правовая база — кандидат выпуска"
+            echo ""
+            echo "Сформирован черновой SQLite-пакет. Он ещё не опубликован и не имеет статуса validated."
+            echo "Перед одобрением проверьте артефакт **legal-content-candidate** в этом запуске Actions."
+            echo "После этого отдельная job ожидает подтверждения в GitHub Environment legal-content-approval."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  approve-and-publish:
+    name: Approve, sign and publish
+    needs: prepare-candidate
+    runs-on: ubuntu-latest
+    environment: legal-content-approval
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v7
+        with:
+          name: legal-content-candidate
+          path: dist/content
+      - name: Validate candidate identity and mark reviewed database
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import sqlite3
+          from pathlib import Path
+
+          path = Path("dist/content/manifest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          if data["content_version"] != os.environ["RELEASE_VERSION"]:
+              raise SystemExit("Candidate content_version does not match requested release")
+          if data["validation"].get("status") != "draft":
+              raise SystemExit("Only a draft candidate can enter the approval/publish job")
+          database_path = path.parent / data["database"]["file"]
+          if hashlib.sha256(database_path.read_bytes()).hexdigest() != data["database"]["sha256"]:
+              raise SystemExit("Candidate SQLite SHA-256 changed after preparation")
+          with sqlite3.connect(database_path) as db:
+              cursor = db.execute(
+                  "UPDATE content_release SET status='validated' WHERE version=? AND status='draft'",
+                  (data["content_version"],)
+              )
+              if cursor.rowcount != 1:
+                  raise SystemExit("Expected exactly one draft content_release row for this version")
+              db.commit()
+          data["database"]["sha256"] = hashlib.sha256(database_path.read_bytes()).hexdigest()
+          data["validation"]["status"] = "validated"
+          data["validation"]["manual_approval_required"] = False
+          data["validation"]["approved_by_workflow"] = True
+          release_base = (
+              f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
+              f"content-{os.environ['RELEASE_VERSION']}"
+          )
+          data["database"]["download_url"] = f"{release_base}/zakon-content.sqlite"
+          data["signature"] = {
+              "algorithm": "SHA256withRSA",
+              "download_url": f"{release_base}/manifest.sig"
+          }
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+      - name: Generate version-bound delta when a previous approved release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PREVIOUS_MANIFEST="content/updates/manifest.json"
+          if [ ! -f "$PREVIOUS_MANIFEST" ]; then
+            echo "No previous manifest; this will be a full database release."
+            exit 0
+          fi
+          PREVIOUS_STATUS=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('validation',{}).get('status','draft'))")
+          PREVIOUS_VERSION=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('content_version',''))")
+          PREVIOUS_CODE=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST')).get('version_code',json.load(open('$PREVIOUS_MANIFEST')).get('version',0)))")
+          if [ "$PREVIOUS_STATUS" != "validated" ] || [ -z "$PREVIOUS_VERSION" ] || [ "$PREVIOUS_CODE" -le 0 ]; then
+            echo "No previous validated release; publishing full database only."
+            exit 0
+          fi
+          CURRENT_CODE=$(python -c "import json; print(json.load(open('dist/content/manifest.json'))['version_code'])")
+          if [ "$CURRENT_CODE" -le "$PREVIOUS_CODE" ]; then
+            echo "::error::Content version_code must increase beyond the previous validated release."
+            exit 1
+          fi
+          mkdir -p dist/previous
+          if ! gh release download "content-$PREVIOUS_VERSION" --pattern "zakon-content.sqlite" --dir dist/previous; then
+            echo "::warning::Previous database asset is unavailable; publishing full database only."
+            exit 0
+          fi
+          EXPECTED_PREVIOUS_SHA=$(python -c "import json; print(json.load(open('$PREVIOUS_MANIFEST'))['database']['sha256'])")
+          ACTUAL_PREVIOUS_SHA=$(sha256sum dist/previous/zakon-content.sqlite | cut -d ' ' -f 1)
+          if [ "$ACTUAL_PREVIOUS_SHA" != "$EXPECTED_PREVIOUS_SHA" ]; then
+            echo "::warning::Previous database asset does not match its approved manifest; publishing full database only."
+            exit 0
+          fi
+          if ! python agent/create_database_delta.py \
+            --base dist/previous/zakon-content.sqlite \
+            --target dist/content/zakon-content.sqlite \
+            --from-version "$PREVIOUS_CODE" \
+            --to-version "$CURRENT_CODE" \
+            --output dist/content/zakon-content.delta.json; then
+            echo "::warning::Delta could not be generated safely; publishing the validated full database only."
+            rm -f dist/content/zakon-content.delta.json
+            exit 0
+          fi
+          PREVIOUS_VERSION_CODE="$PREVIOUS_CODE" python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          root = Path("dist/content")
+          manifest_path = root / "manifest.json"
+          patch_path = root / "zakon-content.delta.json"
+          data = json.loads(manifest_path.read_text(encoding="utf-8"))
+          data["delta"] = {
+              "file": patch_path.name,
+              "sha256": hashlib.sha256(patch_path.read_bytes()).hexdigest(),
+              "from_version_code": int(os.environ["PREVIOUS_VERSION_CODE"]),
+              "to_version_code": data["version_code"],
+              "download_url": (
+                  f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
+                  f"content-{data['content_version']}/zakon-content.delta.json"
+              )
+          }
+          manifest_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+      - name: Sign content manifest
+        env:
+          LEGAL_CONTENT_SIGNING_PRIVATE_KEY: ${{ secrets.LEGAL_CONTENT_SIGNING_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$LEGAL_CONTENT_SIGNING_PRIVATE_KEY" || {
+            echo "::error::Repository secret LEGAL_CONTENT_SIGNING_PRIVATE_KEY is not configured."
+            exit 1
+          }
+          printf '%s' "$LEGAL_CONTENT_SIGNING_PRIVATE_KEY" > "$RUNNER_TEMP/legal-content-private.pem"
+          chmod 600 "$RUNNER_TEMP/legal-content-private.pem"
+          openssl dgst -sha256 -sign "$RUNNER_TEMP/legal-content-private.pem" \
+            -out dist/content/manifest.sig dist/content/manifest.json
+          openssl dgst -sha256 -verify content/signing/public.pem \
+            -signature dist/content/manifest.sig dist/content/manifest.json
+          rm -f "$RUNNER_TEMP/legal-content-private.pem"
+      - name: Validate signed manifest and SQLite database
+        run: python agent/validate_manifest.py dist/content/manifest.json
+      - name: Publish versioned content release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: content-${{ inputs.release_version }}
+          name: "ЗаконЪ — база знаний ${{ inputs.release_version }}"
+          body: |
+            Независимый выпуск правовой базы ЗаконЪ.
+            Версия приложения не изменяется.
+            Кандидат собран и проверен до ручного approval; публикация разрешена только после подтверждения через environment legal-content-approval.
+            Если предыдущая база доступна, в выпуск также включён пакет обновления-дельты.
+          files: dist/content/*
+          fail_on_unmatched_files: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish current manifest
+        run: |
+          set -euo pipefail
+          cp dist/content/manifest.json content/updates/manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/updates/manifest.json
+          git commit -m "Publish legal content manifest ${{ inputs.release_version }}"
+          git push origin HEAD:main

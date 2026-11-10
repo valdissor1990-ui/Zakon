@@ -1,6 +1,6 @@
 {
   "registry_version": 1,
-  "policy": "Each legal text candidate must be checked against three state-operated sources where the act is available. A mismatch blocks publication and requires manual review.",
+  "policy": "Each legal text candidate must be checked against three distinct state-operated information systems representing at least two operators where the act is available. A mismatch blocks publication and requires manual review.",
   "sources": [
     {
       "id": "pravo_official_publication",
@@ -14,7 +14,10 @@
         "official_text",
         "amendment_acts",
         "entry_into_force_metadata"
-      ]
+      ],
+      "state_operated": true,
+      "system_id": "official_publication_portal",
+      "operator_id": "gspi"
     },
     {
       "id": "pravo_law_bank",
@@ -27,22 +30,44 @@
         "consolidated_text",
         "document_metadata",
         "current_revision"
-      ]
+      ],
+      "state_operated": true,
+      "system_id": "integrated_law_bank",
+      "operator_id": "gspi"
     },
     {
       "id": "minjust_npa",
       "name": "Портал Минюста России «Нормативные правовые акты в Российской Федерации»",
-      "url": "https://minjust.gov.ru/ru/appeals/faq/605/",
+      "url": "https://pravo.minjust.ru/",
       "publisher": "Министерство юстиции Российской Федерации",
       "role": "independent_state_cross_check",
-      "authority": "state_reference_database",
+      "authority": "official_minjust_state_portal",
       "use_for": [
-        "document_metadata",
+        "federal_and_regional_npa_cross_check",
         "systematized_text_cross_check",
         "registration_metadata"
       ],
-      "access_url": "http://pravo-minjust.ru/",
-      "access_note": "Адрес портала указан на официальном сайте Минюста; веб-доступ к самому порталу может быть нестабильным. HTTPS-страница Минюста используется как подтверждение источника."
+      "state_operated": true,
+      "system_id": "minjust_npa_portal",
+      "operator_id": "minjust"
+    },
+    {
+      "id": "minjust_official_documents",
+      "name": "Официальный сайт Минюста России — раздел документов",
+      "url": "https://minjust.gov.ru/ru/documents/",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "role": "official_ministry_document_reference",
+      "authority": "official_ministry_documentation",
+      "use_for": [
+        "document_title",
+        "document_number",
+        "adoption_date",
+        "ministry_hosted_text",
+        "consolidated_text_cross_check"
+      ],
+      "state_operated": true,
+      "system_id": "minjust_official_documents",
+      "operator_id": "minjust"
     }
   ],
   "publication_rule": {
@@ -50,6 +75,8 @@
     "minimum_state_operated_sources": 3,
     "mismatch_action": "block_release",
     "missing_source_action": "manual_review",
-    "never_generate_missing_legal_text": true
+    "never_generate_missing_legal_text": true,
+    "minimum_distinct_systems": 3,
+    "minimum_distinct_operators": 2
   }
 }

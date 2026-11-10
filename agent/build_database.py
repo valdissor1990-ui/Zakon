@@ -21,6 +21,99 @@ def require_hash(value: str, label: str) -> None:
     if not isinstance(value, str) or not HEX64.fullmatch(value.lower()):
         raise ValueError(f"{label} must be a 64-character SHA-256 hex string")
 
+def validate_iso_date(value: str | None, label: str, required: bool = False) -> None:
+    if value in (None, ""):
+        if required:
+            raise ValueError(f"{label} is required")
+        return
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        raise ValueError(f"{label} must use YYYY-MM-DD")
+    from datetime import date
+    try:
+        date.fromisoformat(value)
+    except ValueError as error:
+        raise ValueError(f"{label} is not a valid calendar date") from error
+
+
+def validate_article_hierarchy(document_id: str, articles: list[dict]) -> None:
+    article_ids = {item.get("id") for item in articles}
+    parents = {}
+    for article in articles:
+        article_id = article.get("id")
+        parent_id = article.get("parent_id")
+        if parent_id is not None and parent_id not in article_ids:
+            raise ValueError(f"{document_id}: article {article_id} parent must belong to the same document")
+        parents[article_id] = parent_id
+
+    visiting = set()
+    visited = set()
+
+    def visit(article_id: str) -> None:
+        if article_id in visiting:
+            raise ValueError(f"{document_id}: cyclic article parent hierarchy")
+        if article_id in visited:
+            return
+        visiting.add(article_id)
+        parent_id = parents[article_id]
+        if parent_id is not None:
+            visit(parent_id)
+        visiting.remove(article_id)
+        visited.add(article_id)
+
+    for article_id in parents:
+        visit(article_id)
+
+
+def validate_source_evidence(source: dict, registry_source: dict) -> str:
+    """Require the exact captured original and its provenance metadata before a source can enter a release."""
+    key = source.get("key")
+    if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,100}", key):
+        raise ValueError("Every source needs a safe capture key using lowercase letters, digits, '_' or '-'")
+    digest = source.get("sha256")
+    require_hash(digest, f"source {key} sha256")
+    digest = digest.lower()
+
+    allowed_hosts = {
+        urlparse(value).netloc.lower()
+        for value in (registry_source.get("url", ""), registry_source.get("access_url", ""))
+        if urlparse(value).scheme == "https" and urlparse(value).netloc
+    }
+    requested_url = source.get("official_url", "")
+    parsed = urlparse(requested_url)
+    if parsed.scheme != "https" or parsed.username or parsed.password or parsed.netloc.lower() not in allowed_hosts:
+        raise ValueError(f"Source {key}: official_url must use an allowlisted credential-free HTTPS host")
+
+    evidence_dir = ROOT / "content" / "evidence" / key
+    evidence_path = evidence_dir / f"{digest}.source"
+    metadata_path = evidence_dir / f"{digest}.json"
+    if not evidence_path.is_file() or not metadata_path.is_file():
+        raise ValueError(
+            f"Source {key}: captured original or metadata is missing; run agent/capture_sources.py "
+            "and commit content/evidence before building"
+        )
+
+    payload = evidence_path.read_bytes()
+    if sha256(payload) != digest:
+        raise ValueError(f"Source {key}: saved original does not match its SHA-256")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    final_url = urlparse(metadata.get("final_url", ""))
+    if final_url.scheme != "https" or final_url.username or final_url.password or final_url.netloc.lower() not in allowed_hosts:
+        raise ValueError(f"Source {key}: captured final URL is not an allowlisted HTTPS address")
+    if metadata.get("source_key") != key or metadata.get("registry_id") != source.get("registry_id", key):
+        raise ValueError(f"Source {key}: capture metadata source identity does not match records.json")
+    if metadata.get("sha256", "").lower() != digest:
+        raise ValueError(f"Source {key}: capture metadata SHA-256 does not match the source record")
+    if metadata.get("requested_url") != requested_url:
+        raise ValueError(f"Source {key}: captured request URL differs from records.json")
+    if metadata.get("evidence_file") != evidence_path.name or metadata.get("byte_length") != len(payload):
+        raise ValueError(f"Source {key}: capture metadata does not describe the saved original")
+    if metadata.get("retrieved_at") != source.get("retrieved_at"):
+        raise ValueError(f"Source {key}: retrieved_at must match the captured evidence metadata")
+    if metadata.get("legal_text_extraction_performed") is not False:
+        raise ValueError(f"Source {key}: raw evidence metadata must confirm no automatic legal-text extraction")
+    return digest
+
+
 def build(records_path: Path, output_dir: Path) -> None:
     raw = records_path.read_bytes()
     data = json.loads(raw)
@@ -33,7 +126,23 @@ def build(records_path: Path, output_dir: Path) -> None:
         raise ValueError("No legal documents supplied; refusing to create an empty release")
     if not release.get("version") or not release.get("created_at") or not release.get("effective_as_of"):
         raise ValueError("Release version, created_at and effective_as_of are required")
-
+    validate_iso_date(release.get("effective_as_of"), "release.effective_as_of", required=True)
+    if not isinstance(release.get("created_at"), str):
+        raise ValueError("release.created_at must be UTC ISO-8601 with seconds and Z")
+    from datetime import datetime
+    try:
+        datetime.strptime(release["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError as error:
+        raise ValueError("release.created_at must be a valid UTC ISO-8601 timestamp") from error
+    version_code = release.get("version_code")
+    if isinstance(version_code, bool) or not isinstance(version_code, int) or version_code < 7:
+        raise ValueError("release.version_code must be an integer >= 7 for the first SQLite release, then increase monotonically (legacy JSON versions reached 6)")
+    current_manifest = ROOT / "content" / "updates" / "manifest.json"
+    if current_manifest.is_file():
+        current = json.loads(current_manifest.read_text(encoding="utf-8"))
+        previous_code = current.get("version_code", current.get("version", 0))
+        if isinstance(previous_code, int) and version_code <= previous_code:
+            raise ValueError(f"release.version_code must be greater than the currently published version {previous_code}")
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = output_dir / "zakon-content.sqlite"
     working_db_path = output_dir / ".zakon-content.sqlite.tmp"
@@ -46,20 +155,17 @@ def build(records_path: Path, output_dir: Path) -> None:
     db.execute("PRAGMA user_version=1")
 
     source_ids = {}
+    source_hashes = {}
     for source in source_rows:
         key = source["key"]
+        registry_id = source.get("registry_id", key)
         if key in source_ids:
-            raise ValueError(f"Duplicate source key: {key}")
-        if key not in registry_sources:
-            raise ValueError(f"Source key is not in approved registry: {key}")
-        require_hash(source.get("sha256"), f"source {key} sha256")
-        if not source.get("retrieved_at") or not source.get("official_url"):
-            raise ValueError(f"Source {key} is missing retrieval time or URL")
-        expected_hosts = {urlparse(registry_sources[key]["url"]).netloc.lower()}
-        if registry_sources[key].get("access_url"):
-            expected_hosts.add(urlparse(registry_sources[key]["access_url"]).netloc.lower())
-        if urlparse(source["official_url"]).netloc.lower() not in expected_hosts:
-            raise ValueError(f"Source {key}: captured URL host is not in the approved registry")
+            raise ValueError(f"Duplicate source capture key: {key}")
+        if registry_id not in registry_sources:
+            raise ValueError(f"Source registry_id is not in approved registry: {registry_id}")
+        if not all(source.get(field) for field in ("name", "publisher", "official_url", "source_type", "retrieved_at")):
+            raise ValueError(f"Source {key} is missing required provenance fields")
+        source_hashes[key] = validate_source_evidence(source, registry_sources[registry_id])
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
                source_document_id,sha256,notes) VALUES(?,?,?,?,?,?,?,?)""",
@@ -81,9 +187,19 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: at least three distinct source checks are required")
         if primary_key not in checked_keys:
             raise ValueError(f"{doc_id}: primary source must be included in source_checks")
-        if any(key not in source_ids or key not in registry_sources for key in checked_keys):
-            raise ValueError(f"{doc_id}: a checked source is not registered or not captured")
-        hosts = {urlparse(registry_sources[key]["url"]).netloc.lower() for key in checked_keys}
+        if any(key not in source_ids for key in checked_keys):
+            raise ValueError(f"{doc_id}: a checked source is not captured")
+        source_by_key = {source["key"]: source for source in source_rows}
+        hosts = {urlparse(source_by_key[key]["official_url"]).netloc.lower() for key in checked_keys}
+        registry_ids = {source_by_key[key].get("registry_id", key) for key in checked_keys}
+        if len(registry_ids) < 3:
+            raise ValueError(f"{doc_id}: checks must use three distinct registered state sources")
+        system_ids = {registry_sources[source_id].get("system_id") for source_id in registry_ids}
+        operator_ids = {registry_sources[source_id].get("operator_id") for source_id in registry_ids}
+        if None in system_ids or len(system_ids) < 3:
+            raise ValueError(f"{doc_id}: checks must cover three distinct state-operated information systems")
+        if None in operator_ids or len(operator_ids) < 2:
+            raise ValueError(f"{doc_id}: checks must cover at least two distinct state operators")
         if len(hosts) < 3:
             raise ValueError(f"{doc_id}: checks must cover three distinct source hosts")
         if any(item.get("status") != "match" for item in checks):
@@ -92,21 +208,44 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: every source check needs retrieved_at")
         for item in checks:
             require_hash(item.get("sha256"), f"{doc_id} source check sha256")
+            if item["sha256"].lower() != source_hashes[item["source_key"]]:
+                raise ValueError(f"{doc_id}: source check hash does not match the captured source record")
+            if item["retrieved_at"] != next(
+                source["retrieved_at"] for source in source_rows if source["key"] == item["source_key"]
+            ):
+                raise ValueError(f"{doc_id}: source check retrieved_at does not match the captured evidence")
         if doc.get("verification_status") != "approved":
             raise ValueError(f"{doc_id}: document must be manually approved before database build")
+        if not doc.get("title") or not doc.get("document_type") or not doc.get("legal_status"):
+            raise ValueError(f"{doc_id}: title, document_type and legal_status are required")
+        for field in ("adopted_at", "published_at", "effective_from", "effective_to"):
+            validate_iso_date(doc.get(field), f"{doc_id}.{field}")
+        validate_iso_date(doc.get("verified_at"), f"{doc_id}.verified_at", required=True)
+        if doc.get("effective_from") and doc.get("effective_to") and doc["effective_to"] < doc["effective_from"]:
+            raise ValueError(f"{doc_id}: effective_to precedes effective_from")
         articles = sorted(doc.get("articles", []), key=lambda a: int(a.get("ordinal", 0)))
         if not articles:
             raise ValueError(f"{doc_id}: document has no articles")
         seen_article_ids = set()
+        seen_ordinals = set()
         for article in articles:
             article_id = article.get("id")
             article_number = article.get("number")
             body = article.get("body")
+            ordinal = article.get("ordinal")
             if not article_id or article_id in seen_article_ids:
                 raise ValueError(f"{doc_id}: every article needs a unique, non-empty id")
+            if isinstance(ordinal, bool) or not isinstance(ordinal, int) or ordinal < 1 or ordinal in seen_ordinals:
+                raise ValueError(f"{doc_id}: article {article_id} needs a unique positive ordinal")
             seen_article_ids.add(article_id)
+            seen_ordinals.add(ordinal)
             if not article_number or not isinstance(body, str) or not body.strip():
                 raise ValueError(f"{doc_id}: article {article_id} needs a number and non-empty legal text")
+            validate_iso_date(article.get("effective_from"), f"{doc_id}.{article_id}.effective_from")
+            validate_iso_date(article.get("effective_to"), f"{doc_id}.{article_id}.effective_to")
+            if article.get("effective_from") and article.get("effective_to") and article["effective_to"] < article["effective_from"]:
+                raise ValueError(f"{doc_id}: article {article_id} effective_to precedes effective_from")
+        validate_article_hierarchy(doc_id, articles)
         text_digest = sha256("\n".join(a.get("body", "") for a in articles).encode("utf-8"))
         if doc.get("text_sha256") != text_digest:
             raise ValueError(f"{doc_id}: text_sha256 does not match article bodies")
@@ -138,33 +277,97 @@ def build(records_path: Path, output_dir: Path) -> None:
                  article["number"], article.get("title"), article["body"],
                  article.get("effective_from"), article.get("effective_to"))
             )
+        for history in doc.get("status_history", []):
+            source_key = history.get("source_key")
+            if source_key not in source_ids:
+                raise ValueError(f"{doc_id}: status history must cite a captured source")
+            if not history.get("status") or not history.get("recorded_at"):
+                raise ValueError(f"{doc_id}: status history needs status and recorded_at")
+            validate_iso_date(history.get("valid_from"), f"{doc_id}.status_history.valid_from")
+            validate_iso_date(history.get("valid_to"), f"{doc_id}.status_history.valid_to")
+            validate_iso_date(history.get("recorded_at"), f"{doc_id}.status_history.recorded_at", required=True)
+            if history.get("valid_from") and history.get("valid_to") and history["valid_to"] < history["valid_from"]:
+                raise ValueError(f"{doc_id}: status history valid_to precedes valid_from")
+            db.execute(
+                """INSERT INTO legal_status_history(document_id,status,valid_from,valid_to,
+                   source_id,recorded_at,explanation) VALUES(?,?,?,?,?,?,?)""",
+                (doc_id, history["status"], history.get("valid_from"), history.get("valid_to"),
+                 source_ids[source_key], history["recorded_at"], history.get("explanation"))
+            )
+
+
+    document_ids = {item["id"] for item in documents}
+    article_records = {
+        article["id"]: (document["id"], article["number"])
+        for document in documents for article in document.get("articles", [])
+    }
+    for doc in documents:
+        doc_id = doc["id"]
+        own_article_ids = {article["id"] for article in doc.get("articles", [])}
         for ref in doc.get("cross_references", []):
+            from_id = ref.get("from_article_id")
+            target_doc = ref.get("to_document_id")
+            resolved_id = ref.get("resolved_article_id")
+            status = ref.get("resolution_status")
+            if from_id not in own_article_ids:
+                raise ValueError(f"{doc_id}: cross-reference origin must belong to this document")
+            if not ref.get("to_article_number") or not ref.get("reference_text"):
+                raise ValueError(f"{doc_id}: cross-reference needs target article number and reference text")
+            if status not in {"resolved", "ambiguous", "unresolved"}:
+                raise ValueError(f"{doc_id}: invalid cross-reference resolution_status")
+            if target_doc is not None and target_doc not in document_ids:
+                raise ValueError(f"{doc_id}: cross-reference target document is absent from this release")
+            if status == "resolved":
+                if not resolved_id or resolved_id not in article_records:
+                    raise ValueError(f"{doc_id}: resolved cross-reference target article does not exist")
+                resolved_doc, resolved_number = article_records[resolved_id]
+                if target_doc is not None and resolved_doc != target_doc:
+                    raise ValueError(f"{doc_id}: resolved cross-reference points outside to_document_id")
+                if resolved_number != ref["to_article_number"]:
+                    raise ValueError(f"{doc_id}: resolved cross-reference article number does not match target")
+            elif resolved_id is not None:
+                raise ValueError(f"{doc_id}: only resolved cross-references may set resolved_article_id")
             db.execute(
                 """INSERT INTO cross_references(from_article_id,to_document_id,to_article_number,
                    reference_text,resolved_article_id,resolution_status) VALUES(?,?,?,?,?,?)""",
-                (ref["from_article_id"], ref.get("to_document_id"), ref["to_article_number"],
-                 ref["reference_text"], ref.get("resolved_article_id"), ref["resolution_status"])
+                (from_id, target_doc, ref["to_article_number"], ref["reference_text"], resolved_id, status)
             )
 
     db.execute(
         "INSERT INTO content_release(version,created_at,effective_as_of,manifest_sha256,status) VALUES(?,?,?,?,?)",
         (release["version"], release["created_at"], release["effective_as_of"], sha256(raw), "draft")
     )
+    db.executemany(
+        "INSERT INTO content_metadata(key,value) VALUES(?,?)",
+        [("pack_version", str(version_code)), ("pack_label", release["version"])]
+    )
     db.commit()
+    foreign_key_errors = db.execute("PRAGMA foreign_key_check").fetchall()
+    if foreign_key_errors:
+        db.close()
+        raise ValueError(f"SQLite foreign-key check failed: {foreign_key_errors[:3]}")
     integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
     if integrity != "ok":
         db.close()
         raise ValueError(f"SQLite integrity check failed: {integrity}")
     db.close()
 
+
     manifest = {
         "schema_version": 1,
+        "version_code": version_code,
         "content_version": release["version"],
         "created_at": release["created_at"],
         "effective_as_of": release["effective_as_of"],
-        "database": {"file": db_path.name, "sha256": sha256(working_db_path.read_bytes())},
-        "validation": {"status": "draft", "documents": len(documents),
-                       "manual_approval_required": True}
+        "database": {
+            "file": db_path.name,
+            "sha256": sha256(working_db_path.read_bytes())
+        },
+        "validation": {
+            "status": "draft",
+            "documents": len(documents),
+            "manual_approval_required": True
+        }
     }
     manifest_tmp_path = output_dir / ".manifest.json.tmp"
     manifest_tmp_path.write_text(
