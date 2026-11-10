@@ -15,12 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,11 +40,10 @@ private fun Context.findAct(): FragmentActivity? {
     return null
 }
 
+/** Strong biometrics only — aligns with Keystore AUTH_BIOMETRIC_STRONG (ZAK-03). */
 private fun bioOk(ctx: Context): Boolean {
     val bm = BiometricManager.from(ctx)
-    val s = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-    if (s == BiometricManager.BIOMETRIC_SUCCESS) return true
-    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
+    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
 }
 
 private fun showBio(act: FragmentActivity, ok: () -> Unit, err: (String) -> Unit) {
@@ -52,14 +54,13 @@ private fun showBio(act: FragmentActivity, ok: () -> Unit, err: (String) -> Unit
         }
     })
     try {
-        val bm = BiometricManager.from(act)
-        val auth = if (bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS)
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
-        else BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
         p.authenticate(
             BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Вход в личный кабинет").setSubtitle("Подтвердите личность")
-                .setAllowedAuthenticators(auth).setNegativeButtonText("Пароль").build()
+                .setTitle("Вход в личный кабинет")
+                .setSubtitle("Подтвердите личность")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                .setNegativeButtonText("Пароль")
+                .build()
         )
     } catch (e: Exception) { err(e.message ?: "Ошибка") }
 }
@@ -88,10 +89,40 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
     var ws by remember { mutableStateOf(CabinetWorkspace()) }
     var route by remember { mutableStateOf<CabRoute>(CabRoute.Hub) }
     var tab by remember { mutableStateOf(0) }
+    var loadError by remember { mutableStateOf<String?>(null) }
     val canBio = remember(ctx) { bioOk(ctx) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && unlocked) {
+                unlocked = false
+                pin = ""
+                loadError = null
+                st.clearViewCache()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    fun applyLoadResult(result: WorkspaceLoad) {
+        when (result) {
+            is WorkspaceLoad.Ok -> { ws = result.ws; loadError = null }
+            is WorkspaceLoad.Empty -> { ws = CabinetWorkspace(); loadError = null }
+            is WorkspaceLoad.DecryptError -> {
+                ws = CabinetWorkspace()
+                loadError = "Не удалось расшифровать данные кабинета. ${result.message}"
+            }
+        }
+    }
+
+    fun unlockAndLoad() {
+        unlocked = true
+        applyLoadResult(st.loadWorkspaceResult())
+    }
+
     fun popCabinet(): Boolean {
-        // true = handled inside cabinet; false = leave cabinet to previous screen
         if (setPin) {
             if (st.hasVerifier()) {
                 setPin = false
@@ -113,17 +144,17 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
             else -> false
         }
     }
-    SideEffect {
-        onProvideBack?.invoke { popCabinet() }
+    SideEffect { onProvideBack?.invoke { popCabinet() } }
+    DisposableEffect(Unit) { onDispose { onProvideBack?.invoke { false } } }
+    fun save(n: CabinetWorkspace): Boolean {
+        val ok = st.saveWorkspace(n)
+        if (ok) ws = n else error = "Не удалось сохранить данные"
+        return ok
     }
-    DisposableEffect(Unit) {
-        onDispose { onProvideBack?.invoke { false } }
-    }
-    fun save(n: CabinetWorkspace) { ws = n; st.saveWorkspace(n) }
     DisposableEffect(Unit) { onDispose { st.clearViewCache() } }
     LaunchedEffect(unlocked, setPin) {
         if (!unlocked && !setPin && st.hasPassword() && canBio && act != null && !st.isLockedOut())
-            showBio(act, { unlocked = true; ws = st.loadWorkspace() }, {})
+            showBio(act, { unlockAndLoad() }, {})
     }
     Box(Modifier.fillMaxSize().padding(padding).background(CabBg)) {
         when {
@@ -134,9 +165,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                     pin, { if (it.length <= 32) pin = it },
                     label = { Text("Пароль") },
                     visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true, enabled = !busy, modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnCab, unfocusedTextColor = OnCab,
                         focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
@@ -147,9 +176,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                     pin2, { if (it.length <= 32) pin2 = it },
                     label = { Text("Повтор") },
                     visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true, enabled = !busy, modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnCab, unfocusedTextColor = OnCab,
                         focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
@@ -158,11 +185,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                 )
                 error?.let { Text(it, color = Color(0xFFC62828)) }
                 if (busy) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(color = AccentGold, strokeWidth = 3.dp, modifier = Modifier.size(28.dp))
                         Spacer(Modifier.width(12.dp))
                         Text("Сохранение пароля…", color = MutedGray, fontSize = 14.sp)
@@ -181,15 +204,12 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                                     try {
                                         withContext(Dispatchers.Default) { st.setPassword(pin) }
                                         setPin = false
-                                        unlocked = true
-                                        ws = st.loadWorkspace()
+                                        unlockAndLoad()
                                         pin = ""; pin2 = ""
                                         error = null
                                     } catch (e: Exception) {
                                         error = e.message ?: "Не удалось сохранить пароль"
-                                    } finally {
-                                        busy = false
-                                    }
+                                    } finally { busy = false }
                                 }
                             }
                         }
@@ -206,9 +226,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                     pin, { if (it.length <= 32) pin = it },
                     label = { Text("Пароль") },
                     visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    enabled = !st.isLockedOut(),
-                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true, enabled = !st.isLockedOut(), modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnCab, unfocusedTextColor = OnCab,
                         focusedBorderColor = AccentGold, unfocusedBorderColor = LineGray,
@@ -224,7 +242,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                         scope.launch {
                             val ok = withContext(Dispatchers.Default) { st.checkPassword(pin) }
                             busy = false
-                            if (ok) { unlocked = true; ws = st.loadWorkspace(); pin = ""; error = null }
+                            if (ok) { unlockAndLoad(); pin = ""; error = null }
                             else error = "Неверный пароль"
                         }
                     },
@@ -237,14 +255,27 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                         onClick = {
                             val a = act
                             if (a == null) error = "Нет Activity"
-                            else showBio(a, { unlocked = true; ws = st.loadWorkspace(); error = null }, { error = it })
+                            else showBio(a, { unlockAndLoad(); error = null }, { error = it })
                         },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = OnCab)
                     ) { Text("Отпечаток / Face ID") }
                 } else {
-                    Text("Биометрия недоступна на этом устройстве", color = MutedGray, fontSize = 12.sp)
+                    Text("Сильная биометрия недоступна — используйте пароль", color = MutedGray, fontSize = 12.sp)
                 }
+            }
+            loadError != null -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Ошибка данных", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Spacer(Modifier.height(12.dp))
+                Text(loadError!!, color = Color(0xFFC62828), fontSize = 14.sp)
+                Spacer(Modifier.height(16.dp))
+                Text("Данные не удалены. Попробуйте войти снова или восстановить из резервной копии.", color = MutedGray, fontSize = 13.sp)
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = { unlocked = false; loadError = null; pin = "" },
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentGold, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) { Text("Вернуться к входу") }
             }
             else -> {
                 BackHandler(enabled = route !is CabRoute.Hub) { popCabinet() }
@@ -253,31 +284,31 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                         onClients = { route = CabRoute.Clients },
                         onCases = { route = CabRoute.Cases },
                         onCase = { route = CabRoute.KView(it); tab = 0 },
-                        onLock = { unlocked = false; pin = ""; st.clearViewCache() })
+                        onLock = { unlocked = false; pin = ""; loadError = null; st.clearViewCache() })
                     CabRoute.Clients -> SimpleList("Клиенты", ws.clients.map { it.id to it.name },
                         onBack = { route = CabRoute.Hub }, onAdd = { route = CabRoute.CEdit(null) }, onOpen = { route = CabRoute.CEdit(it) })
                     is CabRoute.CEdit -> ClientForm(ws.clients.find { it.id == r.id },
                         onBack = { route = CabRoute.Clients },
                         onSave = { c ->
                             val list = if (ws.clients.any { it.id == c.id }) ws.clients.map { if (it.id == c.id) c else it } else listOf(c) + ws.clients
-                            save(ws.copy(clients = list)); route = CabRoute.Clients
+                            if (save(ws.copy(clients = list))) route = CabRoute.Clients
                         },
-                        onDelete = { id -> save(ws.copy(clients = ws.clients.filter { it.id != id })); route = CabRoute.Clients })
+                        onDelete = { id -> if (save(ws.copy(clients = ws.clients.filter { it.id != id }))) route = CabRoute.Clients })
                     CabRoute.Cases -> SimpleList("Дела", ws.cases.map { it.id to "${it.title} · ${lab(CaseStatuses, it.status)}" },
                         onBack = { route = CabRoute.Hub }, onAdd = { route = CabRoute.KEdit(null) }, onOpen = { route = CabRoute.KView(it); tab = 0 })
                     is CabRoute.KEdit -> CaseForm(ws.cases.find { it.id == r.id }, ws.clients,
                         onBack = { route = if (r.id != null) CabRoute.KView(r.id!!) else CabRoute.Cases },
                         onSave = { c ->
                             val list = if (ws.cases.any { it.id == c.id }) ws.cases.map { if (it.id == c.id) c else it } else listOf(c) + ws.cases
-                            save(ws.copy(cases = list)); route = CabRoute.KView(c.id); tab = 0
+                            if (save(ws.copy(cases = list))) { route = CabRoute.KView(c.id); tab = 0 }
                         },
                         onDelete = { id ->
-                            save(ws.copy(
+                            if (save(ws.copy(
                                 cases = ws.cases.filter { it.id != id },
                                 events = ws.events.filter { it.caseId != id },
                                 docs = ws.docs.filter { it.caseId != id },
                                 tasks = ws.tasks.filter { it.caseId != id }
-                            )); route = CabRoute.Cases
+                            ))) route = CabRoute.Cases
                         })
                     is CabRoute.KView -> CaseView(ws, r.id, tab, { tab = it },
                         onBack = { route = CabRoute.Cases }, onEdit = { route = CabRoute.KEdit(r.id) },
