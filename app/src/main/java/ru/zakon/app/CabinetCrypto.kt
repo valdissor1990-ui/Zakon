@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.security.KeyStore
 import java.security.SecureRandom
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -18,11 +19,11 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 
 /**
- * Full cabinet cryptography:
+ * Cabinet cryptography:
  * - AES-256-GCM data key in Android Keystore (non-exportable)
  * - StrongBox when available
- * - optional user authentication for key use on API 30+
- * - string and file encrypt/decrypt helpers
+ * - user authentication required when hardware supports it (no silent downgrade)
+ * - UUID file names for attachments
  */
 class CabinetCrypto(private val context: Context) {
 
@@ -32,15 +33,26 @@ class CabinetCrypto(private val context: Context) {
         private const val GCM_TAG_BITS = 128
         private const val IV_BYTES = 12
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
+        /** Max attachment size: 25 MB */
+        const val MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
     }
 
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 
+    /**
+     * Returns existing key or creates a new one.
+     * Never silently drops user-authentication requirement.
+     * If StrongBox fails, retries without StrongBox but keeps auth flags.
+     */
     fun ensureKey(requireUserAuth: Boolean = true): SecretKey {
         if (keyStore.containsAlias(KEY_ALIAS)) {
             val entry = keyStore.getEntry(KEY_ALIAS, null) as KeyStore.SecretKeyEntry
             return entry.secretKey
         }
+        return createKey(requireUserAuth = requireUserAuth, tryStrongBox = true)
+    }
+
+    private fun createKey(requireUserAuth: Boolean, tryStrongBox: Boolean): SecretKey {
         val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
         val builder = KeyGenParameterSpec.Builder(
             KEY_ALIAS,
@@ -53,10 +65,12 @@ class CabinetCrypto(private val context: Context) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             builder.setUnlockedDeviceRequired(true)
-            try {
-                builder.setIsStrongBoxBacked(true)
-            } catch (_: Exception) {
-                // device may not support StrongBox
+            if (tryStrongBox) {
+                try {
+                    builder.setIsStrongBoxBacked(true)
+                } catch (_: Exception) {
+                    // device may not support StrongBox
+                }
             }
         }
 
@@ -73,22 +87,16 @@ class CabinetCrypto(private val context: Context) {
             builder.setUserAuthenticationValidityDurationSeconds(300)
         }
 
-        try {
+        return try {
             keyGenerator.init(builder.build())
-            return keyGenerator.generateKey()
+            keyGenerator.generateKey()
         } catch (e: Exception) {
-            // Fallback without StrongBox / without auth if hardware rejects
-            val fallback = KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .setRandomizedEncryptionRequired(true)
-                .build()
-            keyGenerator.init(fallback)
-            return keyGenerator.generateKey()
+            // Retry without StrongBox only; keep auth requirements
+            if (tryStrongBox) {
+                createKey(requireUserAuth = requireUserAuth, tryStrongBox = false)
+            } else {
+                throw e
+            }
         }
     }
 
@@ -162,10 +170,15 @@ class CabinetCrypto(private val context: Context) {
     fun cacheDir(): File =
         File(context.cacheDir, "cabinet_view").also { if (!it.exists()) it.mkdirs() }
 
-    /** Encrypt bytes into app-private file; returns relative name. */
+    /**
+     * Encrypt bytes into app-private file; returns relative name.
+     * Always uses UUID — never derived from user-provided filename (ZAK-05).
+     */
     fun encryptToFile(plain: ByteArray, preferredName: String? = null): String {
-        val name = preferredName?.replace(Regex("[^A-Za-z0-9._-]"), "_")
-            ?: ("att_" + System.currentTimeMillis() + "_" + SecureRandom().nextInt(1_000_000))
+        require(plain.size <= MAX_ATTACHMENT_BYTES) {
+            "Файл слишком большой (макс. ${MAX_ATTACHMENT_BYTES / (1024 * 1024)} МБ)"
+        }
+        val name = "att_" + UUID.randomUUID().toString().replace("-", "")
         val file = File(encryptedDir(), "$name.enc")
         val cipher = cipherForEncrypt()
         val iv = cipher.iv
@@ -179,11 +192,21 @@ class CabinetCrypto(private val context: Context) {
     }
 
     fun decryptFileToCache(encFileName: String, displayName: String): File {
-        // keep only the file being opened
         clearViewCache()
         val src = File(encryptedDir(), encFileName)
         require(src.exists()) { "missing encrypted file" }
-        val raw = src.readBytes()
+        require(src.length() <= MAX_ATTACHMENT_BYTES + 64) { "encrypted file too large" }
+        val raw = FileInputStream(src).use { fis ->
+            val size = src.length().toInt()
+            val buf = ByteArray(size)
+            var off = 0
+            while (off < size) {
+                val n = fis.read(buf, off, size - off)
+                if (n < 0) break
+                off += n
+            }
+            buf
+        }
         val buf = ByteBuffer.wrap(raw)
         val ivLen = buf.int
         require(ivLen in 8..32) { "bad iv" }
@@ -208,7 +231,6 @@ class CabinetCrypto(private val context: Context) {
         dir.listFiles()?.forEach { f ->
             try {
                 if (f.isFile) {
-                    // overwrite then delete to reduce recovery chance
                     try {
                         java.io.RandomAccessFile(f, "rw").use { raf ->
                             val zeros = ByteArray(minOf(f.length(), 4096L).toInt())
