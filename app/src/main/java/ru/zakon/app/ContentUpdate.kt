@@ -38,17 +38,39 @@ private fun sha256Hex(bytes: ByteArray): String {
     return dig.joinToString("") { "%02x".format(it) }
 }
 
-private fun httpGetBytes(url: String): ByteArray {
+private const val MAX_PACK_BYTES = 40 * 1024 * 1024 // 40 MB
+
+private fun httpGetBytes(url: String, maxBytes: Int = MAX_PACK_BYTES): ByteArray {
+    require(url.startsWith("https://")) { "Только HTTPS" }
     val conn = (URL(url).openConnection() as HttpURLConnection).apply {
         connectTimeout = 20_000
         readTimeout = 60_000
         requestMethod = "GET"
-        instanceFollowRedirects = true
+        instanceFollowRedirects = false
     }
     try {
         val code = conn.responseCode
+        if (code in 300..399) {
+            val loc = conn.getHeaderField("Location") ?: error("HTTP $code без Location")
+            require(loc.startsWith("https://")) { "Редирект только на HTTPS" }
+            return httpGetBytes(loc, maxBytes)
+        }
         if (code !in 200..299) error("HTTP $code")
-        return conn.inputStream.use { it.readBytes() }
+        val len = conn.contentLengthLong
+        if (len > maxBytes) error("Пакет слишком большой")
+        val out = java.io.ByteArrayOutputStream()
+        val buf = ByteArray(8192)
+        var total = 0
+        conn.inputStream.use { input ->
+            while (true) {
+                val n = input.read(buf)
+                if (n < 0) break
+                total += n
+                if (total > maxBytes) error("Пакет слишком большой")
+                out.write(buf, 0, n)
+            }
+        }
+        return out.toByteArray()
     } finally {
         conn.disconnect()
     }
@@ -60,7 +82,7 @@ internal fun SettingsScreen(store: LegalStore, padding: PaddingValues) {
     val scope = rememberCoroutineScope()
     val storage = remember { CabinetStorage(context) }
 
-    var tab by remember { mutableStateOf(0) } // 0 base, 1 security
+    var tab by remember { mutableStateOf(0) }
 
     Column(
         Modifier
@@ -125,15 +147,15 @@ private fun ContentUpdateSection(store: LegalStore) {
                     val label = manifest.optString("label", "")
                     val packUrl = manifest.getString("pack_url")
                     val expectedSha = manifest.optString("sha256", "").lowercase()
+                    require(expectedSha.matches(Regex("[0-9a-f]{64}"))) { "Манифест без корректного SHA-256" }
+                    require(packUrl.startsWith("https://")) { "pack_url должен быть HTTPS" }
                     remoteInfo = "Сервер: v$remoteVer · $label"
                     if (!force && remoteVer <= store.installedPackVersion()) {
                         return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
                     }
                     val packBytes = httpGetBytes(packUrl)
-                    if (expectedSha.isNotBlank()) {
-                        val actual = sha256Hex(packBytes)
-                        if (actual != expectedSha) error("SHA-256 не совпал")
-                    }
+                    val actual = sha256Hex(packBytes)
+                    if (actual != expectedSha) error("SHA-256 не совпал")
                     val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
                     "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
                 }
@@ -181,7 +203,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
 
     val bioStatus = remember {
         BiometricManager.from(context).canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
         )
     }
     val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
@@ -197,13 +219,13 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            if (bioOk) "Биометрия устройства: доступна (отпечаток / лицо)"
-            else "Биометрия: недоступна или не настроена в системе (код $bioStatus)",
+            if (bioOk) "Сильная биометрия: доступна"
+            else "Сильная биометрия: недоступна (код $bioStatus) — используйте пароль",
             color = Muted,
             fontSize = 13.sp
         )
         Text(
-            "Пароль нигде не хранится — только криптографический verifier. Биометрия показывается при входе в кабинет, если пароль включён и датчик настроен.",
+            "Пароль нигде не хранится — только криптографический verifier. Кабинет блокируется при сворачивании приложения.",
             color = Muted,
             fontSize = 12.sp,
             lineHeight = 16.sp
@@ -231,7 +253,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
                 onClick = {
                     message = null
                     when {
-                        currentPin.length < 6 -> message = "Минимум 6 символов"
+                        currentPin.length < 8 -> message = "Минимум 8 символов"
                         currentPin != confirmPin -> message = "Пароли не совпадают"
                         else -> {
                             storage.setPassword(currentPin)
@@ -286,7 +308,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
                 onClick = {
                     message = null
                     when {
-                        newPin.length < 6 -> message = "Минимум 6 символов"
+                        newPin.length < 8 -> message = "Минимум 8 символов"
                         newPin != confirmPin -> message = "Пароли не совпадают"
                         storage.changePassword(currentPin, newPin) -> {
                             message = "Пароль изменён"
@@ -339,7 +361,6 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
     }
 }
 
-/** Kept for callers that still reference the old name. */
 @Composable
 internal fun ContentUpdateScreen(store: LegalStore, padding: PaddingValues) {
     SettingsScreen(store, padding)
