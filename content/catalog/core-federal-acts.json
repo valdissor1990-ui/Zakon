@@ -33,7 +33,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 30.11.1994 51-ФЗ Гражданский кодекс часть первая",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/perechen-normativnyh-pravovyh-aktov-nadzora-za-deyatelnostyu-nekommercheskih-organizacij-privlecheniya-k-admin/",
+      "notes": "Официальный перечень Минюста содержит наименование, дату 30.11.1994 и номер 51-ФЗ, а также ссылку на интегрированный банк правовой информации. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-civil-code-part-2",
@@ -45,7 +47,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 26.01.1996 14-ФЗ Гражданский кодекс часть вторая",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://to66.minjust.gov.ru/ru/activity/directions/6/normativnoe-regulirovanie-v-sfere-gosudarstvennoj-registracii-aktov-grazhdanskogo-sostoyaniya/",
+      "notes": "Официальная страница территориального органа Минюста перечисляет часть вторую ГК РФ с датой 26.01.1996 и номером 14-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-civil-code-part-3",
@@ -57,7 +61,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 26.11.2001 146-ФЗ Гражданский кодекс часть третья",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/normativnoe-regulirovanie-v-sfere-notariata/",
+      "notes": "Официальная страница Минюста перечисляет часть третью ГК РФ с датой 26.11.2001 и номером 146-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-civil-code-part-4",
@@ -69,7 +75,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 18.12.2006 230-ФЗ Гражданский кодекс часть четвертая",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/perechen-normativnyh-pravovyh-aktov-nadzora-za-deyatelnostyu-nekommercheskih-organizacij-privlecheniya-k-admin/",
+      "notes": "Официальный перечень Минюста содержит часть четвёртую ГК РФ, дату 18.12.2006 и номер 230-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-criminal-code",
@@ -81,7 +89,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 13.06.1996 63-ФЗ Уголовный кодекс Российской Федерации",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/normativnoe-regulirovanie-v-sfere-notariata/",
+      "notes": "Официальная страница Минюста перечисляет УК РФ с датой 13.06.1996 и номером 63-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-code-of-administrative-offences",
@@ -105,7 +115,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 18.12.2001 174-ФЗ УПК РФ",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://to02.minjust.gov.ru/ru/activity/directions/4/pravovye-osnovy-advokatskoj-deyatelnosti/",
+      "notes": "Официальная страница территориального органа Минюста указывает УПК РФ от 18.12.2001 № 174-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-civil-procedure-code",
@@ -117,7 +129,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 14.11.2002 138-ФЗ ГПК РФ",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/normativnoe-regulirovanie-v-sfere-notariata/",
+      "notes": "Официальная страница Минюста перечисляет ГПК РФ с датой 14.11.2002 и номером 138-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-arbitration-procedure-code",
@@ -141,7 +155,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 30.12.2001 197-ФЗ Трудовой кодекс РФ",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/normativnoe-regulirovanie-v-sfere-notariata/",
+      "notes": "Официальная страница Минюста перечисляет ТК РФ с датой 30.12.2001 и номером 197-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-family-code",
@@ -153,7 +169,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 29.12.1995 223-ФЗ Семейный кодекс РФ",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://to66.minjust.gov.ru/ru/activity/directions/6/normativnoe-regulirovanie-v-sfere-gosudarstvennoj-registracii-aktov-grazhdanskogo-sostoyaniya/",
+      "notes": "Официальная страница территориального органа Минюста перечисляет СК РФ с датой 29.12.1995 и номером 223-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-tax-code-part-1",
@@ -177,7 +195,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 05.08.2000 117-ФЗ Налоговый кодекс часть вторая",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://www.minjust.gov.ru/ru/pages/normativnoe-regulirovanie-v-sfere-notariata/",
+      "notes": "Официальная страница Минюста перечисляет часть вторую НК РФ с датой 05.08.2000 и номером 117-ФЗ. Проверены только реквизиты, а не полнота действующей редакции. Полный текст, история поправок и периоды действия ещё не импортированы; перед публикацией требуется отдельная сверка по трём государственным системам."
     },
     {
       "id": "ru-advocacy-law",
