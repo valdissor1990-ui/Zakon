@@ -103,7 +103,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 30.12.2001 195-ФЗ КоАП РФ",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://minjust.gov.ru/uploaded/files/blokprava12-16let2ikred251016.pdf",
+      "notes": "Реквизиты (название, дата 30.12.2001 и номер 195-ФЗ) подтверждаются официальным информационным материалом Минюста. Материал старый и не является актуальной редакцией кодекса; полный текст и история поправок не импортированы. Перед включением в выпуск необходима сверка полного текста и всех поправок по трём государственным информационным системам."
     },
     {
       "id": "ru-criminal-procedure-code",
@@ -183,7 +185,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон 31.07.1998 146-ФЗ Налоговый кодекс часть первая",
-      "metadata_status": "provisional"
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://to19.minjust.gov.ru/uploaded/files/prilozhenie120.pdf",
+      "notes": "Реквизиты (Налоговый кодекс РФ, часть первая, дата 31.07.1998 и номер 146-ФЗ) подтверждаются официальным материалом территориального органа Минюста. Источник старый и не подтверждает действующую редакцию; полный текст и история поправок не импортированы. Перед включением в выпуск необходима сверка полного текста и всех поправок по трём государственным информационным системам."
     },
     {
       "id": "ru-tax-code-part-2",
