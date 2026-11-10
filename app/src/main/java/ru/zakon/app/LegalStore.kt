@@ -264,18 +264,31 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             for (i in 0 until docs.length()) {
                 val o = docs.getJSONObject(i)
                 val id = o.getString("id")
-                db.execSQL(
-                    """INSERT OR REPLACE INTO documents(id,title,document_type,number,legal_status,verification_status)
-                    VALUES(?,?,?,?,?,?)""".trimIndent(),
-                    arrayOf(
-                        id,
-                        o.optString("title", id),
-                        o.optString("document_type", "code"),
-                        o.optString("number", ""),
-                        o.optString("legal_status", "справочный текст"),
-                        o.optString("verification_status", "pack")
+                // UPDATE then INSERT — avoids CASCADE delete of articles (ZAK-07)
+                val updated = db.compileStatement(
+                    "UPDATE documents SET title=?,document_type=?,number=?,legal_status=?,verification_status=? WHERE id=?"
+                ).use { st ->
+                    st.bindString(1, o.optString("title", id))
+                    st.bindString(2, o.optString("document_type", "code"))
+                    st.bindString(3, o.optString("number", ""))
+                    st.bindString(4, o.optString("legal_status", "справочный текст"))
+                    st.bindString(5, o.optString("verification_status", "pack"))
+                    st.bindString(6, id)
+                    st.executeUpdateDelete()
+                }
+                if (updated == 0) {
+                    db.execSQL(
+                        "INSERT INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
+                        arrayOf(
+                            id,
+                            o.optString("title", id),
+                            o.optString("document_type", "code"),
+                            o.optString("number", ""),
+                            o.optString("legal_status", "справочный текст"),
+                            o.optString("verification_status", "pack")
+                        )
                     )
-                )
+                }
                 docCount++
             }
             for (i in 0 until arts.length()) {
@@ -285,7 +298,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 db.rawQuery("SELECT 1 FROM documents WHERE id=? LIMIT 1", arrayOf(documentId)).use { c ->
                     if (!c.moveToFirst()) {
                         db.execSQL(
-                            "INSERT OR REPLACE INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
+                            "INSERT OR IGNORE INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
                             arrayOf(documentId, documentId, "code", "", "справочный текст", "pack")
                         )
                     }
