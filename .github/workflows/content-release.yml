@@ -77,10 +77,35 @@ jobs:
     permissions:
       contents: write
       actions: read
+      administration: read
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
+      - name: Verify required reviewer protection is configured
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/environments/legal-content-approval" > "$RUNNER_TEMP/legal-content-environment.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("$RUNNER_TEMP/legal-content-environment.json").read_text(encoding="utf-8"))
+          rules = data.get("protection_rules", [])
+          reviewers = [
+              reviewer
+              for rule in rules
+              if rule.get("type") == "required_reviewers"
+              for reviewer in rule.get("reviewers", [])
+          ]
+          if not reviewers:
+              raise SystemExit(
+                  "Release blocked: configure at least one required reviewer for "
+                  "GitHub Environment legal-content-approval."
+              )
+          print(f"Environment protection verified: {len(reviewers)} required reviewer(s).")
+          PY
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"

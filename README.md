@@ -36,6 +36,8 @@ Android APK и правовая база выпускаются отдельно
 - content-release.yml — ручная публикация отдельного Content Release после approval.
 - android-build.yml — независимая сборка APK, unit-тесты и миграционные instrumentation-тесты на эмуляторе Android 8.0 (API 26).
 
+Подробная инструкция по настройке среды, проверяющих и ключа подписи: `docs/LEGAL_CONTENT_RELEASE.md`.
+
 Перед использованием release workflow необходимо:
 - настроить GitHub Environment `legal-content-approval` с обязательными проверяющими;
 - добавить секрет `LEGAL_CONTENT_SIGNING_PRIVATE_KEY` в Settings → Secrets and variables → Actions. Приватный ключ нельзя коммитить в репозиторий.
