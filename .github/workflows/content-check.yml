@@ -20,6 +20,9 @@ jobs:
           python-version: "3.12"
       - name: Check Python syntax
         run: python -m py_compile agent/*.py
+      - name: Validate workflow YAML syntax
+        run: |
+          ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.{yml,yaml}").sort.each { |file| YAML.parse_file(file); puts "YAML OK: #{file}" }'
       - name: Check content tooling
         run: |
           python agent/validate_source_registry.py
