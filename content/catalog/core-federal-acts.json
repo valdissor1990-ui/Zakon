@@ -6,7 +6,8 @@
   "sources": [
     "pravo_official_publication",
     "pravo_law_bank",
-    "minjust_npa"
+    "minjust_npa",
+    "minjust_official_documents"
   ],
   "documents": [
     {
@@ -18,8 +19,9 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Конституция Российской Федерации текст с изменениями 2020",
-      "notes": "Дата принятия указана как дата всенародного голосования; не трактовать как номер федерального закона.",
-      "metadata_status": "provisional"
+      "notes": "На официальной странице Минюста подтверждены название и дата принятия; страница указывает изменения, одобренные 1 июля 2020 года. Это подтверждение реквизитов и справочная текстовая версия, но не доказательство отсутствия последующих изменений: перед импортом необходимо сверить консолидированный текст и все поправки по официальным государственным источникам.",
+      "metadata_status": "source_reference_verified",
+      "official_reference_url": "https://minjust.gov.ru/ru/documents/8011/"
     },
     {
       "id": "ru-civil-code-part-1",
@@ -187,8 +189,8 @@
       "content_status": "not_imported",
       "verification_status": "not_started",
       "source_search_terms": "Федеральный закон от 31.05.2002 № 63-ФЗ Об адвокатской деятельности и адвокатуре",
-      "official_reference_url": "https://minjust.gov.ru/ru/documents/7647/",
-      "notes": "Реквизиты и название сверены по странице официального сайта Минюста; действующая редакция и полный текст ещё не импортированы.",
+      "official_reference_url": "https://minjust.gov.ru/ru/documents/7885/",
+      "notes": "На официальной странице Минюста подтверждены дата, номер, наименование и опубликована текстовая версия с перечнем изменений, включающим Федеральный закон от 22.04.2024 № 83-ФЗ. Полнота редакции по состоянию на дату выпуска ещё не подтверждена; требуется сверка с официальным банком и актами о последующих изменениях.",
       "metadata_status": "source_reference_verified"
     },
     {

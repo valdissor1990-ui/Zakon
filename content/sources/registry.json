@@ -50,6 +50,24 @@
       "state_operated": true,
       "system_id": "minjust_npa_portal",
       "operator_id": "minjust"
+    },
+    {
+      "id": "minjust_official_documents",
+      "name": "Официальный сайт Минюста России — раздел документов",
+      "url": "https://minjust.gov.ru/ru/documents/",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "role": "official_ministry_document_reference",
+      "authority": "official_ministry_documentation",
+      "use_for": [
+        "document_title",
+        "document_number",
+        "adoption_date",
+        "ministry_hosted_text",
+        "consolidated_text_cross_check"
+      ],
+      "state_operated": true,
+      "system_id": "minjust_official_documents",
+      "operator_id": "minjust"
     }
   ],
   "publication_rule": {
