@@ -90,8 +90,9 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/environments/legal-content-approval" > "$RUNNER_TEMP/legal-content-environment.json"
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
-          data = json.loads(Path("$RUNNER_TEMP/legal-content-environment.json").read_text(encoding="utf-8"))
+          data = json.loads((Path(os.environ["RUNNER_TEMP"]) / "legal-content-environment.json").read_text(encoding="utf-8"))
           rules = data.get("protection_rules", [])
           reviewers = [
               reviewer
