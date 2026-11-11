@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <cache-path name="cache" path="." />
-    <external-cache-path name="ext_cache" path="." />
-    <external-files-path name="ext_files" path="." />
+    <!-- Only decrypted cabinet attachments are shared through FileProvider. -->
+    <cache-path name="cabinet_view" path="cabinet_view/" />
 </paths>
