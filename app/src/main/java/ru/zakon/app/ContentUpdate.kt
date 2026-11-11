@@ -422,13 +422,13 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            if (bioOk) "Биометрия устройства: доступна (отпечаток / лицо)"
-            else "Биометрия: недоступна или не настроена в системе (код $bioStatus)",
+            if (bioOk) "Сильная биометрия: доступна"
+            else "Сильная биометрия: недоступна (код $bioStatus) — используйте пароль",
             color = Muted,
             fontSize = 13.sp
         )
         Text(
-            "Пароль нигде не хранится — только криптографический verifier. Биометрия показывается при входе в кабинет, если пароль включён и датчик настроен.",
+            "Пароль нигде не хранится — только криптографический verifier. Кабинет блокируется при сворачивании приложения.",
             color = Muted,
             fontSize = 12.sp,
             lineHeight = 16.sp
