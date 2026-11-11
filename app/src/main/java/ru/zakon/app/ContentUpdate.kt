@@ -39,6 +39,21 @@ private fun sha256Hex(bytes: ByteArray): String {
 }
 
 private const val MAX_PACK_BYTES = 40 * 1024 * 1024 // 40 MB
+private const val MAX_LOCAL_IMPORT_BYTES = 40 * 1024 * 1024 // 40 MB
+
+private fun readLimitedText(input: java.io.InputStream, maxBytes: Int): String {
+    val output = java.io.ByteArrayOutputStream()
+    val buffer = ByteArray(8192)
+    var total = 0
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        total += count
+        require(total <= maxBytes) { "Файл превышает допустимый размер 40 МБ" }
+        output.write(buffer, 0, count)
+    }
+    return output.toString(Charsets.UTF_8.name())
+}
 
 private fun httpGetBytes(url: String, maxBytes: Int = MAX_PACK_BYTES): ByteArray {
     require(url.startsWith("https://")) { "Только HTTPS" }
@@ -114,24 +129,9 @@ private fun ContentUpdateSection(store: LegalStore) {
     val localVer = store.installedPackVersion()
     val localLabel = store.installedPackLabel()
 
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        busy = true
-        status = null
-        scope.launch {
-            try {
-                val text = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { String(it.readBytes(), Charsets.UTF_8) }
-                        ?: error("Не удалось прочитать файл")
-                }
-                val result = withContext(Dispatchers.IO) { store.importPackJson(text, requireNewer = false) }
-                status = "Импорт: v${result.version}. Документов: ${result.documentsUpserted}, статей: ${result.articlesUpserted}"
-            } catch (e: Exception) {
-                status = "Ошибка: ${e.message}"
-            } finally {
-                busy = false
-            }
-        }
+        pendingImportUri = uri
     }
 
     fun checkAndDownload(force: Boolean) {
@@ -189,6 +189,51 @@ private fun ContentUpdateSection(store: LegalStore) {
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) { Text("Импорт JSON с устройства") }
         status?.let { Text(it, color = OnSurface, fontSize = 14.sp) }
+    }
+
+    pendingImportUri?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { pendingImportUri = null },
+            title = { Text("Импорт непроверенного файла") },
+            text = {
+                Text(
+                    "Файл JSON не имеет подтверждённой цифровой подписи. Его содержимое может быть устаревшим или изменённым. " +
+                        "Импорт заменит или дополнит записи локальной правовой базы. Продолжайте только если доверяете источнику файла."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingImportUri = null
+                    busy = true
+                    status = null
+                    scope.launch {
+                        try {
+                            val text = withContext(Dispatchers.IO) {
+                                context.contentResolver.openInputStream(uri)?.use {
+                                    readLimitedText(it, MAX_LOCAL_IMPORT_BYTES)
+                                } ?: error("Не удалось прочитать файл")
+                            }
+                            val result = withContext(Dispatchers.IO) {
+                                store.importPackJson(
+                                    text,
+                                    requireNewer = false,
+                                    installedLabelOverride = "Локальный импорт (не проверен)"
+                                )
+                            }
+                            status = "Импортирован непроверенный пакет: v${result.version}. " +
+                                "Документов: ${result.documentsUpserted}, статей: ${result.articlesUpserted}"
+                        } catch (e: Exception) {
+                            status = "Ошибка: ${e.message}"
+                        } finally {
+                            busy = false
+                        }
+                    }
+                }) { Text("Импортировать") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingImportUri = null }) { Text("Отмена") }
+            }
+        )
     }
 }
 
