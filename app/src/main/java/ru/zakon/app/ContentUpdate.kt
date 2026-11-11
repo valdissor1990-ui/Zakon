@@ -41,7 +41,7 @@ private fun sha256Hex(bytes: ByteArray): String {
 private const val MAX_PACK_BYTES = 40 * 1024 * 1024 // 40 MB
 private const val MAX_LOCAL_IMPORT_BYTES = 40 * 1024 * 1024 // 40 MB
 
-private fun readLimitedText(input: java.io.InputStream, maxBytes: Int): String {
+internal fun readLimitedText(input: java.io.InputStream, maxBytes: Int): String {
     val output = java.io.ByteArrayOutputStream()
     val buffer = ByteArray(8192)
     var total = 0
