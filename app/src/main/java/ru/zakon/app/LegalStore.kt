@@ -618,7 +618,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 db.rawQuery("SELECT 1 FROM documents WHERE id=? LIMIT 1", arrayOf(documentId)).use { c ->
                     if (!c.moveToFirst()) {
                         db.execSQL(
-                            "INSERT OR REPLACE INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
+                            "INSERT OR IGNORE INTO documents(id,title,document_type,number,legal_status,verification_status) VALUES(?,?,?,?,?,?)",
                             arrayOf(documentId, documentId, "code", "", "справочный текст", "pack")
                         )
                     }
