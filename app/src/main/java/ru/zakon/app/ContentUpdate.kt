@@ -406,7 +406,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
 
     val bioStatus = remember {
         BiometricManager.from(context).canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
         )
     }
     val bioOk = bioStatus == BiometricManager.BIOMETRIC_SUCCESS
@@ -456,7 +456,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
                 onClick = {
                     message = null
                     when {
-                        currentPin.length < 6 -> message = "Минимум 6 символов"
+                        currentPin.length < 8 -> message = "Минимум 8 символов"
                         currentPin != confirmPin -> message = "Пароли не совпадают"
                         else -> {
                             storage.setPassword(currentPin)
@@ -511,7 +511,7 @@ private fun SecuritySettingsSection(storage: CabinetStorage) {
                 onClick = {
                     message = null
                     when {
-                        newPin.length < 6 -> message = "Минимум 6 символов"
+                        newPin.length < 8 -> message = "Минимум 8 символов"
                         newPin != confirmPin -> message = "Пароли не совпадают"
                         storage.changePassword(currentPin, newPin) -> {
                             message = "Пароль изменён"
