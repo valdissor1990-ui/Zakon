@@ -316,8 +316,8 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                 val number = o.optString("number", "")
                 val title = if (o.isNull("title")) null else o.optString("title")
                 val body = o.optString("body", "")
-                // UPDATE first: SQLite REPLACE deletes the old row before inserting,
-                // which can trigger ON DELETE CASCADE on any dependent records.
+                // UPDATE first: REPLACE deletes and recreates the row, running delete
+                // triggers and potentially breaking future foreign-key dependents.
                 val updated = db.compileStatement(
                     "UPDATE articles SET document_id=?,ordinal=?,number=?,title=?,body=? WHERE id=?"
                 ).use { st ->
