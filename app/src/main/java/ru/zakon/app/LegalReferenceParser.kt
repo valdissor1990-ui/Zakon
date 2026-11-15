@@ -17,7 +17,6 @@ internal object LegalReferenceParser {
     private val ignored = setOf("ст", "статья", "статьи", "статью", "часть", "ч", "п", "пункт", "рф", "фз", "кодекс")
 
     fun parse(input: String): ParsedLegalReference? {
-        val normalized = normalize(input)
         if (!Regex("""(?iu)\bст(?:атья|атьи|атью)?\.?\s*\d""").containsMatchIn(input)) return null
         val match = articlePattern.find(input) ?: return null
         val number = match.groupValues[1]
