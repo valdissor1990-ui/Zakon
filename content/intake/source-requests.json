@@ -1,0 +1,72 @@
+{
+  "intake_version": 1,
+  "jurisdiction": "RU",
+  "scope": "First pilot document from the priority-1 federal-act catalog. Captures are raw source evidence only; they do not constitute legal-text approval.",
+  "documents": [
+    {
+      "document_id": "ru-advocacy-law",
+      "title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+      "catalog_priority": 1,
+      "candidate_revision": "2024-04-22",
+      "candidate_revision_note": "The Ministry of Justice text page identifies amendments through Federal Law No. 83-FZ of 22.04.2024. A complete 2025–2026 amendment-history check is still required before the document can be marked current.",
+      "content_status": "source_capture_pending",
+      "verification_status": "not_started",
+      "source_checks": [
+        {
+          "source_key": "advocacy_minjust_rtf",
+          "registry_id": "minjust_official_documents",
+          "purpose": "Official Ministry of Justice RTF consolidated text; primary text candidate",
+          "comparison_status": "pending_manual_comparison"
+        },
+        {
+          "source_key": "advocacy_pravo_bank",
+          "registry_id": "pravo_law_bank",
+          "purpose": "Integrated official legal-information bank; consolidated text cross-check",
+          "comparison_status": "pending_manual_comparison"
+        },
+        {
+          "source_key": "advocacy_amendment_83fz",
+          "registry_id": "pravo_official_publication",
+          "purpose": "Official publication of Federal Law No. 83-FZ, the amendment act cited by the Ministry of Justice text page",
+          "comparison_status": "pending_amendment_chain_review"
+        }
+      ],
+      "publication_blockers": [
+        "Capture and inspect all three original source files.",
+        "Compare the consolidated text in the Ministry of Justice and integrated law bank sources.",
+        "Verify the full amendment chain through 2026; do not infer completeness from the 2024 source-page revision note.",
+        "Manually verify article boundaries, wording, effective dates and transitional provisions.",
+        "Do not set verification_status=approved until the above checks are completed."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "key": "advocacy_minjust_rtf",
+      "registry_id": "minjust_official_documents",
+      "name": "Федеральный закон № 63-ФЗ — текстовая редакция Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+      "source_type": "official_consolidated_text_rtf",
+      "source_document_id": "Федеральный закон от 31.05.2002 № 63-ФЗ; редакция по источнику до 22.04.2024"
+    },
+    {
+      "key": "advocacy_pravo_bank",
+      "registry_id": "pravo_law_bank",
+      "name": "Федеральный закон № 63-ФЗ — интегрированный банк «Законодательство России»",
+      "publisher": "Государственная система правовой информации",
+      "official_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102076346",
+      "source_type": "official_consolidated_text_html",
+      "source_document_id": "102076346"
+    },
+    {
+      "key": "advocacy_amendment_83fz",
+      "registry_id": "pravo_official_publication",
+      "name": "Федеральный закон от 22.04.2024 № 83-ФЗ — официальное опубликование",
+      "publisher": "Официальный интернет-портал правовой информации",
+      "official_url": "https://publication.pravo.gov.ru/document/0001202404220011?index=1",
+      "source_type": "official_amendment_publication",
+      "source_document_id": "0001202404220011"
+    }
+  ]
+}
