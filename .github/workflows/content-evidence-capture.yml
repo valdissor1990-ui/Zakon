@@ -1,0 +1,103 @@
+name: Capture legal source evidence
+
+on:
+  push:
+    branches:
+      - content/populate-core-acts
+    paths:
+      - "content/intake/source-requests.json"
+      - "agent/capture_sources.py"
+      - ".github/workflows/content-evidence-capture.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: legal-source-evidence-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Capture and checksum official source originals
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout intake branch
+        uses: actions/checkout@v7
+        with:
+          ref: content/populate-core-acts
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Capture allowlisted HTTPS source originals
+        run: |
+          set -euo pipefail
+          python agent/capture_sources.py \
+            --records content/intake/source-requests.json \
+            --output content/evidence
+
+      - name: Attach capture metadata to intake requests
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("content")
+          request_path = root / "intake" / "source-requests.json"
+          data = json.loads(request_path.read_text(encoding="utf-8"))
+          for source in data["sources"]:
+              key = source["key"]
+              metadata_files = sorted((root / "evidence" / key).glob("*.json"))
+              if len(metadata_files) != 1:
+                  raise SystemExit(f"{key}: expected exactly one capture metadata file, got {len(metadata_files)}")
+              metadata = json.loads(metadata_files[0].read_text(encoding="utf-8"))
+              source.update({
+                  "sha256": metadata["sha256"],
+                  "retrieved_at": metadata["retrieved_at"],
+                  "final_url": metadata["final_url"],
+                  "content_type": metadata["content_type"],
+                  "byte_length": metadata["byte_length"],
+                  "evidence_file": metadata["evidence_file"],
+                  "legal_text_extraction_performed": False
+              })
+          request_path.write_text(
+              json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Verify captured evidence and metadata
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          data = json.loads(Path("content/intake/source-requests.json").read_text(encoding="utf-8"))
+          for source in data["sources"]:
+              path = Path("content/evidence") / source["key"] / source["evidence_file"]
+              payload = path.read_bytes()
+              digest = hashlib.sha256(payload).hexdigest()
+              if digest != source["sha256"]:
+                  raise SystemExit(f"{source['key']}: SHA-256 mismatch")
+              if len(payload) != source["byte_length"]:
+                  raise SystemExit(f"{source['key']}: byte length mismatch")
+              print(f"OK {source['key']}: {len(payload)} bytes SHA-256 {digest}")
+          PY
+
+      - name: Commit immutable source evidence
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/evidence content/intake/source-requests.json
+          if git diff --cached --quiet; then
+            echo "No evidence changes to commit."
+            exit 0
+          fi
+          git commit -m "content: capture official sources for federal law 63-FZ"
+          git push origin HEAD:content/populate-core-acts
