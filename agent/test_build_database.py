@@ -8,9 +8,26 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_database
+from validate_source_registry import https_host
 
 
 class BuildDatabaseSafetyTests(unittest.TestCase):
+    def test_https_source_host_is_normalized(self):
+        self.assertEqual(
+            https_host("https://Pravo.gov.ru/law", "test source"),
+            "pravo.gov.ru"
+        )
+
+    def test_http_source_url_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "HTTPS"):
+            https_host("http://pravo.gov.ru/law", "test source")
+
+    def test_credentials_and_nonstandard_ports_are_rejected(self):
+        with self.assertRaises(ValueError):
+            https_host("https://user:pass@pravo.gov.ru/law", "test source")
+        with self.assertRaises(ValueError):
+            https_host("https://pravo.gov.ru:8443/law", "test source")
+
     def test_failed_validation_preserves_previous_database(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
