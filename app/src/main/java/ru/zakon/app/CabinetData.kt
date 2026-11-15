@@ -141,6 +141,7 @@ internal class CabinetStorage(private val context: Context) {
                     .putBoolean("pin_enabled", false)
                     .putInt("pin_fail_count", 0)
                     .putLong("pin_lock_until_elapsed", 0L)
+                    .putLong("pin_lock_set_elapsed", 0L)
                     .commit()
             ) return false
             if (wipeData) wipeAllCabinetData()
