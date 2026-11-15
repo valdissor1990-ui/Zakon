@@ -151,7 +151,7 @@ def main() -> int:
               "results": captured}
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "capture-report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Captured {report['captured']} raw source file(s); failed: {len(report['failed'])}.")
     print("No legal text was parsed, rewritten, or generated.")
     return 0 if report["captured"] else 1
