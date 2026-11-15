@@ -29,7 +29,9 @@ data class SearchHit(
     val documentTitle: String,
     val articleNumber: String,
     val articleTitle: String?,
-    val preview: String
+    val preview: String,
+    val score: Int = 0,
+    val matchReason: String = ""
 )
 
 data class PackImportResult(
@@ -231,43 +233,124 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         else LegalArticle(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4))
     }
 
-    fun search(query: String): List<SearchHit> {
+    /** Exact legal reference lookup. Returns only rows matching a parsed article number. */
+    fun searchExactReference(query: String): List<SearchHit> {
+        val parsed = LegalReferenceParser.parse(query) ?: return emptyList()
         val db = readableDatabase
-        try {
-            return db.rawQuery(
-                """SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
-                FROM articles_fts f JOIN articles a ON a.id=f.article_id JOIN documents d ON d.id=a.document_id
-                WHERE articles_fts MATCH ? ORDER BY d.title,a.ordinal LIMIT 100""".trimIndent(),
-                arrayOf(query)
-            ).use { c ->
-                buildList {
-                    while (c.moveToNext()) add(
-                        SearchHit(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4))
-                    )
-                }
-            }
-        } catch (_: SQLiteException) {
-            val pattern = "%$query%"
-            return db.rawQuery(
-                """SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
-                FROM articles a JOIN documents d ON d.id=a.document_id
-                WHERE a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?
-                ORDER BY d.title,a.ordinal LIMIT 100""".trimIndent(),
-                arrayOf(pattern, pattern, pattern, pattern)
-            ).use { c ->
-                buildList {
-                    while (c.moveToNext()) add(
-                        SearchHit(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4))
-                    )
-                }
+        val sql = """
+            SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
+            FROM articles a JOIN documents d ON d.id=a.document_id
+            WHERE (a.number = ? OR (a.number LIKE ? AND ? = '1'))
+              AND (? = '' OR lower(d.title) LIKE '%' || ? || '%')
+            ORDER BY CASE WHEN a.number = ? THEN 0 ELSE 1 END, d.title, a.ordinal
+            LIMIT 50
+        """.trimIndent()
+        return db.rawQuery(sql, arrayOf(parsed.article, parsed.article + ".%", if (parsed.allowSubArticles) "1" else "0", parsed.documentHint.orEmpty(), parsed.documentHint.orEmpty(), parsed.article)).use { c ->
+            buildList {
+                while (c.moveToNext()) add(SearchHit(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4), 1000, "Точное совпадение номера статьи"))
             }
         }
     }
 
-    /**
-     * Atomically installs a prebuilt content SQLite database.
-     * The caller must verify the downloaded SHA-256 before calling this method.
-     */
+    /** Full-text lookup. FTS4 remains the compatible baseline for Android API 26. */
+    fun searchLexical(query: String, limit: Int = 100): List<SearchHit> {
+        val tokens = LegalReferenceParser.tokens(query)
+        if (tokens.isEmpty()) return emptyList()
+        val db = readableDatabase
+        // A shortened prefix also catches a common one-character typo at the end of a word.
+        val match = tokens.flatMap { token ->
+            if (token.length >= 5) listOf("\"$token\"", "\"${token.dropLast(1)}\"*")
+            else listOf("\"$token\"")
+        }.distinct().joinToString(" OR ")
+        val candidates = try {
+            db.rawQuery(
+                """SELECT a.id,d.title,a.number,a.title,a.body
+                FROM articles_fts f JOIN articles a ON a.id=f.article_id
+                JOIN documents d ON d.id=a.document_id
+                WHERE articles_fts MATCH ? LIMIT 500""".trimIndent(),
+                arrayOf(match)
+            ).use { c ->
+                buildList {
+                    while (c.moveToNext()) add(
+                        SearchCandidate(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4))
+                    )
+                }
+            }
+        } catch (_: SQLiteException) {
+            val clauses = tokens.joinToString(" OR ") { "(a.number LIKE ? OR COALESCE(a.title,'') LIKE ? OR a.body LIKE ? OR d.title LIKE ?)" }
+            val args = tokens.flatMap { listOf("%$it%", "%$it%", "%$it%", "%$it%") }.toTypedArray()
+            db.rawQuery(
+                """SELECT a.id,d.title,a.number,a.title,a.body FROM articles a
+                JOIN documents d ON d.id=a.document_id WHERE $clauses LIMIT 300""".trimIndent(), args
+            ).use { c ->
+                buildList {
+                    while (c.moveToNext()) add(
+                        SearchCandidate(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4))
+                    )
+                }
+            }
+        }
+        val normalizedQuery = LegalReferenceParser.normalize(query)
+        return candidates.map { candidate ->
+            val titleText = LegalReferenceParser.normalize(listOfNotNull(candidate.documentTitle, candidate.articleNumber, candidate.articleTitle).joinToString(" "))
+            val bodyText = LegalReferenceParser.normalize(candidate.body)
+            val titleWords = titleText.split(' ').filter(String::isNotBlank)
+            val bodyWords = bodyText.split(' ').filter(String::isNotBlank).take(4000)
+            val matched = tokens.count { token ->
+                titleText.contains(token) || bodyText.contains(token) ||
+                    titleWords.any { isWithinOneEdit(token, it) } ||
+                    bodyWords.any { isWithinOneEdit(token, it) }
+            }
+            val titleMatches = tokens.count { token ->
+                titleText.contains(token) || titleWords.any { isWithinOneEdit(token, it) }
+            }
+            val phraseBonus = if (normalizedQuery.length > 2 && (titleText.contains(normalizedQuery) || bodyText.contains(normalizedQuery))) 35 else 0
+            val score = matched * 20 + titleMatches * 12 + phraseBonus
+            SearchHit(candidate.articleId, candidate.documentTitle, candidate.articleNumber, candidate.articleTitle,
+                candidate.body.take(240), score, when { phraseBonus > 0 -> "Совпадение фразы"; titleMatches > 0 -> "Совпадение в названии"; else -> "Совпадение в тексте" })
+        }.filter { it.score > 0 }.distinctBy { it.articleId }.sortedByDescending { it.score }.take(limit)
+    }
+
+    /** Backwards-compatible entry point used by older screens. */
+    fun search(query: String): List<SearchHit> {
+        val term = query.trim()
+        if (term.isEmpty()) return emptyList()
+        val exact = searchExactReference(term)
+        val lexical = searchLexical(term)
+        return (exact + lexical).distinctBy { it.articleId }
+            .sortedByDescending { it.score }.take(100)
+    }
+
+    private data class SearchCandidate(
+        val articleId: String, val documentTitle: String, val articleNumber: String,
+        val articleTitle: String?, val body: String
+    )
+
+    /** Bounded edit-distance check used only on the small FTS candidate set. */
+    private fun isWithinOneEdit(left: String, right: String): Boolean {
+        if (left == right) return true
+        if (kotlin.math.abs(left.length - right.length) > 1 || left.length < 4) return false
+        var i = 0
+        var j = 0
+        var edits = 0
+        while (i < left.length && j < right.length) {
+            if (left[i] == right[j]) {
+                i++
+                j++
+            } else {
+                edits++
+                if (edits > 1) return false
+                when {
+                    left.length > right.length -> i++
+                    right.length > left.length -> j++
+                    else -> { i++; j++ }
+                }
+            }
+        }
+        if (i < left.length || j < right.length) edits++
+        return edits <= 1
+    }
+
     fun installDatabaseFile(source: java.io.File, version: Int, label: String): Int =
         synchronized(databaseInstallLock) {
             require(source.isFile && source.length() > 0L) { "Файл базы пуст или отсутствует" }

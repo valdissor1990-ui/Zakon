@@ -254,19 +254,37 @@ private fun DocumentCard(doc: LegalDocument, onClick: () -> Unit) {
 
 @Composable
 internal fun SearchScreen(store: LegalStore, query: String, onQuery: (String) -> Unit, padding: PaddingValues, onOpen: (String) -> Unit) {
+    val searchCoordinator = remember(store) { LegalSearchCoordinator(store) }
+    var searchMode by remember { mutableStateOf(LegalSearchMode.SMART) }
     var hits by remember { mutableStateOf<List<SearchHit>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
     var searchError by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().padding(padding).padding(18.dp)) {
         Text("Поиск по законодательству", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text("Название документа, номер статьи или фраза из текста", color = LegalMuted, style = MaterialTheme.typography.bodySmall)
+        Text(
+            if (searchMode == LegalSearchMode.EXACT_REFERENCE) "Поиск по номеру статьи, например: ст. 159"
+            else "Поиск по названию, номеру статьи и содержанию правовых норм",
+            color = LegalMuted, style = MaterialTheme.typography.bodySmall
+        )
         Spacer(Modifier.height(14.dp))
         OutlinedTextField(
             value = query, onValueChange = onQuery, modifier = Modifier.fillMaxWidth(),
             label = { Text("Что ищем?") }, singleLine = true,
             shape = RoundedCornerShape(16.dp)
         )
-        LaunchedEffect(query, store) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = searchMode == LegalSearchMode.SMART,
+                onClick = { searchMode = LegalSearchMode.SMART },
+                label = { Text("Умный поиск") }
+            )
+            FilterChip(
+                selected = searchMode == LegalSearchMode.EXACT_REFERENCE,
+                onClick = { searchMode = LegalSearchMode.EXACT_REFERENCE },
+                label = { Text("Точная статья") }
+            )
+        }
+        LaunchedEffect(query, store, searchMode) {
             val term = query.trim()
             if (term.isBlank()) {
                 hits = emptyList()
@@ -276,7 +294,7 @@ internal fun SearchScreen(store: LegalStore, query: String, onQuery: (String) ->
                 searching = true
                 try {
                     delay(250)
-                    hits = withContext(Dispatchers.IO) { store.search(term) }
+                    hits = withContext(Dispatchers.IO) { searchCoordinator.search(term, searchMode) }
                     searchError = null
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -304,6 +322,7 @@ internal fun SearchScreen(store: LegalStore, query: String, onQuery: (String) ->
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Text(hit.documentTitle, color = LegalMuted, style = MaterialTheme.typography.labelMedium)
                             Text("Статья ${hit.articleNumber}" + (hit.articleTitle?.let { " — $it" } ?: ""), fontWeight = FontWeight.Bold)
+                            Text(hit.matchReason, style = MaterialTheme.typography.labelSmall, color = LegalGold)
                             Text(hit.preview, style = MaterialTheme.typography.bodySmall, color = LegalMuted, maxLines = 3)
                         }
                     }
