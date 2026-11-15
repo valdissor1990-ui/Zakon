@@ -322,6 +322,7 @@ internal fun SearchScreen(store: LegalStore, query: String, onQuery: (String) ->
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Text(hit.documentTitle, color = LegalMuted, style = MaterialTheme.typography.labelMedium)
                             Text("Статья ${hit.articleNumber}" + (hit.articleTitle?.let { " — $it" } ?: ""), fontWeight = FontWeight.Bold)
+                            Text(hit.matchReason, style = MaterialTheme.typography.labelSmall, color = LegalGold)
                             Text(hit.preview, style = MaterialTheme.typography.bodySmall, color = LegalMuted, maxLines = 3)
                         }
                     }
