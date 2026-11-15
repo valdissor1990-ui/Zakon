@@ -24,7 +24,7 @@ internal object LegalReferenceParser {
         val normalized = normalize(input)
         val documentHint = when {
             Regex("""\bук\b|уголовн").containsMatchIn(normalized) -> "уголовный кодекс"
-            Regex("""\\bгк\b|гражданск").containsMatchIn(normalized) -> "гражданский кодекс"
+            Regex("""\bгк\b|гражданск").containsMatchIn(normalized) -> "гражданский кодекс"
             Regex("""\bкоап\b|административн").containsMatchIn(normalized) -> "кодекс российской федерации об административных правонарушениях"
             Regex("""\bупк\b|уголовно процессуальн").containsMatchIn(normalized) -> "уголовно процессуальный кодекс"
             Regex("""\bтк\b|трудов").containsMatchIn(normalized) -> "трудовой кодекс"
