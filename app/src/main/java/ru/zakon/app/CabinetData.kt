@@ -80,16 +80,23 @@ internal class CabinetStorage(private val context: Context) {
         require(pin.length >= 8) { "Пароль должен быть не короче 8 символов" }
         val salt = CabinetPinKdf.newSalt()
         val verifier = CabinetPinKdf.derive(pin, salt)
-        securePrefs.edit()
-            .putString("pin_salt", CabinetPinKdf.toBase64(salt))
-            .putString("pin_verifier", CabinetPinKdf.toBase64(verifier))
-            .putBoolean("pin_enabled", true)
-            .putBoolean("pin_prompt_done", true)
-            .putInt("pin_fail_count", 0)
-            .putLong("pin_lock_until_elapsed", 0L)
-            .commit()
-        salt.fill(0); verifier.fill(0)
-        try { crypto.ensureKey(requireUserAuth = true) } catch (_: Exception) {}
+        try {
+            // Do not report a configured PIN if the device cannot create its encryption key.
+            crypto.ensureKey(requireUserAuth = true)
+            check(
+                securePrefs.edit()
+                    .putString("pin_salt", CabinetPinKdf.toBase64(salt))
+                    .putString("pin_verifier", CabinetPinKdf.toBase64(verifier))
+                    .putBoolean("pin_enabled", true)
+                    .putBoolean("pin_prompt_done", true)
+                    .putInt("pin_fail_count", 0)
+                    .putLong("pin_lock_until_elapsed", 0L)
+                    .commit()
+            ) { "Не удалось сохранить настройки защиты" }
+        } finally {
+            salt.fill(0)
+            verifier.fill(0)
+        }
     }
 
     fun checkPassword(pin: String): Boolean {
