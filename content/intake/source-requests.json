@@ -48,7 +48,15 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
       "source_type": "official_consolidated_text_rtf",
-      "source_document_id": "Федеральный закон от 31.05.2002 № 63-ФЗ; редакция по источнику до 22.04.2024"
+      "source_document_id": "Федеральный закон от 31.05.2002 № 63-ФЗ; редакция по источнику до 22.04.2024",
+      "capture_status": "captured",
+      "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+      "retrieved_at": "2026-11-15T22:00:03Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+      "content_type": "application/rtf",
+      "byte_length": 1141873,
+      "evidence_file": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.source",
+      "legal_text_extraction_performed": false
     },
     {
       "key": "advocacy_pravo_bank",
@@ -57,7 +65,9 @@
       "publisher": "Государственная система правовой информации",
       "official_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102076346",
       "source_type": "official_consolidated_text_html",
-      "source_document_id": "102076346"
+      "source_document_id": "102076346",
+      "capture_status": "failed",
+      "capture_error": "URLError: <urlopen error timed out>"
     },
     {
       "key": "advocacy_amendment_83fz",
@@ -66,7 +76,9 @@
       "publisher": "Официальный интернет-портал правовой информации",
       "official_url": "https://publication.pravo.gov.ru/document/0001202404220011?index=1",
       "source_type": "official_amendment_publication",
-      "source_document_id": "0001202404220011"
+      "source_document_id": "0001202404220011",
+      "capture_status": "failed",
+      "capture_error": "URLError: <urlopen error timed out>"
     }
   ]
 }
