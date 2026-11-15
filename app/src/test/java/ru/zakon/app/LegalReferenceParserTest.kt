@@ -14,6 +14,11 @@ class LegalReferenceParserTest {
     }
 
     @Test
+    fun resolvesCriminalCodeHint() {
+        assertEquals("уголовный кодекс", LegalReferenceParser.parse("ст. 159 УК РФ")?.documentHint)
+    }
+
+    @Test
     fun parsesDecimalArticleReference() {
         val parsed = LegalReferenceParser.parse("статья 12.1")
         assertEquals("12.1", parsed?.article)
