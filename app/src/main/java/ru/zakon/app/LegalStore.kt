@@ -240,7 +240,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val sql = """
             SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
             FROM articles a JOIN documents d ON d.id=a.document_id
-            WHERE a.number = ? OR (a.number LIKE ? AND ? = 1)
+            WHERE a.number = ? OR (a.number LIKE ? AND ? = '1')
             ORDER BY CASE WHEN a.number = ? THEN 0 ELSE 1 END, d.title, a.ordinal
             LIMIT 50
         """.trimIndent()
