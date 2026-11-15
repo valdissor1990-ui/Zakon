@@ -2,6 +2,7 @@ package ru.zakon.app
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -40,10 +41,17 @@ private fun Context.findAct(): FragmentActivity? {
     return null
 }
 
-/** Strong biometrics only — aligns with Keystore AUTH_BIOMETRIC_STRONG (ZAK-03). */
+/** Matches the Keystore key policy on each Android release. */
+private fun cabinetAuthenticators(): Int =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    } else {
+        BiometricManager.Authenticators.BIOMETRIC_STRONG
+    }
+
 private fun bioOk(ctx: Context): Boolean {
     val bm = BiometricManager.from(ctx)
-    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+    return bm.canAuthenticate(cabinetAuthenticators()) == BiometricManager.BIOMETRIC_SUCCESS
 }
 
 private fun showBio(act: FragmentActivity, ok: () -> Unit, err: (String) -> Unit) {
@@ -54,14 +62,20 @@ private fun showBio(act: FragmentActivity, ok: () -> Unit, err: (String) -> Unit
         }
     })
     try {
-        p.authenticate(
-            BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Вход в личный кабинет")
-                .setSubtitle("Подтвердите личность")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-                .setNegativeButtonText("Пароль")
-                .build()
-        )
+        val prompt = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Вход в личный кабинет")
+            .setSubtitle(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    "Подтвердите личность биометрией или PIN-кодом устройства"
+                } else {
+                    "Подтвердите личность сильной биометрией"
+                }
+            )
+            .setAllowedAuthenticators(cabinetAuthenticators())
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            prompt.setNegativeButtonText("Отмена")
+        }
+        p.authenticate(prompt.build())
     } catch (e: Exception) { err(e.message ?: "Ошибка") }
 }
 
@@ -91,6 +105,7 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
     var tab by remember { mutableStateOf(0) }
     var loadError by remember { mutableStateOf<String?>(null) }
     val canBio = remember(ctx) { bioOk(ctx) }
+    val requiresSystemAuth = remember(st) { st.requiresUserAuthentication() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -152,15 +167,24 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
         return ok
     }
     DisposableEffect(Unit) { onDispose { st.clearViewCache() } }
-    LaunchedEffect(unlocked, setPin) {
-        if (!unlocked && !setPin && st.hasPassword() && canBio && act != null && !st.isLockedOut())
+    LaunchedEffect(unlocked, setPin, requiresSystemAuth, canBio) {
+        if (!unlocked && !setPin && st.hasPassword() && requiresSystemAuth && canBio && act != null && !st.isLockedOut()) {
             showBio(act, { unlockAndLoad() }, {})
+        }
     }
     Box(Modifier.fillMaxSize().padding(padding).background(CabBg)) {
         when {
             setPin -> Column(Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Новый пароль", color = OnCab, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text("Минимум 8 символов. После сохранения можно входить по отпечатку.", color = MutedGray, fontSize = 13.sp)
+                Text(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        "Минимум 8 символов. Для расшифровки потребуется биометрия или PIN-код устройства."
+                    } else {
+                        "Минимум 8 символов. Доступ защищается паролем приложения."
+                    },
+                    color = MutedGray,
+                    fontSize = 13.sp
+                )
                 OutlinedTextField(
                     pin, { if (it.length <= 32) pin = it },
                     label = { Text("Пароль") },
@@ -204,9 +228,9 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                                     try {
                                         withContext(Dispatchers.Default) { st.setPassword(pin) }
                                         setPin = false
-                                        unlockAndLoad()
                                         pin = ""; pin2 = ""
                                         error = null
+                                        if (!st.requiresUserAuthentication()) unlockAndLoad()
                                     } catch (e: Exception) {
                                         error = e.message ?: "Не удалось сохранить пароль"
                                     } finally { busy = false }
@@ -242,8 +266,20 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                         scope.launch {
                             val ok = withContext(Dispatchers.Default) { st.checkPassword(pin) }
                             busy = false
-                            if (ok) { unlockAndLoad(); pin = ""; error = null }
-                            else error = "Неверный пароль"
+                            if (ok) {
+                                pin = ""
+                                error = null
+                                if (requiresSystemAuth) {
+                                    val a = act
+                                    if (a != null && canBio) {
+                                        showBio(a, { unlockAndLoad() }, { error = it })
+                                    } else {
+                                        error = "Для расшифровки старого ключа требуется системная биометрия или PIN устройства."
+                                    }
+                                } else {
+                                    unlockAndLoad()
+                                }
+                            } else error = "Неверный пароль"
                         }
                     },
                     enabled = !busy && !st.isLockedOut(),
@@ -259,9 +295,22 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                         },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = OnCab)
-                    ) { Text("Отпечаток / Face ID") }
+                    ) {
+                        Text(
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) "Биометрия / PIN устройства"
+                            else "Биометрия"
+                        )
+                    }
                 } else {
-                    Text("Сильная биометрия недоступна — используйте пароль", color = MutedGray, fontSize = 12.sp)
+                    Text(
+                        if (requiresSystemAuth) {
+                            "Для этого ключа нужна системная биометрия или PIN устройства. Пароль приложения не заменяет системную аутентификацию."
+                        } else {
+                            "Биометрия недоступна — используйте пароль приложения."
+                        },
+                        color = MutedGray,
+                        fontSize = 12.sp
+                    )
                 }
             }
             loadError != null -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
