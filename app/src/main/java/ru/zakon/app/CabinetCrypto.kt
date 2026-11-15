@@ -22,9 +22,13 @@ import javax.crypto.spec.GCMParameterSpec
  * Cabinet cryptography:
  * - AES-256-GCM data key in Android Keystore (non-exportable)
  * - StrongBox when available
- * - user authentication required when hardware supports it (no silent downgrade)
+ * - Android 11+: key use requires strong biometrics or device credential
+ * - Android 6-10: app PIN is the fallback; the Keystore key remains non-exportable
  * - UUID file names for attachments
  */
+internal fun newCabinetKeyRequiresSystemAuth(sdkInt: Int): Boolean =
+    sdkInt >= Build.VERSION_CODES.R
+
 class CabinetCrypto(private val context: Context) {
 
     companion object {
@@ -74,18 +78,16 @@ class CabinetCrypto(private val context: Context) {
             }
         }
 
-        if (requireUserAuth && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (requireUserAuth && newCabinetKeyRequiresSystemAuth(Build.VERSION.SDK_INT)) {
             builder.setUserAuthenticationRequired(true)
             builder.setUserAuthenticationParameters(
-                300, // 5 minutes validity after auth
+                300, // 5 minutes validity after biometric or device-credential authentication
                 KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
             )
-        } else if (requireUserAuth && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            @Suppress("DEPRECATION")
-            builder.setUserAuthenticationRequired(true)
-            @Suppress("DEPRECATION")
-            builder.setUserAuthenticationValidityDurationSeconds(300)
         }
+        // Android 6-10: do not bind the key to biometric-only authentication.
+        // The app PIN remains the unlock gate on these releases; the AES key is
+        // still non-exportable and protected by Android Keystore.
 
         return try {
             keyGenerator.init(builder.build())
@@ -101,6 +103,21 @@ class CabinetCrypto(private val context: Context) {
     }
 
     fun getSecretKey(): SecretKey = ensureKey(requireUserAuth = true)
+
+    fun requiresUserAuthentication(): Boolean {
+        if (!keyStore.containsAlias(KEY_ALIAS)) {
+            return newCabinetKeyRequiresSystemAuth(Build.VERSION.SDK_INT)
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
+        return try {
+            val key = (keyStore.getEntry(KEY_ALIAS, null) as KeyStore.SecretKeyEntry).secretKey
+            val factory = SecretKeyFactory.getInstance(key.algorithm, ANDROID_KEYSTORE)
+            val info = factory.getKeySpec(key, KeyInfo::class.java) as KeyInfo
+            info.isUserAuthenticationRequired
+        } catch (_: Exception) {
+            true // Fail closed if the existing key's authentication policy cannot be read.
+        }
+    }
 
     fun securityLevelLabel(): String {
         return try {
