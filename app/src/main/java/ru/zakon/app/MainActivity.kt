@@ -100,7 +100,6 @@ private fun ZakonApp(store: LegalStore) {
 
     BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
     BackHandler(enabled = !isHome && drawerState.isClosed) { goBack() }
-    BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
         if (isHome) {
@@ -190,9 +189,6 @@ private fun ZakonApp(store: LegalStore) {
                         },
                         actions = {
                             Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 12.dp), fontSize = 20.sp)
-                            if (isHome) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 12.dp), fontSize = 22.sp)
-                            }
                         }
                     )
                 },
@@ -251,16 +247,16 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
         Spacer(Modifier.weight(0.55f))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("§", "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
-                GlassCard("◆", "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
+                GlassCard(HomeFeatureIcon.Codes, "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
+                GlassCard(HomeFeatureIcon.Constitution, "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("⚖", "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
-                GlassCard("⌕", "Поиск", Modifier.weight(1f)) { onNavigate("search") }
+                GlassCard(HomeFeatureIcon.Laws, "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
+                GlassCard(HomeFeatureIcon.Search, "Поиск", Modifier.weight(1f)) { onNavigate("search") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("★", "Избранное", Modifier.weight(1f)) { onNavigate("favorites") }
-                GlassCard("👤", "Личный\nкабинет", Modifier.weight(1f)) { onNavigate("cabinet") }
+                GlassCard(HomeFeatureIcon.Favorites, "Избранное", Modifier.weight(1f)) { onNavigate("favorites") }
+                GlassCard(HomeFeatureIcon.Cabinet, "Личный\nкабинет", Modifier.weight(1f)) { onNavigate("cabinet") }
             }
         }
         Spacer(Modifier.weight(0.22f))
@@ -365,11 +361,12 @@ private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: P
     val initial = scrollIndexMap[scrollKey] ?: 0
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
     LaunchedEffect(documentId) {
-        withContext(Dispatchers.IO) {
+        val loaded = withContext(Dispatchers.IO) {
             val doc = store.getDocument(documentId)
-            title = doc?.title ?: documentId
-            articles = store.getArticles(documentId)
+            (doc?.title ?: documentId) to store.getArticles(documentId)
         }
+        title = loaded.first
+        articles = loaded.second
     }
     LaunchedEffect(gridState.isScrollInProgress) { if (!gridState.isScrollInProgress) scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex }
     DisposableEffect(Unit) { onDispose { scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex } }
@@ -404,7 +401,7 @@ private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: P
 }
 
 @Composable
-private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun GlassCard(icon: HomeFeatureIcon, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
         modifier
             .height(118.dp)
@@ -417,7 +414,7 @@ private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifi
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IconBadge(symbol, 42.dp)
+        HomeFeatureIconView(icon, size = 42.dp, color = Color(0xFFFFE0A0))
         Spacer(Modifier.height(10.dp))
         Text(title, color = TextOnDark, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 16.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
