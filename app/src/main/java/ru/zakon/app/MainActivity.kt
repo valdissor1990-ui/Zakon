@@ -213,7 +213,9 @@ private fun ZakonApp(store: LegalStore) {
                         else PlaceholderLight("Не найдено", padding)
                     }
                     route.startsWith("code/") -> {
-                        val id = route.removePrefix("code/")                        val code = AllRfCodes.find { it.id == id }                        if (code != null) CodeHubScreen(
+                        val id = route.removePrefix("code/")
+                        val code = AllRfCodes.find { it.id == id }
+                        if (code != null) CodeHubScreen(
                             code = code, padding = padding,
                             onContent = {
                                 val docId = docIdForCodeId(id)
@@ -432,8 +434,10 @@ private fun CodeHubScreen(code: RfCode, padding: PaddingValues, onContent: () ->
             symbol = code.symbol,
             title = "${code.shortName} — полностью",
             subtitle = "Все статьи кодекса",
-            onClick = onContent        )
-        if (code.hasLiability) {            HubActionTile(
+            onClick = onContent
+        )
+        if (code.hasLiability) {
+            HubActionTile(
                 symbol = "⚖",
                 title = "Ответственность по ${code.shortName}",
                 subtitle = "Наказания и виды ответственности",
