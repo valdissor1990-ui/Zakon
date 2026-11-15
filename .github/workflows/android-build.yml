@@ -1,4 +1,4 @@
-name: Android debug build
+name: Android CI (debug artifact only)
 on:
   push:
     paths: ["app/**", "*.gradle.kts", "gradle.properties", ".github/workflows/android-build.yml"]
@@ -6,7 +6,7 @@ on:
     paths: ["app/**", "*.gradle.kts", "gradle.properties"]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
@@ -35,15 +35,3 @@ jobs:
         with:
           name: zakon-debug-apk
           path: Zakon-debug.apk
-      - name: Publish APK to Release (direct .apk, no zip)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: debug-latest
-          name: Zakon debug APK
-          body: "Прямая загрузка APK без ZIP.\n\nКоммит: ${{ github.sha }}"
-          files: Zakon-debug.apk
-          fail_on_unmatched_files: true
-          make_latest: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

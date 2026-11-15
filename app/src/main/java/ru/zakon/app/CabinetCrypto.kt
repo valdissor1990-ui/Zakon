@@ -191,9 +191,16 @@ class CabinetCrypto(private val context: Context) {
         return file.name
     }
 
+    private fun encryptedAttachmentFile(encFileName: String): File {
+        require(encFileName.matches(Regex("att_[0-9a-f]{32}\\.enc"))) {
+            "Некорректное имя защищённого вложения"
+        }
+        return File(encryptedDir(), encFileName)
+    }
+
     fun decryptFileToCache(encFileName: String, displayName: String): File {
         clearViewCache()
-        val src = File(encryptedDir(), encFileName)
+        val src = encryptedAttachmentFile(encFileName)
         require(src.exists()) { "missing encrypted file" }
         require(src.length() <= MAX_ATTACHMENT_BYTES + 64) { "encrypted file too large" }
         val raw = FileInputStream(src).use { fis ->
@@ -223,7 +230,7 @@ class CabinetCrypto(private val context: Context) {
     }
 
     fun deleteEncryptedFile(encFileName: String) {
-        File(encryptedDir(), encFileName).delete()
+        encryptedAttachmentFile(encFileName).delete()
     }
 
     fun clearViewCache() {

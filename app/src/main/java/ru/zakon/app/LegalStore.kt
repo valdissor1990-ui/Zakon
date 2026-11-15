@@ -241,12 +241,21 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         }
     }
 
-    fun importPackJson(json: String, requireNewer: Boolean = false): PackImportResult {
+    fun importPackJson(
+        json: String,
+        requireNewer: Boolean = false,
+        installedLabelOverride: String? = null
+    ): PackImportResult {
         val db = writableDatabase
-        return importPackJsonInto(db, json, requireNewer)
+        return importPackJsonInto(db, json, requireNewer, installedLabelOverride)
     }
 
-    private fun importPackJsonInto(db: SQLiteDatabase, json: String, requireNewer: Boolean): PackImportResult {
+    private fun importPackJsonInto(
+        db: SQLiteDatabase,
+        json: String,
+        requireNewer: Boolean,
+        installedLabelOverride: String? = null
+    ): PackImportResult {
         val root = JSONObject(json)
         val version = root.optInt("version", 0)
         val label = root.optString("label", "pack")
@@ -303,18 +312,29 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
                         )
                     }
                 }
-                db.execSQL(
-                    """INSERT OR REPLACE INTO articles(id,document_id,ordinal,number,title,body)
-                    VALUES(?,?,?,?,?,?)""".trimIndent(),
-                    arrayOf(
-                        id,
-                        documentId,
-                        o.optInt("ordinal", i),
-                        o.optString("number", ""),
-                        if (o.isNull("title")) null else o.optString("title"),
-                        o.optString("body", "")
+                val ordinal = o.optInt("ordinal", i)
+                val number = o.optString("number", "")
+                val title = if (o.isNull("title")) null else o.optString("title")
+                val body = o.optString("body", "")
+                // UPDATE first: REPLACE deletes and recreates the row, running delete
+                // triggers and potentially breaking future foreign-key dependents.
+                val updated = db.compileStatement(
+                    "UPDATE articles SET document_id=?,ordinal=?,number=?,title=?,body=? WHERE id=?"
+                ).use { st ->
+                    st.bindString(1, documentId)
+                    st.bindLong(2, ordinal.toLong())
+                    st.bindString(3, number)
+                    if (title == null) st.bindNull(4) else st.bindString(4, title)
+                    st.bindString(5, body)
+                    st.bindString(6, id)
+                    st.executeUpdateDelete()
+                }
+                if (updated == 0) {
+                    db.execSQL(
+                        "INSERT INTO articles(id,document_id,ordinal,number,title,body) VALUES(?,?,?,?,?,?)",
+                        arrayOf(id, documentId, ordinal, number, title, body)
                     )
-                )
+                }
                 artCount++
             }
             db.setTransactionSuccessful()
@@ -322,7 +342,7 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
             db.endTransaction()
         }
 
-        if (version > 0) setInstalledPack(version, label)
+        if (version > 0) setInstalledPack(version, installedLabelOverride ?: label)
         return PackImportResult(version, label, docCount, artCount)
     }
 }

@@ -8,9 +8,47 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_database
+from validate_source_registry import https_host
+from validate_manifest import resolve_database_path
 
 
 class BuildDatabaseSafetyTests(unittest.TestCase):
+    def test_https_source_host_is_normalized(self):
+        self.assertEqual(
+            https_host("https://Pravo.gov.ru/law", "test source"),
+            "pravo.gov.ru"
+        )
+
+    def test_http_source_url_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "HTTPS"):
+            https_host("http://pravo.gov.ru/law", "test source")
+
+    def test_credentials_and_nonstandard_ports_are_rejected(self):
+        with self.assertRaises(ValueError):
+            https_host("https://user:pass@pravo.gov.ru/law", "test source")
+        with self.assertRaises(ValueError):
+            https_host("https://pravo.gov.ru:8443/law", "test source")
+
+    def test_manifest_database_path_cannot_escape_its_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            manifest = Path(temporary) / "manifest.json"
+            with self.assertRaises(ValueError):
+                resolve_database_path(manifest, "../outside.sqlite")
+            with self.assertRaises(ValueError):
+                resolve_database_path(manifest, "/tmp/outside.sqlite")
+
+    def test_manifest_database_symlink_cannot_escape_its_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            outside = root.parent / (root.name + "-outside.sqlite")
+            outside.write_bytes(b"outside")
+            try:
+                (root / "database.sqlite").symlink_to(outside)
+                with self.assertRaises(ValueError):
+                    resolve_database_path(root / "manifest.json", "database.sqlite")
+            finally:
+                outside.unlink(missing_ok=True)
+
     def test_failed_validation_preserves_previous_database(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

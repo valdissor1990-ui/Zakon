@@ -340,12 +340,13 @@ internal fun DocumentScreen(store: LegalStore, id: String, padding: PaddingValue
             loadError != null -> Text("Ошибка загрузки документа: $loadError", color = MaterialTheme.colorScheme.error)
             doc == null -> Text("Документ не найден в установленной базе.")
             else -> {
-                Text(doc!!.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
+                val currentDoc = requireNotNull(doc)
+                Text(currentDoc.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
                 Spacer(Modifier.height(8.dp))
                 Surface(color = LegalSurface, shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, LegalLine)) {
                     Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Статус: ${doc!!.legalStatus}", style = MaterialTheme.typography.bodySmall)
-                        Text("Проверка источников: ${doc!!.verificationStatus}", style = MaterialTheme.typography.bodySmall, color = LegalMuted)
+                        Text("Статус: ${currentDoc.legalStatus}", style = MaterialTheme.typography.bodySmall)
+                        Text("Проверка источников: ${currentDoc.verificationStatus}", style = MaterialTheme.typography.bodySmall, color = LegalMuted)
                     }
                 }
                 Spacer(Modifier.height(16.dp))
@@ -406,10 +407,11 @@ internal fun ArticleScreen(
             loadError != null -> Text("Ошибка: $loadError", color = MaterialTheme.colorScheme.error)
             article == null -> Text("Статья не найдена.")
             else -> {
-                Text("Статья ${article!!.number}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
-                article!!.title?.let { Text(it, style = MaterialTheme.typography.titleMedium, color = LegalMuted) }
+                val currentArticle = requireNotNull(article)
+                Text("Статья ${currentArticle.number}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = LegalNavy)
+                currentArticle.title?.let { Text(it, style = MaterialTheme.typography.titleMedium, color = LegalMuted) }
                 Spacer(Modifier.height(8.dp))
-                Text(article!!.body, style = MaterialTheme.typography.bodyLarge, lineHeight = 24.sp)
+                Text(currentArticle.body, style = MaterialTheme.typography.bodyLarge, lineHeight = 24.sp)
                 Spacer(Modifier.height(16.dp))
                 Text("Справочный текст. Для юридически значимых действий используйте актуальные официальные источники.", color = LegalMuted, style = MaterialTheme.typography.labelSmall)
             }

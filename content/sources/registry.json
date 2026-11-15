@@ -40,9 +40,7 @@
         "document_metadata",
         "systematized_text_cross_check",
         "registration_metadata"
-      ],
-      "access_url": "http://pravo-minjust.ru/",
-      "access_note": "Адрес портала указан на официальном сайте Минюста; веб-доступ к самому порталу может быть нестабильным. HTTPS-страница Минюста используется как подтверждение источника."
+      ]
     }
   ],
   "publication_rule": {
