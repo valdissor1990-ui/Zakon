@@ -60,9 +60,9 @@ class CabinetCrypto(private val context: Context) {
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 
     /**
-     * Returns existing key or creates a new one.
-     * Never silently drops user-authentication requirement.
-     * If StrongBox fails, retries without StrongBox but keeps auth flags.
+     * Returns the existing key or creates one according to the platform policy:
+     * Android 11+ requires system authentication; older versions use the app PIN gate.
+     * If StrongBox fails, retries without StrongBox but keeps the selected auth policy.
      */
     fun ensureKey(requireUserAuth: Boolean = true): SecretKey {
         if (keyStore.containsAlias(KEY_ALIAS)) {
