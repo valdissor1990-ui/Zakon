@@ -217,8 +217,7 @@ private fun ZakonApp(store: LegalStore) {
                         else PlaceholderLight("Не найдено", padding)
                     }
                     route.startsWith("code/") -> {
-                        val id = route.removePrefix("code/")
-                        val code = AllRfCodes.find { it.id == id }
+                        val id = route.removePrefix("code/")                        val code = AllRfCodes.find { it.id == id }
                         if (code != null) CodeHubScreen(
                             code = code, padding = padding,
                             onContent = {
@@ -251,8 +250,8 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
         Spacer(Modifier.weight(0.55f))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("§", "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
-                GlassCard("◆", "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
+                GlassCard(HomeFeatureIcon.Codes, "Кодексы", Modifier.weight(1f)) { onNavigate("codes") }
+                GlassCard(HomeFeatureIcon.Constitution, "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 GlassCard("⚖", "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
@@ -404,7 +403,7 @@ private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: P
 }
 
 @Composable
-private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun GlassCard(icon: HomeFeatureIcon, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
         modifier
             .height(118.dp)
@@ -417,7 +416,7 @@ private fun GlassCard(symbol: String, title: String, modifier: Modifier = Modifi
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IconBadge(symbol, 42.dp)
+        HomeFeatureIconView(icon, size = 42.dp, color = Color(0xFFFFE0A0))
         Spacer(Modifier.height(10.dp))
         Text(title, color = TextOnDark, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 16.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
@@ -437,8 +436,7 @@ private fun CodeHubScreen(code: RfCode, padding: PaddingValues, onContent: () ->
             symbol = code.symbol,
             title = "${code.shortName} — полностью",
             subtitle = "Все статьи кодекса",
-            onClick = onContent
-        )
+            onClick = onContent        )
         if (code.hasLiability) {
             HubActionTile(
                 symbol = "⚖",
