@@ -274,7 +274,11 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                                     if (a != null && canBio) {
                                         showBio(a, { unlockAndLoad() }, { error = it })
                                     } else {
-                                        error = "Для расшифровки старого ключа требуется системная биометрия или PIN устройства."
+                                        error = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                            "Для расшифровки ключа требуется биометрия или PIN/пароль устройства."
+                                        } else {
+                                            "Старый ключ требует сильной биометрии. Пароль приложения не заменяет системную аутентификацию."
+                                        }
                                     }
                                 } else {
                                     unlockAndLoad()
@@ -303,8 +307,10 @@ internal fun CabinetScreen(padding: PaddingValues, onProvideBack: ((() -> Boolea
                     }
                 } else {
                     Text(
-                        if (requiresSystemAuth) {
-                            "Для этого ключа нужна системная биометрия или PIN устройства. Пароль приложения не заменяет системную аутентификацию."
+                        if (requiresSystemAuth && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            "Для этого ключа нужна биометрия или PIN/пароль устройства."
+                        } else if (requiresSystemAuth) {
+                            "Этот старый ключ требует сильной биометрии. Пароль приложения не заменяет системную аутентификацию."
                         } else {
                             "Биометрия недоступна — используйте пароль приложения."
                         },
