@@ -54,7 +54,8 @@ internal class CabinetStorage(private val context: Context) {
         val hasLegacyPin = lv != null && ls != null
         val hasLegacyCases = legacyPrefs.getString("cases_enc", null) != null
         if (!hasLegacyPin && !hasLegacyCases) {
-            if (legacyPrefs.all.isNotEmpty()) legacyPrefs.edit().clear().commit()
+            // Unknown legacy formats (for example the original cases_json/pin_hash)
+            // must be preserved until a dedicated migration can safely interpret them.
             return
         }
         val edit = securePrefs.edit()
@@ -66,8 +67,10 @@ internal class CabinetStorage(private val context: Context) {
                 edit.putString("cases_enc", it)
             }
         }
-        if (!edit.commit()) return
-        legacyPrefs.edit().clear().commit()
+        check(edit.commit()) { "Не удалось перенести защищённые данные кабинета" }
+        check(legacyPrefs.edit().clear().commit()) {
+            "Защищённая копия создана, но старые данные не удалось очистить"
+        }
     }
 
     fun hasVerifier() = securePrefs.contains("pin_verifier") && securePrefs.contains("pin_salt")
@@ -124,12 +127,13 @@ internal class CabinetStorage(private val context: Context) {
     fun deletePin(currentPin: String, wipeData: Boolean): Boolean {
         return try {
             if (hasVerifier() && (currentPin.isBlank() || !checkPassword(currentPin))) return false
-            securePrefs.edit()
-                .remove("pin_salt").remove("pin_verifier")
-                .putBoolean("pin_enabled", false)
-                .putInt("pin_fail_count", 0)
-                .putLong("pin_lock_until_elapsed", 0L)
-                .commit()
+            if (!securePrefs.edit()
+                    .remove("pin_salt").remove("pin_verifier")
+                    .putBoolean("pin_enabled", false)
+                    .putInt("pin_fail_count", 0)
+                    .putLong("pin_lock_until_elapsed", 0L)
+                    .commit()
+            ) return false
             if (wipeData) wipeAllCabinetData()
             true
         } catch (_: Exception) { false }
@@ -143,8 +147,7 @@ internal class CabinetStorage(private val context: Context) {
 
     fun disablePin(currentPin: String): Boolean {
         if (!checkPassword(currentPin)) return false
-        securePrefs.edit().putBoolean("pin_enabled", false).commit()
-        return true
+        return securePrefs.edit().putBoolean("pin_enabled", false).commit()
     }
 
     fun enablePin() { if (hasVerifier()) securePrefs.edit().putBoolean("pin_enabled", true).apply() }
