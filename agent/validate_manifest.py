@@ -2,10 +2,22 @@
 """Basic release-manifest validation. This does not validate legal text correctness."""
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
 REQUIRED = ("schema_version", "content_version", "created_at", "effective_as_of", "database", "validation")
+
+
+def resolve_database_path(manifest_path: Path, filename: str) -> Path:
+    if not isinstance(filename, str) or not filename or Path(filename).name != filename or filename in {".", ".."}:
+        raise ValueError("Database file must be a plain filename inside the manifest directory")
+    parent = manifest_path.resolve().parent
+    resolved = (parent / filename).resolve()
+    if resolved.parent != parent:
+        raise ValueError("Database file must not resolve outside the manifest directory")
+    return resolved
+
 
 def main() -> int:
     manifest_path = Path(sys.argv[1] if len(sys.argv) > 1 else "../content/manifest.example.json")
@@ -18,7 +30,12 @@ def main() -> int:
         raise SystemExit("Manifest database.file and database.sha256 are required")
     if data["validation"].get("status") != "validated":
         raise SystemExit("Refusing publication: content validation status is not 'validated'")
-    db_path = manifest_path.parent / db["file"]
+    if not isinstance(db["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", db["sha256"]):
+        raise SystemExit("Database SHA-256 must be 64 lowercase hexadecimal characters")
+    try:
+        db_path = resolve_database_path(manifest_path, db["file"])
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     if not db_path.is_file():
         raise SystemExit(f"Database file not found: {db_path}")
     actual = hashlib.sha256(db_path.read_bytes()).hexdigest()
