@@ -94,6 +94,7 @@ internal class CabinetStorage(private val context: Context) {
                     .putBoolean("pin_prompt_done", true)
                     .putInt("pin_fail_count", 0)
                     .putLong("pin_lock_until_elapsed", 0L)
+                    .putLong("pin_lock_set_elapsed", 0L)
                     .commit()
             ) { "Не удалось сохранить настройки защиты" }
         } finally {
@@ -109,7 +110,10 @@ internal class CabinetStorage(private val context: Context) {
             val expected = CabinetPinKdf.fromBase64(securePrefs.getString("pin_verifier", null) ?: return false)
             val ok = try { CabinetPinKdf.matches(pin, salt, expected) } finally { salt.fill(0); expected.fill(0) }
             if (ok) {
-                securePrefs.edit().putInt("pin_fail_count", 0).putLong("pin_lock_until_elapsed", 0L).apply()
+                securePrefs.edit().putInt("pin_fail_count", 0)
+                    .putLong("pin_lock_until_elapsed", 0L)
+                    .putLong("pin_lock_set_elapsed", 0L)
+                    .apply()
             } else {
                 val fails = securePrefs.getInt("pin_fail_count", 0) + 1
                 val delaySec = when {
@@ -117,8 +121,13 @@ internal class CabinetStorage(private val context: Context) {
                     fails >= 3 -> (1 shl (fails - 3).coerceAtMost(5)).coerceAtMost(60)
                     else -> 0
                 }
-                val until = if (delaySec > 0) SystemClock.elapsedRealtime() + delaySec * 1000L else 0L
-                securePrefs.edit().putInt("pin_fail_count", fails).putLong("pin_lock_until_elapsed", until).apply()
+                val now = SystemClock.elapsedRealtime()
+                val until = if (delaySec > 0) now + delaySec * 1000L else 0L
+                securePrefs.edit()
+                    .putInt("pin_fail_count", fails)
+                    .putLong("pin_lock_until_elapsed", until)
+                    .putLong("pin_lock_set_elapsed", if (delaySec > 0) now else 0L)
+                    .apply()
             }
             ok
         } catch (_: Exception) { false }
@@ -132,6 +141,7 @@ internal class CabinetStorage(private val context: Context) {
                     .putBoolean("pin_enabled", false)
                     .putInt("pin_fail_count", 0)
                     .putLong("pin_lock_until_elapsed", 0L)
+                    .putLong("pin_lock_set_elapsed", 0L)
                     .commit()
             ) return false
             if (wipeData) wipeAllCabinetData()
@@ -152,17 +162,25 @@ internal class CabinetStorage(private val context: Context) {
 
     fun enablePin() { if (hasVerifier()) securePrefs.edit().putBoolean("pin_enabled", true).apply() }
 
-    fun isLockedOut(): Boolean {
+    private fun currentLockRemainingMs(): Long {
+        val now = SystemClock.elapsedRealtime()
         val until = securePrefs.getLong("pin_lock_until_elapsed", 0L)
-        if (until <= 0L) return false
-        return SystemClock.elapsedRealtime() < until
+        val startedAt = securePrefs.getLong("pin_lock_set_elapsed", 0L)
+        val remaining = remainingLockMs(now, startedAt, until)
+        if (until > 0L && remaining == 0L) {
+            // A missing start marker or a smaller elapsed clock means this lock
+            // predates the migration or the device has rebooted.
+            securePrefs.edit()
+                .putLong("pin_lock_until_elapsed", 0L)
+                .putLong("pin_lock_set_elapsed", 0L)
+                .apply()
+        }
+        return remaining
     }
 
-    fun lockRemainingMs(): Long {
-        val until = securePrefs.getLong("pin_lock_until_elapsed", 0L)
-        if (until <= 0L) return 0L
-        return (until - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
-    }
+    fun isLockedOut(): Boolean = currentLockRemainingMs() > 0L
+
+    fun lockRemainingMs(): Long = currentLockRemainingMs()
 
     fun wipeAllCabinetData() {
         try { loadWorkspaceSafe().docs.forEach { deleteAttachment(it.encName) } } catch (_: Exception) {}
