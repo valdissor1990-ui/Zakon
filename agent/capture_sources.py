@@ -4,6 +4,9 @@ import argparse
 import hashlib
 import json
 import re
+import socket
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,10 +49,31 @@ def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
         headers={"User-Agent": "Zakon-Legal-Source-Capture/1.0", "Accept": "*/*"},
     )
     opener = urllib.request.build_opener(AllowlistedRedirectHandler(hosts))
-    with opener.open(request, timeout=30) as response:
-        final_url = response.geturl()
-        content_type = response.headers.get("Content-Type", "application/octet-stream")
-        payload = response.read(MAX_BYTES + 1)
+    # Some hosted runners prefer IPv6 routes that are unavailable to selected
+    # government hosts. Force IPv4 only for this bounded HTTPS request.
+    original_getaddrinfo = socket.getaddrinfo
+    def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+    socket.getaddrinfo = ipv4_getaddrinfo
+    try:
+        last_error = None
+        for attempt in range(1, 4):
+            try:
+                with opener.open(request, timeout=20) as response:
+                    final_url = response.geturl()
+                    content_type = response.headers.get("Content-Type", "application/octet-stream")
+                    payload = response.read(MAX_BYTES + 1)
+                break
+            except (urllib.error.URLError, TimeoutError, OSError) as error:
+                last_error = error
+                if attempt == 3:
+                    raise
+                print(f"Retry {attempt}/3 for {url}: {error}", flush=True)
+                time.sleep(attempt * 2)
+        else:
+            raise RuntimeError(f"Unable to capture {url}: {last_error}")
+    finally:
+        socket.getaddrinfo = original_getaddrinfo
     # Do not rely solely on the redirect handler: validate the final response URL too,
     # including custom openers or transports that do not invoke HTTPRedirectHandler.
     validate_url(final_url, hosts)
@@ -82,8 +106,10 @@ def main() -> int:
         hosts = allowed_hosts(registry, registry_id)
         url = source["official_url"]
         validate_url(url, hosts)
+        print(f"Capturing {key} from {url}", flush=True)
         payload, final_url, content_type = capture(url, hosts)
         validate_url(final_url, hosts)
+        print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
         digest = hashlib.sha256(payload).hexdigest()
         expected = source.get("sha256", "").lower()
         if expected and digest != expected:
