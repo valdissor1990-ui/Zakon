@@ -29,6 +29,22 @@ import javax.crypto.spec.GCMParameterSpec
 internal fun newCabinetKeyRequiresSystemAuth(sdkInt: Int): Boolean =
     sdkInt >= Build.VERSION_CODES.R
 
+/** Best-effort overwrite before deletion; flash storage cannot guarantee physical erasure. */
+internal fun overwriteFileBestEffort(file: File) {
+    if (!file.exists() || !file.isFile) return
+    val zeros = ByteArray(8192)
+    java.io.RandomAccessFile(file, "rw").use { raf ->
+        var remaining = raf.length()
+        raf.seek(0)
+        while (remaining > 0L) {
+            val count = minOf(remaining, zeros.size.toLong()).toInt()
+            raf.write(zeros, 0, count)
+            remaining -= count
+        }
+        raf.fd.sync()
+    }
+}
+
 class CabinetCrypto(private val context: Context) {
 
     companion object {
@@ -256,11 +272,10 @@ class CabinetCrypto(private val context: Context) {
             try {
                 if (f.isFile) {
                     try {
-                        java.io.RandomAccessFile(f, "rw").use { raf ->
-                            val zeros = ByteArray(minOf(f.length(), 4096L).toInt())
-                            raf.write(zeros)
-                        }
-                    } catch (_: Exception) {}
+                        overwriteFileBestEffort(f)
+                    } catch (_: Exception) {
+                        // Deletion still proceeds; cache cleanup is best effort on flash storage.
+                    }
                     f.delete()
                 } else {
                     f.deleteRecursively()
