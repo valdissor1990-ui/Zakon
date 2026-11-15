@@ -256,13 +256,17 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val tokens = LegalReferenceParser.tokens(query)
         if (tokens.isEmpty()) return emptyList()
         val db = readableDatabase
-        val match = tokens.joinToString(" OR ") { "\"$it\"" }
+        // A shortened prefix also catches a common one-character typo at the end of a word.
+        val match = tokens.flatMap { token ->
+            if (token.length >= 5) listOf("\"$token\"", "\"${token.dropLast(1)}\"*")
+            else listOf("\"$token\"")
+        }.distinct().joinToString(" OR ")
         val candidates = try {
             db.rawQuery(
                 """SELECT a.id,d.title,a.number,a.title,a.body
                 FROM articles_fts f JOIN articles a ON a.id=f.article_id
                 JOIN documents d ON d.id=a.document_id
-                WHERE articles_fts MATCH ? LIMIT 300""".trimIndent(),
+                WHERE articles_fts MATCH ? LIMIT 500""".trimIndent(),
                 arrayOf(match)
             ).use { c ->
                 buildList {
@@ -289,8 +293,16 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         return candidates.map { candidate ->
             val titleText = LegalReferenceParser.normalize(listOfNotNull(candidate.documentTitle, candidate.articleNumber, candidate.articleTitle).joinToString(" "))
             val bodyText = LegalReferenceParser.normalize(candidate.body)
-            val matched = tokens.count { token -> titleText.contains(token) || bodyText.contains(token) }
-            val titleMatches = tokens.count { titleText.contains(it) }
+            val titleWords = titleText.split(' ').filter(String::isNotBlank)
+            val bodyWords = bodyText.split(' ').filter(String::isNotBlank).take(4000)
+            val matched = tokens.count { token ->
+                titleText.contains(token) || bodyText.contains(token) ||
+                    titleWords.any { isWithinOneEdit(token, it) } ||
+                    bodyWords.any { isWithinOneEdit(token, it) }
+            }
+            val titleMatches = tokens.count { token ->
+                titleText.contains(token) || titleWords.any { isWithinOneEdit(token, it) }
+            }
             val phraseBonus = if (normalizedQuery.length > 2 && (titleText.contains(normalizedQuery) || bodyText.contains(normalizedQuery))) 35 else 0
             val score = matched * 20 + titleMatches * 12 + phraseBonus
             SearchHit(candidate.articleId, candidate.documentTitle, candidate.articleNumber, candidate.articleTitle,
@@ -312,6 +324,31 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val articleId: String, val documentTitle: String, val articleNumber: String,
         val articleTitle: String?, val body: String
     )
+
+    /** Bounded edit-distance check used only on the small FTS candidate set. */
+    private fun isWithinOneEdit(left: String, right: String): Boolean {
+        if (left == right) return true
+        if (kotlin.math.abs(left.length - right.length) > 1 || left.length < 4) return false
+        var i = 0
+        var j = 0
+        var edits = 0
+        while (i < left.length && j < right.length) {
+            if (left[i] == right[j]) {
+                i++
+                j++
+            } else {
+                edits++
+                if (edits > 1) return false
+                when {
+                    left.length > right.length -> i++
+                    right.length > left.length -> j++
+                    else -> { i++; j++ }
+                }
+            }
+        }
+        if (i < left.length || j < right.length) edits++
+        return edits <= 1
+    }
 
     fun installDatabaseFile(source: java.io.File, version: Int, label: String): Int =
         synchronized(databaseInstallLock) {
