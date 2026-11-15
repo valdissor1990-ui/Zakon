@@ -40,6 +40,18 @@ private fun sha256Hex(bytes: ByteArray): String {
 
 private const val MAX_PACK_BYTES = 40 * 1024 * 1024 // 40 MB
 private const val MAX_LOCAL_IMPORT_BYTES = 40 * 1024 * 1024 // 40 MB
+private const val MAX_CONTENT_REDIRECTS = 4
+
+internal fun isAllowedContentUrl(value: String): Boolean = try {
+    val parsed = URL(value)
+    parsed.protocol.equals("https", ignoreCase = true) &&
+        parsed.host.equals("raw.githubusercontent.com", ignoreCase = true) &&
+        (parsed.port == -1 || parsed.port == 443) &&
+        parsed.userInfo == null &&
+        parsed.path.startsWith("/valdissor1990-ui/Zakon/")
+} catch (_: Exception) {
+    false
+}
 
 internal fun readLimitedText(input: java.io.InputStream, maxBytes: Int): String {
     val output = java.io.ByteArrayOutputStream()
@@ -55,9 +67,14 @@ internal fun readLimitedText(input: java.io.InputStream, maxBytes: Int): String 
     return output.toString(Charsets.UTF_8.name())
 }
 
-private fun httpGetBytes(url: String, maxBytes: Int = MAX_PACK_BYTES): ByteArray {
-    require(url.startsWith("https://")) { "Только HTTPS" }
-    val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+private fun httpGetBytes(
+    url: String,
+    maxBytes: Int = MAX_PACK_BYTES,
+    redirectsRemaining: Int = MAX_CONTENT_REDIRECTS
+): ByteArray {
+    require(isAllowedContentUrl(url)) { "Разрешены только HTTPS-файлы из репозитория ЗаконЪ" }
+    val parsedUrl = URL(url)
+    val conn = (parsedUrl.openConnection() as HttpURLConnection).apply {
         connectTimeout = 20_000
         readTimeout = 60_000
         requestMethod = "GET"
@@ -66,9 +83,11 @@ private fun httpGetBytes(url: String, maxBytes: Int = MAX_PACK_BYTES): ByteArray
     try {
         val code = conn.responseCode
         if (code in 300..399) {
+            require(redirectsRemaining > 0) { "Превышен лимит перенаправлений" }
             val loc = conn.getHeaderField("Location") ?: error("HTTP $code без Location")
-            require(loc.startsWith("https://")) { "Редирект только на HTTPS" }
-            return httpGetBytes(loc, maxBytes)
+            val nextUrl = URL(parsedUrl, loc).toExternalForm()
+            require(isAllowedContentUrl(nextUrl)) { "Перенаправление за пределы репозитория запрещено" }
+            return httpGetBytes(nextUrl, maxBytes, redirectsRemaining - 1)
         }
         if (code !in 200..299) error("HTTP $code")
         val len = conn.contentLengthLong
@@ -148,18 +167,19 @@ private fun ContentUpdateSection(store: LegalStore) {
                     val packUrl = manifest.getString("pack_url")
                     val expectedSha = manifest.optString("sha256", "").lowercase()
                     require(expectedSha.matches(Regex("[0-9a-f]{64}"))) { "Манифест без корректного SHA-256" }
-                    require(packUrl.startsWith("https://")) { "pack_url должен быть HTTPS" }
-                    remoteInfo = "Сервер: v$remoteVer · $label"
+                    require(isAllowedContentUrl(packUrl)) { "pack_url должен указывать на HTTPS-файл этого репозитория" }
+                    val serverLabel = "Сервер: v$remoteVer · $label"
                     if (!force && remoteVer <= store.installedPackVersion()) {
-                        return@withContext "Уже актуальная база (v${store.installedPackVersion()})."
+                        return@withContext serverLabel to "Уже актуальная база (v${store.installedPackVersion()})."
                     }
                     val packBytes = httpGetBytes(packUrl)
                     val actual = sha256Hex(packBytes)
                     if (actual != expectedSha) error("SHA-256 не совпал")
                     val imported = store.importPackJson(String(packBytes, Charsets.UTF_8), requireNewer = false)
-                    "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
+                    serverLabel to "Обновлено: v${imported.version}. Статей: ${imported.articlesUpserted}"
                 }
-                status = resultMsg
+                remoteInfo = resultMsg.first
+                status = resultMsg.second
             } catch (e: Exception) {
                 status = "Ошибка: ${e.message}"
             } finally {
