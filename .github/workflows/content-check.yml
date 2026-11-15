@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   capture-evidence:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/content/populate-core-acts'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -65,6 +65,7 @@ jobs:
               })
               source.pop("capture_error", None)
               captured_count += 1
+          request_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           if captured_count == 0:
               raise SystemExit("No official source could be captured")
           PY
