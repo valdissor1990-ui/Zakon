@@ -182,13 +182,32 @@ private fun ZakonApp(store: LegalStore) {
                         },
                         navigationIcon = {
                             if (isHome) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 16.dp), fontSize = 22.sp)
+                                Box(
+                                    Modifier.size(56.dp).clickable(onClickLabel = "Открыть меню") { scope.launch { drawerState.open() } },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    HomeFeatureIconView(HomeFeatureIcon.Menu, size = 24.dp, color = TextOnDark)
+                                }
                             } else {
-                                Text("‹", Modifier.clickable { goBack() }.padding(horizontal = 16.dp), fontSize = 30.sp)
+                                Box(
+                                    Modifier.size(56.dp).clickable(onClickLabel = "Назад") { goBack() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    HomeFeatureIconView(HomeFeatureIcon.Back, size = 24.dp, color = TextOnLight)
+                                }
                             }
                         },
                         actions = {
-                            Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 12.dp), fontSize = 20.sp)
+                            Box(
+                                Modifier.size(48.dp).clickable(onClickLabel = "Настройки") { navigate("settings") },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                HomeFeatureIconView(
+                                    HomeFeatureIcon.Settings,
+                                    size = 22.dp,
+                                    color = if (isHome) TextOnDark else TextOnLight
+                                )
+                            }
                         }
                     )
                 },

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 internal enum class HomeFeatureIcon {
-    Codes, Constitution, Laws, Search, Favorites, Cabinet
+    Codes, Constitution, Laws, Search, Favorites, Cabinet, Menu, Settings, Back
 }
 
 /** Consistent, scalable line icons drawn natively; no emoji/font fallback is involved. */
@@ -33,8 +33,6 @@ internal fun HomeFeatureIconView(
             drawLine(color, a, b, width, cap = StrokeCap.Round)
         fun circle(c: Offset, r: Float, width: Float = stroke) =
             drawCircle(color, r, c, style = Stroke(width))
-        fun rect(left: Float, top: Float, width: Float, height: Float, radius: Float = s * 0.06f) =
-            drawRoundRect(color, Offset(left, top), Size(width, height), androidx.compose.ui.geometry.CornerRadius(radius), style = Stroke(stroke))
         when (icon) {
             HomeFeatureIcon.Codes -> {
                 val l = s * 0.17f
@@ -106,6 +104,30 @@ internal fun HomeFeatureIconView(
                 }
                 drawPath(shoulders, color, style = Stroke(stroke, cap = StrokeCap.Round))
                 line(Offset(s * 0.2f, s * 0.82f), Offset(s * 0.8f, s * 0.82f), stroke * 0.8f)
+            }
+            HomeFeatureIcon.Menu -> {
+                for (y in listOf(s * 0.3f, s * 0.5f, s * 0.7f)) {
+                    line(Offset(s * 0.2f, y), Offset(s * 0.8f, y), stroke)
+                }
+            }
+            HomeFeatureIcon.Back -> {
+                line(Offset(s * 0.78f, s * 0.5f), Offset(s * 0.23f, s * 0.5f), stroke)
+                line(Offset(s * 0.23f, s * 0.5f), Offset(s * 0.45f, s * 0.28f), stroke)
+                line(Offset(s * 0.23f, s * 0.5f), Offset(s * 0.45f, s * 0.72f), stroke)
+            }
+            HomeFeatureIcon.Settings -> {
+                circle(center, s * 0.19f, stroke)
+                circle(center, s * 0.07f, stroke)
+                for (i in 0 until 8) {
+                    val angle = Math.PI * i / 4.0
+                    val inner = s * 0.23f
+                    val outer = s * 0.35f
+                    line(
+                        Offset(center.x + kotlin.math.cos(angle).toFloat() * inner, center.y + kotlin.math.sin(angle).toFloat() * inner),
+                        Offset(center.x + kotlin.math.cos(angle).toFloat() * outer, center.y + kotlin.math.sin(angle).toFloat() * outer),
+                        stroke
+                    )
+                }
             }
         }
     }
