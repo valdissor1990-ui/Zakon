@@ -107,8 +107,14 @@ def main() -> int:
         url = source["official_url"]
         validate_url(url, hosts)
         print(f"Capturing {key} from {url}", flush=True)
-        payload, final_url, content_type = capture(url, hosts)
-        validate_url(final_url, hosts)
+        try:
+            payload, final_url, content_type = capture(url, hosts)
+            validate_url(final_url, hosts)
+        except Exception as error:
+            print(f"FAILED {key}: {type(error).__name__}: {error}", flush=True)
+            captured.append({"source_key": key, "registry_id": registry_id, "requested_url": url,
+                             "capture_status": "failed", "error": f"{type(error).__name__}: {error}"})
+            continue
         print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
         digest = hashlib.sha256(payload).hexdigest()
         expected = source.get("sha256", "").lower()
@@ -140,9 +146,15 @@ def main() -> int:
         )
         captured.append(metadata)
 
-    print(f"Captured {len(captured)} raw source file(s) under {args.output}.")
+    report = {"captured": sum(1 for item in captured if item.get("sha256")),
+              "failed": [item for item in captured if item.get("capture_status") == "failed"],
+              "results": captured}
+    args.output.mkdir(parents=True, exist_ok=True)
+    (args.output / "capture-report.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    print(f"Captured {report['captured']} raw source file(s); failed: {len(report['failed'])}.")
     print("No legal text was parsed, rewritten, or generated.")
-    return 0
+    return 0 if report["captured"] else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())
