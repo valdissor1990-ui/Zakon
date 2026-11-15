@@ -217,8 +217,7 @@ private fun ZakonApp(store: LegalStore) {
                         else PlaceholderLight("Не найдено", padding)
                     }
                     route.startsWith("code/") -> {
-                        val id = route.removePrefix("code/")                        val code = AllRfCodes.find { it.id == id }
-                        if (code != null) CodeHubScreen(
+                        val id = route.removePrefix("code/")                        val code = AllRfCodes.find { it.id == id }                        if (code != null) CodeHubScreen(
                             code = code, padding = padding,
                             onContent = {
                                 val docId = docIdForCodeId(id)
@@ -254,12 +253,12 @@ private fun HomeGlassScreen(padding: PaddingValues, onNavigate: (String) -> Unit
                 GlassCard(HomeFeatureIcon.Constitution, "Конституция", Modifier.weight(1f)) { onNavigate("constitution") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("⚖", "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
-                GlassCard("⌕", "Поиск", Modifier.weight(1f)) { onNavigate("search") }
+                GlassCard(HomeFeatureIcon.Laws, "Федеральные\nзаконы", Modifier.weight(1f)) { onNavigate("laws") }
+                GlassCard(HomeFeatureIcon.Search, "Поиск", Modifier.weight(1f)) { onNavigate("search") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GlassCard("★", "Избранное", Modifier.weight(1f)) { onNavigate("favorites") }
-                GlassCard("👤", "Личный\nкабинет", Modifier.weight(1f)) { onNavigate("cabinet") }
+                GlassCard(HomeFeatureIcon.Favorites, "Избранное", Modifier.weight(1f)) { onNavigate("favorites") }
+                GlassCard(HomeFeatureIcon.Cabinet, "Личный\nкабинет", Modifier.weight(1f)) { onNavigate("cabinet") }
             }
         }
         Spacer(Modifier.weight(0.22f))
@@ -437,8 +436,7 @@ private fun CodeHubScreen(code: RfCode, padding: PaddingValues, onContent: () ->
             title = "${code.shortName} — полностью",
             subtitle = "Все статьи кодекса",
             onClick = onContent        )
-        if (code.hasLiability) {
-            HubActionTile(
+        if (code.hasLiability) {            HubActionTile(
                 symbol = "⚖",
                 title = "Ответственность по ${code.shortName}",
                 subtitle = "Наказания и виды ответственности",
