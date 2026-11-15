@@ -100,7 +100,6 @@ private fun ZakonApp(store: LegalStore) {
 
     BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
     BackHandler(enabled = !isHome && drawerState.isClosed) { goBack() }
-    BackHandler(enabled = isHome && drawerState.isClosed) { }
 
     Box(Modifier.fillMaxSize()) {
         if (isHome) {
@@ -190,9 +189,6 @@ private fun ZakonApp(store: LegalStore) {
                         },
                         actions = {
                             Text("⚙", Modifier.clickable { navigate("settings") }.padding(horizontal = 12.dp), fontSize = 20.sp)
-                            if (isHome) {
-                                Text("☰", Modifier.clickable { scope.launch { drawerState.open() } }.padding(horizontal = 12.dp), fontSize = 22.sp)
-                            }
                         }
                     )
                 },
@@ -363,11 +359,12 @@ private fun CodeArticlesScreen(store: LegalStore, documentId: String, padding: P
     val initial = scrollIndexMap[scrollKey] ?: 0
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initial)
     LaunchedEffect(documentId) {
-        withContext(Dispatchers.IO) {
+        val loaded = withContext(Dispatchers.IO) {
             val doc = store.getDocument(documentId)
-            title = doc?.title ?: documentId
-            articles = store.getArticles(documentId)
+            (doc?.title ?: documentId) to store.getArticles(documentId)
         }
+        title = loaded.first
+        articles = loaded.second
     }
     LaunchedEffect(gridState.isScrollInProgress) { if (!gridState.isScrollInProgress) scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex }
     DisposableEffect(Unit) { onDispose { scrollIndexMap[scrollKey] = gridState.firstVisibleItemIndex } }
