@@ -59,7 +59,7 @@ def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
         last_error = None
         for attempt in range(1, 4):
             try:
-                with opener.open(request, timeout=20) as response:
+                with opener.open(request, timeout=30) as response:
                     final_url = response.geturl()
                     content_type = response.headers.get("Content-Type", "application/octet-stream")
                     payload = response.read(MAX_BYTES + 1)
