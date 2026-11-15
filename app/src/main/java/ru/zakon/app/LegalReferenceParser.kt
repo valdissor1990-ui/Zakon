@@ -23,14 +23,14 @@ internal object LegalReferenceParser {
         val number = match.groupValues[1]
         val normalized = normalize(input)
         val documentHint = when {
-            Regex("""\\bук\\b|уголовн").containsMatchIn(normalized) -> "уголовный кодекс"
-            Regex("""\\бгк\\b|гражданск").containsMatchIn(normalized) -> "гражданский кодекс"
-            Regex("""\\bкоап\\b|административн").containsMatchIn(normalized) -> "кодекс российской федерации об административных правонарушениях"
-            Regex("""\\bупк\\b|уголовно процессуальн").containsMatchIn(normalized) -> "уголовно процессуальный кодекс"
-            Regex("""\\bтк\\b|трудов").containsMatchIn(normalized) -> "трудовой кодекс"
-            Regex("""\\bнк\\b|налогов").containsMatchIn(normalized) -> "налоговый кодекс"
-            Regex("""\\bжк\\b|жилищн").containsMatchIn(normalized) -> "жилищный кодекс"
-            Regex("""\\bск\\b|семейн").containsMatchIn(normalized) -> "семейный кодекс"
+            Regex("""\bук\b|уголовн").containsMatchIn(normalized) -> "уголовный кодекс"
+            Regex("""\\bгк\b|гражданск").containsMatchIn(normalized) -> "гражданский кодекс"
+            Regex("""\bкоап\b|административн").containsMatchIn(normalized) -> "кодекс российской федерации об административных правонарушениях"
+            Regex("""\bупк\b|уголовно процессуальн").containsMatchIn(normalized) -> "уголовно процессуальный кодекс"
+            Regex("""\bтк\b|трудов").containsMatchIn(normalized) -> "трудовой кодекс"
+            Regex("""\bнк\b|налогов").containsMatchIn(normalized) -> "налоговый кодекс"
+            Regex("""\bжк\b|жилищн").containsMatchIn(normalized) -> "жилищный кодекс"
+            Regex("""\bск\b|семейн").containsMatchIn(normalized) -> "семейный кодекс"
             else -> null
         }
         return ParsedLegalReference(number, !number.contains('.'), documentHint)
