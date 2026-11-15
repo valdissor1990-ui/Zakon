@@ -6,8 +6,6 @@ import json
 import re
 import sqlite3
 from pathlib import Path
-from urllib.parse import urlparse
-
 from validate_source_registry import https_host
 
 ROOT = Path(__file__).resolve().parents[1]
