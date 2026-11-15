@@ -6,7 +6,8 @@ package ru.zakon.app
  */
 internal data class ParsedLegalReference(
     val article: String,
-    val allowSubArticles: Boolean
+    val allowSubArticles: Boolean,
+    val documentHint: String?
 )
 
 internal object LegalReferenceParser {
@@ -20,7 +21,19 @@ internal object LegalReferenceParser {
         if (!Regex("""(?iu)\bст(?:атья|атьи|атью)?\.?\s*\d""").containsMatchIn(input)) return null
         val match = articlePattern.find(input) ?: return null
         val number = match.groupValues[1]
-        return ParsedLegalReference(number, !number.contains('.'))
+        val normalized = normalize(input)
+        val documentHint = when {
+            Regex("""\\bук\\b|уголовн").containsMatchIn(normalized) -> "уголовный кодекс"
+            Regex("""\\бгк\\b|гражданск").containsMatchIn(normalized) -> "гражданский кодекс"
+            Regex("""\\bкоап\\b|административн").containsMatchIn(normalized) -> "кодекс российской федерации об административных правонарушениях"
+            Regex("""\\bупк\\b|уголовно процессуальн").containsMatchIn(normalized) -> "уголовно процессуальный кодекс"
+            Regex("""\\bтк\\b|трудов").containsMatchIn(normalized) -> "трудовой кодекс"
+            Regex("""\\bнк\\b|налогов").containsMatchIn(normalized) -> "налоговый кодекс"
+            Regex("""\\bжк\\b|жилищн").containsMatchIn(normalized) -> "жилищный кодекс"
+            Regex("""\\bск\\b|семейн").containsMatchIn(normalized) -> "семейный кодекс"
+            else -> null
+        }
+        return ParsedLegalReference(number, !number.contains('.'), documentHint)
     }
 
     fun tokens(input: String): List<String> = tokenPattern.findAll(normalize(input))
