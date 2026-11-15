@@ -240,11 +240,12 @@ class LegalStore(context: Context) : SQLiteOpenHelper(context.applicationContext
         val sql = """
             SELECT a.id,d.title,a.number,a.title,substr(a.body,1,240)
             FROM articles a JOIN documents d ON d.id=a.document_id
-            WHERE a.number = ? OR (a.number LIKE ? AND ? = '1')
+            WHERE (a.number = ? OR (a.number LIKE ? AND ? = '1'))
+              AND (? = '' OR lower(d.title) LIKE '%' || ? || '%')
             ORDER BY CASE WHEN a.number = ? THEN 0 ELSE 1 END, d.title, a.ordinal
             LIMIT 50
         """.trimIndent()
-        return db.rawQuery(sql, arrayOf(parsed.article, parsed.article + ".%", if (parsed.allowSubArticles) "1" else "0", parsed.article)).use { c ->
+        return db.rawQuery(sql, arrayOf(parsed.article, parsed.article + ".%", if (parsed.allowSubArticles) "1" else "0", parsed.documentHint.orEmpty(), parsed.documentHint.orEmpty(), parsed.article)).use { c ->
             buildList {
                 while (c.moveToNext()) add(SearchHit(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4), 1000, "Точное совпадение номера статьи"))
             }
