@@ -8,6 +8,8 @@ import sqlite3
 from pathlib import Path
 from urllib.parse import urlparse
 
+from validate_source_registry import https_host
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RECORDS = ROOT / "content" / "records" / "records.json"
 SCHEMA = ROOT / "content" / "schema" / "schema.sql"
@@ -55,11 +57,12 @@ def build(records_path: Path, output_dir: Path) -> None:
         require_hash(source.get("sha256"), f"source {key} sha256")
         if not source.get("retrieved_at") or not source.get("official_url"):
             raise ValueError(f"Source {key} is missing retrieval time or URL")
-        expected_hosts = {urlparse(registry_sources[key]["url"]).netloc.lower()}
+        expected_hosts = {https_host(registry_sources[key]["url"], f"Registry source {key}")}
         if registry_sources[key].get("access_url"):
-            expected_hosts.add(urlparse(registry_sources[key]["access_url"]).netloc.lower())
-        if urlparse(source["official_url"]).netloc.lower() not in expected_hosts:
-            raise ValueError(f"Source {key}: captured URL host is not in the approved registry")
+            expected_hosts.add(https_host(registry_sources[key]["access_url"], f"Registry access URL {key}"))
+        captured_host = https_host(source["official_url"], f"Captured source {key}")
+        if captured_host not in expected_hosts:
+            raise ValueError(f"Source {key}: captured URL host is not in the approved HTTPS registry")
         cur = db.execute(
             """INSERT INTO sources(name,publisher,official_url,source_type,retrieved_at,
                source_document_id,sha256,notes) VALUES(?,?,?,?,?,?,?,?)""",
@@ -83,7 +86,7 @@ def build(records_path: Path, output_dir: Path) -> None:
             raise ValueError(f"{doc_id}: primary source must be included in source_checks")
         if any(key not in source_ids or key not in registry_sources for key in checked_keys):
             raise ValueError(f"{doc_id}: a checked source is not registered or not captured")
-        hosts = {urlparse(registry_sources[key]["url"]).netloc.lower() for key in checked_keys}
+        hosts = {https_host(registry_sources[key]["url"], f"Registry source {key}") for key in checked_keys}
         if len(hosts) < 3:
             raise ValueError(f"{doc_id}: checks must cover three distinct source hosts")
         if any(item.get("status") != "match" for item in checks):
