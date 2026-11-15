@@ -38,13 +38,23 @@ jobs:
           root = Path("content")
           request_path = root / "intake" / "source-requests.json"
           data = json.loads(request_path.read_text(encoding="utf-8"))
+          report_path = root / "evidence" / "capture-report.json"
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          by_key = {item["source_key"]: item for item in report["results"]}
+          captured_count = 0
           for source in data["sources"]:
               key = source["key"]
+              result = by_key.get(key, {})
               metadata_files = sorted((root / "evidence" / key).glob("*.json"))
+              if not metadata_files:
+                  source["capture_status"] = "failed"
+                  source["capture_error"] = result.get("error", "No capture result")
+                  continue
               if len(metadata_files) != 1:
                   raise SystemExit(f"{key}: expected exactly one metadata file, got {len(metadata_files)}")
               metadata = json.loads(metadata_files[0].read_text(encoding="utf-8"))
               source.update({
+                  "capture_status": "captured",
                   "sha256": metadata["sha256"],
                   "retrieved_at": metadata["retrieved_at"],
                   "final_url": metadata["final_url"],
@@ -53,7 +63,10 @@ jobs:
                   "evidence_file": metadata["evidence_file"],
                   "legal_text_extraction_performed": False
               })
-          request_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+              source.pop("capture_error", None)
+              captured_count += 1
+          if captured_count == 0:
+              raise SystemExit("No official source could be captured")
           PY
       - name: Verify source evidence checksums
         run: |
@@ -62,7 +75,11 @@ jobs:
           import hashlib, json
           from pathlib import Path
           data = json.loads(Path("content/intake/source-requests.json").read_text(encoding="utf-8"))
+          verified = 0
           for source in data["sources"]:
+              if source.get("capture_status") != "captured":
+                  print(f"UNAVAILABLE {source['key']}: capture not completed")
+                  continue
               path = Path("content/evidence") / source["key"] / source["evidence_file"]
               payload = path.read_bytes()
               if hashlib.sha256(payload).hexdigest() != source["sha256"]:
@@ -70,6 +87,9 @@ jobs:
               if len(payload) != source["byte_length"]:
                   raise SystemExit(f"{source['key']}: byte length mismatch")
               print(f"OK {source['key']}: {len(payload)} bytes")
+              verified += 1
+          if verified == 0:
+              raise SystemExit("No source evidence passed checksum verification")
           PY
       - name: Commit captured originals to intake branch
         run: |
