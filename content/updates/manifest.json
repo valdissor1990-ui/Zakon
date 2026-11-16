@@ -1,7 +1,7 @@
 {
-  "version": 6,
-  "label": "2026-11-06 demo",
+  "version": 7,
+  "label": "2026-11-16 seed catalog + const excerpts",
   "pack_url": "https://raw.githubusercontent.com/valdissor1990-ui/Zakon/main/content/updates/pack.json",
-  "sha256": "7c782356006107ba91521b4594d2d3694aac8ef7b0285315527e9cade74909af",
-  "note": "Справочный пакет. Не полная официальная база."
+  "sha256": "b36f06c1366ccb52e834ecdd09b27f2f4adec9a2eea74c43095ee99a6ad56a47",
+  "note": "Справочный пакет (seed). Не полная официальная база. Полный текст — только после сверки трёх источников."
 }
