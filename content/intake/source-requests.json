@@ -1,7 +1,7 @@
 {
   "intake_version": 1,
   "jurisdiction": "RU",
-  "scope": "First pilot document from the priority-1 federal-act catalog. Captures are raw source evidence only; they do not constitute legal-text approval.",
+  "scope": "Полная федеральная правовая база РФ: Конституция, все кодексы каталога приложения, федеральные конституционные и федеральные законы, нормативные акты Президента, Правительства и федеральных органов, а также отдельно маркированные решения КС РФ и разъяснения ВС РФ. Очередность и категории описаны в coverage-plan.json. Текущая запись 63-ФЗ — только первый пилотный документ, не граница наполнения.",
   "documents": [
     {
       "document_id": "ru-advocacy-law",
@@ -80,5 +80,6 @@
       "capture_status": "failed",
       "capture_error": "URLError: <urlopen error timed out>"
     }
-  ]
+  ],
+  "coverage_plan": "content/intake/coverage-plan.json"
 }
