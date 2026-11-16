@@ -11,4 +11,23 @@
 - При расхождении источников отправлять документ на ручную проверку.
 - Не публиковать выпуск при ошибках целостности или неполной проверке.
 
-Сборщики конкретных источников будут добавляться отдельными адаптерами с ограничением частоты запросов и журналированием.
+## Захват источников (сырые копии)
+
+```bash
+cd agent
+python3 test_http_util.py
+python3 test_build_database.py
+python3 fetch_and_record.py --source all --interval 2
+```
+
+Сырые ответы пишутся в `content/records/captures/<source_id>/` вместе с `.meta.json` (url, sha256, retrieved_at, http_status).
+
+Парсинг статей и выпуск SQLite — только после ручной сверки трёх источников:
+
+```bash
+python3 build_database.py --records ../content/records/records.json --output ../dist/content
+```
+
+`build_database.py` откажет в выпуске, если нет ≥3 source_checks со статусом `match` или `verification_status != approved`.
+
+Сборщики конкретных источников добавляются адаптерами с ограничением частоты запросов и журналированием.
