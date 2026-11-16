@@ -184,9 +184,14 @@ def main():
         args.output.mkdir(parents=True, exist_ok=True)
         target = args.output / f"{key}.txt"
         target.write_text(text, encoding="utf-8")
+        extracted_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        source["legal_text_extraction_performed"] = True
+        source["extracted_candidate_file"] = target.name
+        source["extracted_candidate_sha256"] = extracted_hash
+        source["article_heading_candidates"] = len(articles)
         report["sources"].append({
             "source_key": key, "source_sha256": digest, "source_bytes": len(payload),
-            "extracted_file": target.name, "extracted_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "extracted_file": target.name, "extracted_sha256": extracted_hash,
             "characters": len(text), "article_heading_candidates": len(articles),
             "first_headings": [row["number_heading"] for row in articles[:5]],
             "last_headings": [row["number_heading"] for row in articles[-5:]],
@@ -197,6 +202,7 @@ def main():
         raise SystemExit("No captured DOCX/RTF sources available for extraction")
     (args.output / "extraction-report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.intake.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("Extraction complete. No legal records or SQLite database were changed.")
 
 if __name__ == "__main__":
