@@ -105,6 +105,36 @@ jobs:
           git commit -m "content: capture official source evidence for law 63-FZ"
           git push origin HEAD:content/populate-core-acts
 
+
+  extract-review-candidates:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout intake branch
+        uses: actions/checkout@v7
+        with:
+          ref: content/populate-core-acts
+          persist-credentials: true
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Extract captured DOCX and RTF into review-only text
+        run: python agent/extract_source_text.py
+      - name: Commit extracted review candidates
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/extracted
+          if git diff --cached --quiet; then
+            echo "No extraction changes."
+            exit 0
+          fi
+          git commit -m "content: extract captured official texts for review"
+          git push origin HEAD:content/populate-core-acts
+
   validate:
     runs-on: ubuntu-latest
     steps:
