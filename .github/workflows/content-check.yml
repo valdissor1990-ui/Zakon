@@ -107,6 +107,7 @@ jobs:
 
 
   extract-review-candidates:
+    needs: capture-evidence
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
     runs-on: ubuntu-latest
     permissions:
