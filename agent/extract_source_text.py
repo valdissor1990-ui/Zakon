@@ -96,7 +96,7 @@ def rtf_text(payload: bytes) -> str:
                     fallback -= 1
                 else:
                     try:
-                        out.append(bytes([int(hexpart, 16)]).decode("cp1251"))
+                        out.append(bytes([int(hexpart, 16)]).decode(codepage))
                     except (ValueError, UnicodeDecodeError):
                         out.append(bytes([int(hexpart, 16)]).decode("cp1252", "replace"))
             continue
