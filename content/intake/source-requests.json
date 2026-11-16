@@ -139,6 +139,30 @@
       "capture_status": "pending",
       "legal_text_extraction_performed": false,
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
+    },
+    {
+      "key": "labour_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "Трудовой кодекс РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7863/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7863",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Официальная страница документа; вложенный текстовый файл требуется отдельно извлечь и проверить."
+    },
+    {
+      "key": "civil_code_minjust_index",
+      "registry_id": "minjust_official_documents",
+      "name": "Гражданский кодекс РФ — официальный каталог частей Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
+      "source_type": "official_document_collection_page_html",
+      "source_document_id": "grazhdanskij-kodeks",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Каталог перечисляет четыре части ГК РФ; отдельные страницы и файлы частей требуется идентифицировать."
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
