@@ -79,6 +79,66 @@
       "source_document_id": "0001202404220011",
       "capture_status": "failed",
       "capture_error": "URLError: <urlopen error timed out>"
+    },
+    {
+      "key": "constitution_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "Конституция РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/8011/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "8011",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
+    },
+    {
+      "key": "uk_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "Уголовный кодекс РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7612/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7612",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
+    },
+    {
+      "key": "gpk_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "Гражданский процессуальный кодекс РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7613/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7613",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
+    },
+    {
+      "key": "koap_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "КоАП РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7614/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7614",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
+    },
+    {
+      "key": "kas_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "КАС РФ — официальная страница Минюста",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7611/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7611",
+      "capture_status": "pending",
+      "legal_text_extraction_performed": false,
+      "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту."
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
