@@ -166,10 +166,10 @@
     },
     {
       "key": "constitution_minjust_rtf",
-      "registry_id": "minjust_official_documents",
+      "registry_id": "minjust_official_documents_www",
       "name": "Конституция РФ — официальный RTF-текст Минюста",
       "publisher": "Министерство юстиции Российской Федерации",
-      "official_url": "https://minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+      "official_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "source_type": "official_consolidated_text_rtf",
       "source_document_id": "8011",
       "capture_status": "pending",
