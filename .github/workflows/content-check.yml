@@ -6,7 +6,7 @@ on:
     paths: ["content/**", "agent/**", ".github/workflows/content-check.yml"]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: content-check-${{ github.ref }}
   cancel-in-progress: true
@@ -19,13 +19,42 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check Python syntax
-        run: python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py agent/build_database.py
+        run: |
+          python -m py_compile agent/validate_manifest.py agent/validate_source_registry.py \
+            agent/build_database.py agent/build_pack_from_shards.py
       - name: Check content tooling
         run: |
           python agent/validate_source_registry.py
           python agent/build_database.py --help
       - name: Run content pipeline regression tests
         run: python -m unittest discover -s agent -p "test_*.py"
+      - name: Assemble pack from shards
+        run: |
+          if [ -d content/updates/shards ]; then
+            python agent/build_pack_from_shards.py
+            python - <<'PY'
+import json
+from pathlib import Path
+p = json.loads(Path("content/updates/pack.json").read_text(encoding="utf-8"))
+assert len(p.get("documents", [])) >= 10, p
+assert len(p.get("articles", [])) >= 30, f"too few articles: {len(p.get('articles', []))}"
+print("pack OK:", len(p["documents"]), "docs", len(p["articles"]), "articles")
+PY
+          else
+            echo "No shards directory — skip assemble"
+          fi
+      - name: Commit assembled pack (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          git config user.name "zakon-content-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/updates/pack.json content/updates/manifest.json
+          if git diff --staged --quiet; then
+            echo "No pack changes"
+          else
+            git commit -m "content: assemble pack.json from shards"
+            git push
+          fi
       - name: Check SQLite schema and full-text triggers
         run: |
           python - <<'PY'
