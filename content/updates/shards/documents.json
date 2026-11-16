@@ -1,0 +1,114 @@
+[
+  {
+    "id": "apk",
+    "title": "Арбитражный процессуальный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "АПК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "bk",
+    "title": "Бюджетный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "БК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "const",
+    "title": "Конституция Российской Федерации",
+    "document_type": "constitution",
+    "number": "Конституция РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "fz",
+    "title": "Федеральные законы",
+    "document_type": "code",
+    "number": "ФЗ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "gk",
+    "title": "Гражданский кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "ГК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "gpk",
+    "title": "Гражданский процессуальный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "ГПК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "koap",
+    "title": "Кодекс Российской Федерации об административных правонарушениях",
+    "document_type": "code",
+    "number": "КоАП РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "nk",
+    "title": "Налоговый кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "НК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "sk",
+    "title": "Семейный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "СК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "tk",
+    "title": "Трудовой кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "ТК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "uk",
+    "title": "Уголовный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "УК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "upk",
+    "title": "Уголовно-процессуальный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "УПК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "zhk",
+    "title": "Жилищный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "ЖК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  },
+  {
+    "id": "zk",
+    "title": "Земельный кодекс Российской Федерации",
+    "document_type": "code",
+    "number": "ЗК РФ",
+    "legal_status": "справочный текст",
+    "verification_status": "seed"
+  }
+]
