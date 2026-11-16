@@ -51,6 +51,7 @@ def rtf_text(payload: bytes) -> str:
     }
     i, depth, skip_depth, uc_skip = 0, 0, None, 1
     fallback = 0
+    codepage = "cp1252"
     while i < len(source):
         ch = source[i]
         if ch == "{":
@@ -69,7 +70,10 @@ def rtf_text(payload: bytes) -> str:
                 if fallback:
                     fallback -= 1
                 elif ch not in "\r\n":
-                    out.append(ch)
+                    if ord(ch) >= 128:
+                        out.append(ch.encode("latin-1").decode(codepage, "replace"))
+                    else:
+                        out.append(ch)
             i += 1
             continue
         i += 1
@@ -121,7 +125,9 @@ def rtf_text(payload: bytes) -> str:
             i += 1
         if word in skip_destinations and depth:
             skip_depth = depth
-        if word == "uc" and number is not None:
+        if word == "ansicpg" and number is not None:
+            codepage = f"cp{number}"
+        elif word == "uc" and number is not None:
             uc_skip = max(0, min(number, 16))
         elif word == "u" and number is not None and skip_depth is None:
             out.append(chr(number if number >= 0 else number + 65536))
