@@ -9,7 +9,8 @@
       "title": "Конституция Российской Федерации",
       "priority": 1,
       "source_keys": [
-        "constitution_minjust_page"
+        "constitution_minjust_page",
+        "constitution_minjust_rtf"
       ],
       "official_reference": "https://minjust.gov.ru/ru/documents/8011/",
       "source_page_verified": true,
@@ -17,7 +18,8 @@
       "revision_verification": "pending",
       "article_extraction": "pending",
       "cross_check": "pending",
-      "release_eligible": false
+      "release_eligible": false,
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
     },
     {
       "id": "ru-criminal-code",
@@ -26,7 +28,8 @@
       "adopted_at": "1996-06-13",
       "priority": 1,
       "source_keys": [
-        "uk_minjust_page"
+        "uk_minjust_page",
+        "uk_minjust_docx"
       ],
       "official_reference": "https://minjust.gov.ru/ru/documents/7612/",
       "source_page_verified": true,
@@ -34,7 +37,8 @@
       "revision_verification": "pending",
       "article_extraction": "pending",
       "cross_check": "pending",
-      "release_eligible": false
+      "release_eligible": false,
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
     },
     {
       "id": "ru-criminal-procedure-code",
@@ -58,7 +62,8 @@
       "adopted_at": "2002-11-14",
       "priority": 1,
       "source_keys": [
-        "gpk_minjust_page"
+        "gpk_minjust_page",
+        "gpk_minjust_docx"
       ],
       "official_reference": "https://minjust.gov.ru/ru/documents/7613/",
       "source_page_verified": true,
@@ -66,7 +71,8 @@
       "revision_verification": "pending",
       "article_extraction": "pending",
       "cross_check": "pending",
-      "release_eligible": false
+      "release_eligible": false,
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
     },
     {
       "id": "ru-administrative-offences-code",
@@ -75,7 +81,8 @@
       "adopted_at": "2001-12-30",
       "priority": 1,
       "source_keys": [
-        "koap_minjust_page"
+        "koap_minjust_page",
+        "koap_minjust_docx"
       ],
       "official_reference": "https://minjust.gov.ru/ru/documents/7614/",
       "source_page_verified": true,
@@ -83,7 +90,8 @@
       "revision_verification": "pending",
       "article_extraction": "pending",
       "cross_check": "pending",
-      "release_eligible": false
+      "release_eligible": false,
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
     },
     {
       "id": "ru-civil-code",
@@ -133,7 +141,8 @@
       "adopted_at": "2015-03-08",
       "priority": 2,
       "source_keys": [
-        "kas_minjust_page"
+        "kas_minjust_page",
+        "kas_minjust_docx"
       ],
       "official_reference": "https://minjust.gov.ru/ru/documents/7611/",
       "source_page_verified": true,
@@ -141,7 +150,8 @@
       "revision_verification": "pending",
       "article_extraction": "pending",
       "cross_check": "pending",
-      "release_eligible": false
+      "release_eligible": false,
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
     },
     {
       "id": "ru-penal-enforcement-code",
