@@ -19,7 +19,9 @@
       "article_extraction": "pending",
       "cross_check": "pending",
       "release_eligible": false,
-      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
+      "text_extraction_tool": "agent/extract_source_text.py",
+      "text_extraction_status": "workflow_pending"
     },
     {
       "id": "ru-criminal-code",
@@ -38,7 +40,9 @@
       "article_extraction": "pending",
       "cross_check": "pending",
       "release_eligible": false,
-      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
+      "text_extraction_tool": "agent/extract_source_text.py",
+      "text_extraction_status": "workflow_pending"
     },
     {
       "id": "ru-criminal-procedure-code",
@@ -72,7 +76,9 @@
       "article_extraction": "pending",
       "cross_check": "pending",
       "release_eligible": false,
-      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
+      "text_extraction_tool": "agent/extract_source_text.py",
+      "text_extraction_status": "workflow_pending"
     },
     {
       "id": "ru-administrative-offences-code",
@@ -91,7 +97,9 @@
       "article_extraction": "pending",
       "cross_check": "pending",
       "release_eligible": false,
-      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
+      "text_extraction_tool": "agent/extract_source_text.py",
+      "text_extraction_status": "workflow_pending"
     },
     {
       "id": "ru-civil-code",
@@ -151,7 +159,9 @@
       "article_extraction": "pending",
       "cross_check": "pending",
       "release_eligible": false,
-      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска."
+      "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
+      "text_extraction_tool": "agent/extract_source_text.py",
+      "text_extraction_status": "workflow_pending"
     },
     {
       "id": "ru-penal-enforcement-code",
