@@ -42,6 +42,17 @@ class SourceExtractionTests(unittest.TestCase):
         rows = article_index(text)
         self.assertEqual([row["number_heading"] for row in rows], ["Статья 1", "Статья 2"])
 
+    def test_article_heading_candidates_include_decimal_numbers(self):
+        text = (
+            "Статья 6.1. Адвокатский запрос\nТекст\n"
+            "Статья 17.1. Представления органов юстиции\nТекст"
+        )
+        rows = article_index(text)
+        self.assertEqual(
+            [row["number_heading"] for row in rows],
+            ["Статья 6.1", "Статья 17.1"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
