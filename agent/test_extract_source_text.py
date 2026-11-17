@@ -23,6 +23,18 @@ class SourceExtractionTests(unittest.TestCase):
         self.assertIn("Visible text", result)
         self.assertNotIn("Arial", result)
 
+    def test_rtf_table_rows_preserve_article_heading_boundaries(self):
+        source = (
+            br"{\rtf1\ansi\ansicpg1251 "
+            br"Статья 15. Внесение сведений\cell\row "
+            br"Статья 19. Страхование риска\cell\row}"
+        )
+        rows = article_index(rtf_text(source))
+        self.assertEqual(
+            [row["number_heading"] for row in rows],
+            ["Статья 15", "Статья 19"],
+        )
+
     def test_docx_paragraph_extraction(self):
         ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
         root = ET.Element(f"{{{ns}}}document")
