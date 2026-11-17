@@ -133,8 +133,8 @@ def rtf_text(payload: bytes) -> str:
             out.append(chr(number if number >= 0 else number + 65536))
             fallback = uc_skip
         elif skip_depth is None:
-            if word in ("par", "line"): out.append("\n")
-            elif word == "tab": out.append("\t")
+            if word in ("par", "line", "row", "page", "sect"): out.append("\n")
+            elif word in ("tab", "cell"): out.append("\t")
             elif word in ("emdash",): out.append("\u2014")
             elif word in ("endash",): out.append("\u2013")
             elif word == "bullet": out.append("\u2022")
