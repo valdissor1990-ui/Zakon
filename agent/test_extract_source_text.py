@@ -25,10 +25,10 @@ class SourceExtractionTests(unittest.TestCase):
 
     def test_rtf_table_rows_preserve_article_heading_boundaries(self):
         source = (
-            br"{\rtf1\ansi\ansicpg1251 "
-            br"Статья 15. Внесение сведений\cell\row "
-            br"Статья 19. Страхование риска\cell\row}"
-        )
+            r"{\rtf1\ansi\ansicpg1251 "
+            r"Статья 15. Внесение сведений\cell\row "
+            r"Статья 19. Страхование риска\cell\row}"
+        ).encode("cp1251")
         rows = article_index(rtf_text(source))
         self.assertEqual(
             [row["number_heading"] for row in rows],
