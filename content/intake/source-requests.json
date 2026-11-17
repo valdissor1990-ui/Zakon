@@ -56,7 +56,10 @@
       "content_type": "application/rtf",
       "byte_length": 1141873,
       "evidence_file": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.source",
-      "legal_text_extraction_performed": false
+      "legal_text_extraction_performed": true,
+      "extracted_candidate_file": "advocacy_minjust_rtf.txt",
+      "extracted_candidate_sha256": "67113c7326f58c493c3e835490c97b8d5643f47b2f1e1cd9dd50382fa92f59a4",
+      "article_heading_candidates": 54
     },
     {
       "key": "advocacy_pravo_bank",
@@ -215,14 +218,17 @@
       "source_type": "official_consolidated_text_rtf",
       "source_document_id": "8011",
       "capture_status": "captured",
-      "legal_text_extraction_performed": false,
+      "legal_text_extraction_performed": true,
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
       "retrieved_at": "2026-11-17T08:38:46Z",
       "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "content_type": "application/rtf",
       "byte_length": 953243,
-      "evidence_file": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877.source"
+      "evidence_file": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877.source",
+      "extracted_candidate_file": "constitution_minjust_rtf.txt",
+      "extracted_candidate_sha256": "5b3d17331bab7306e630da1455f921a2dd6cc38ae2d3ea1066bd2df8d0862a18",
+      "article_heading_candidates": 142
     },
     {
       "key": "uk_minjust_docx",
@@ -233,14 +239,17 @@
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7612",
       "capture_status": "captured",
-      "legal_text_extraction_performed": false,
+      "legal_text_extraction_performed": true,
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb",
       "retrieved_at": "2026-11-17T08:38:48Z",
       "final_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
       "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "byte_length": 333078,
-      "evidence_file": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb.source"
+      "evidence_file": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb.source",
+      "extracted_candidate_file": "uk_minjust_docx.txt",
+      "extracted_candidate_sha256": "9f9c1fdb21f7aea73e08319ea9add56f72f0a55ac0fd84ad91d3bbd9c2795c03",
+      "article_heading_candidates": 492
     },
     {
       "key": "gpk_minjust_docx",
@@ -251,14 +260,17 @@
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7613",
       "capture_status": "captured",
-      "legal_text_extraction_performed": false,
+      "legal_text_extraction_performed": true,
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
       "retrieved_at": "2026-11-17T08:38:50Z",
       "final_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
       "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "byte_length": 336575,
-      "evidence_file": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184.source"
+      "evidence_file": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184.source",
+      "extracted_candidate_file": "gpk_minjust_docx.txt",
+      "extracted_candidate_sha256": "2a8443b9514cff317e5c88973567c4e74add36368b81cc3c7acf1aa51b98b3dd",
+      "article_heading_candidates": 486
     },
     {
       "key": "koap_minjust_docx",
@@ -269,14 +281,17 @@
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7614",
       "capture_status": "captured",
-      "legal_text_extraction_performed": false,
+      "legal_text_extraction_performed": true,
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
       "retrieved_at": "2026-11-17T08:38:52Z",
       "final_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
       "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "byte_length": 756735,
-      "evidence_file": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38.source"
+      "evidence_file": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38.source",
+      "extracted_candidate_file": "koap_minjust_docx.txt",
+      "extracted_candidate_sha256": "2da40647cd596e1204c3afbfb637eb9148890183eba951773de1c10086744070",
+      "article_heading_candidates": 1004
     },
     {
       "key": "kas_minjust_docx",
@@ -287,14 +302,17 @@
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7611",
       "capture_status": "captured",
-      "legal_text_extraction_performed": false,
+      "legal_text_extraction_performed": true,
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18",
       "retrieved_at": "2026-11-17T08:38:59Z",
       "final_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
       "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "byte_length": 374252,
-      "evidence_file": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18.source"
+      "evidence_file": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18.source",
+      "extracted_candidate_file": "kas_minjust_docx.txt",
+      "extracted_candidate_sha256": "04a949b7d6aa0061cb7ba7e8fa24b5db9f55d5c916bb2c85b27aed1858971eac",
+      "article_heading_candidates": 404
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
