@@ -1,9 +1,12 @@
 import io
+import json
+import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, docx_text, rtf_text
+from extract_source_text import article_index, docx_text, refresh_review_index, rtf_text
 
 
 class SourceExtractionTests(unittest.TestCase):
@@ -48,6 +51,76 @@ class SourceExtractionTests(unittest.TestCase):
         with zipfile.ZipFile(stream, "w") as archive:
             archive.writestr("word/document.xml", xml)
         self.assertIn("Статья 1", docx_text(stream.getvalue()))
+
+
+    def test_review_index_refreshes_capture_timestamp_without_changing_text(self):
+        text = "Статья 1. Общие положения\nТекст\nСтатья 2. Права\nНорма\n"
+        rows = article_index(text)
+        extracted_hash = "b" * 64
+        source = {
+            "key": "test_source",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-18T08:00:00Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        index_data = {
+            "artifact_type": "review_only_article_boundary_index",
+            "status": "review_only_not_legal_record",
+            "source": {
+                "sha256": source["sha256"],
+                "extracted_sha256": extracted_hash,
+                "retrieved_at": "2026-11-17T08:00:00Z",
+            },
+            "extracted_text": {},
+            "annotation_markers": [{"marker": "note"}],
+            "articles": [
+                {
+                    "number": row["number_heading"].replace("Статья ", ""),
+                    "start_char": row["start_char"],
+                    "end_char": rows[i + 1]["start_char"] if i + 1 < len(rows) else len(text),
+                }
+                for i, row in enumerate(rows)
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "review-index.json"
+            path.write_text(json.dumps(index_data), encoding="utf-8")
+            refresh_review_index(path, source, "test_source.txt", extracted_hash, text, rows)
+            updated = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(updated["source"]["retrieved_at"], source["retrieved_at"])
+        self.assertEqual(updated["source"]["byte_length"], 123)
+        self.assertEqual(updated["source"]["extracted_file"], "test_source.txt")
+        self.assertEqual(updated["extracted_text"]["characters"], len(text))
+        self.assertEqual(updated["extracted_text"]["annotation_marker_count"], 1)
+
+    def test_review_index_refuses_changed_extracted_text(self):
+        text = "Статья 1. Общие положения\nТекст\n"
+        rows = article_index(text)
+        source = {
+            "key": "test_source",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-18T08:00:00Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        index_data = {
+            "artifact_type": "review_only_article_boundary_index",
+            "status": "review_only_not_legal_record",
+            "source": {"sha256": source["sha256"], "extracted_sha256": "c" * 64},
+            "articles": [{
+                "number": "1",
+                "start_char": rows[0]["start_char"],
+                "end_char": len(text),
+            }],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "review-index.json"
+            path.write_text(json.dumps(index_data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "extracted text changed"):
+                refresh_review_index(path, source, "test_source.txt", "b" * 64, text, rows)
 
     def test_article_heading_candidates(self):
         text = "Статья 1. Общие положения\nТекст\nСтатья 2. Права\nТекст"

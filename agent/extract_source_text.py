@@ -157,6 +157,65 @@ def article_index(text: str):
         })
     return rows
 
+
+def refresh_review_index(
+    index_path: Path,
+    source: dict,
+    extracted_file: str,
+    extracted_hash: str,
+    text: str,
+    articles: list[dict],
+) -> None:
+    """Refresh provenance for an existing review-only index without rewriting legal content."""
+    if not index_path.is_file():
+        return
+    index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    if index_data.get("artifact_type") != "review_only_article_boundary_index":
+        raise ValueError(f"{index_path}: unsupported review index artifact type")
+    if index_data.get("status") != "review_only_not_legal_record":
+        raise ValueError(f"{index_path}: review index must remain non-publishable")
+    index_source = index_data.get("source")
+    if not isinstance(index_source, dict):
+        raise ValueError(f"{index_path}: source provenance is missing")
+    if index_source.get("sha256") != source.get("sha256"):
+        raise ValueError(f"{index_path}: source SHA-256 changed; rebuild and review the index")
+    if index_source.get("extracted_sha256") != extracted_hash:
+        raise ValueError(f"{index_path}: extracted text changed; rebuild and review article boundaries")
+
+    indexed_articles = index_data.get("articles")
+    if not isinstance(indexed_articles, list) or len(indexed_articles) != len(articles):
+        raise ValueError(f"{index_path}: article count differs from the current extraction")
+    for indexed, current in zip(indexed_articles, articles):
+        current_number = current["number_heading"].split(" ", 1)[1].strip()
+        if (
+            indexed.get("number") != current_number
+            or indexed.get("start_char") != current["start_char"]
+            or indexed.get("end_char") != current["end_char"]
+        ):
+            raise ValueError(
+                f"{index_path}: article boundaries changed at ordinal {current.get('ordinal')}; "
+                "manual index regeneration is required"
+            )
+
+    index_source.update({
+        "source_key": source["key"],
+        "registry_id": source.get("registry_id"),
+        "official_url": source.get("official_url"),
+        "retrieved_at": source.get("retrieved_at"),
+        "byte_length": source.get("byte_length"),
+        "sha256": source.get("sha256"),
+        "extracted_file": extracted_file,
+        "extracted_sha256": extracted_hash,
+    })
+    extracted_meta = index_data.setdefault("extracted_text", {})
+    extracted_meta["characters"] = len(text)
+    extracted_meta["article_heading_candidates"] = len(articles)
+    extracted_meta["annotation_marker_count"] = len(index_data.get("annotation_markers", []))
+    index_path.write_text(
+        json.dumps(index_data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, default=INTAKE)
@@ -191,12 +250,15 @@ def main():
         target = args.output / f"{key}.txt"
         target.write_text(text, encoding="utf-8")
         extracted_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        review_index_path = args.output / f"{key}.article-index.json"
+        refresh_review_index(review_index_path, source, target.name, extracted_hash, text, articles)
         source["legal_text_extraction_performed"] = True
         source["extracted_candidate_file"] = target.name
         source["extracted_candidate_sha256"] = extracted_hash
         source["article_heading_candidates"] = len(articles)
         report["sources"].append({
             "source_key": key, "source_sha256": digest, "source_bytes": len(payload),
+            "retrieved_at": source.get("retrieved_at"), "official_url": source.get("official_url"),
             "extracted_file": target.name, "extracted_sha256": extracted_hash,
             "characters": len(text), "article_heading_candidates": len(articles),
             "first_headings": [row["number_heading"] for row in articles[:5]],
