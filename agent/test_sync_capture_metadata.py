@@ -53,6 +53,7 @@ class SyncCaptureMetadataTests(unittest.TestCase):
             records, report, evidence, digest = self.fixture(root, old_capture=False)
             data = json.loads(records.read_text(encoding="utf-8"))
             data["sources"][0].update({
+                "sha256": digest,
                 "legal_text_extraction_performed": True,
                 "extracted_candidate_file": "source_one.txt",
                 "extracted_candidate_sha256": "c" * 64,
@@ -78,6 +79,9 @@ class SyncCaptureMetadataTests(unittest.TestCase):
             self.assertEqual(source["capture_status"], "failed")
             self.assertNotIn("sha256", source)
             self.assertNotIn("evidence_file", source)
+            self.assertNotIn("legal_text_extraction_performed", source)
+            self.assertNotIn("extracted_candidate_file", source)
+            self.assertNotIn("extracted_candidate_sha256", source)
 
     def test_missing_current_result_does_not_reuse_stale_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
