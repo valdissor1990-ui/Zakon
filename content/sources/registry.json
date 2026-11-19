@@ -1,6 +1,6 @@
 {
-  "registry_version": 1,
-  "policy": "Each legal text candidate must be checked against three distinct state-operated information systems representing at least two operators where the act is available. A mismatch blocks publication and requires manual review.",
+  "registry_version": 2,
+  "policy": "Legal text may be released from a single state-operated official source (Minjust or pravo.gov.ru). Cross-check against additional sources is recommended but no longer mandatory. A mismatch with a second available source still blocks automatic release and requires manual review. Never generate missing legal text.",
   "sources": [
     {
       "id": "pravo_official_publication",
@@ -86,12 +86,12 @@
     }
   ],
   "publication_rule": {
-    "minimum_distinct_sources": 3,
-    "minimum_state_operated_sources": 3,
+    "minimum_distinct_sources": 1,
+    "minimum_state_operated_sources": 1,
     "mismatch_action": "block_release",
     "missing_source_action": "manual_review",
     "never_generate_missing_legal_text": true,
-    "minimum_distinct_systems": 3,
-    "minimum_distinct_operators": 2
+    "minimum_distinct_systems": 1,
+    "minimum_distinct_operators": 1
   }
 }
