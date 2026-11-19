@@ -10,7 +10,7 @@ Important operational constraint (2026):
 Recommended capture strategy:
   1. Prefer Minjust hosted originals when available (already allowlisted).
   2. For pravo endpoints run capture from a Russian exit (VPS / residential proxy)
-     using HTTP_PROXY / HTTPS_PROXY or --proxy.
+     using proxy rotation (PROXY_LIST / PROXY_LIST_FILE / --proxy-file).
   3. Never invent or reconstruct legal text when the source is unreachable.
 """
 from __future__ import annotations
@@ -23,6 +23,8 @@ import urllib.error
 import urllib.request
 from typing import Optional
 from urllib.parse import quote, urlparse
+
+from adapters.proxy_pool import ProxyPool
 
 # Document numbers in the IPS system are numeric (nd=...)
 IPS_DOC_RE = re.compile(r"nd=(\d+)")
@@ -77,22 +79,15 @@ def is_pravo_host(url: str) -> bool:
     return host.endswith("pravo.gov.ru") or host == "pravo.gov.ru"
 
 
-def fetch_with_retries(
+def _open_with_proxy(
     url: str,
+    proxy: str | None,
     *,
-    timeout: float = 60.0,
-    max_attempts: int = 5,
-    user_agent: str = "Zakon-Legal-Source-Capture/1.1 (pravo-adapter)",
-    proxy: str | None = None,
-    force_ipv4: bool = True,
-    max_bytes: int = 25 * 1024 * 1024,
+    timeout: float,
+    user_agent: str,
+    max_bytes: int,
+    force_ipv4: bool,
 ) -> tuple[bytes, str, str]:
-    """HTTPS fetch with longer timeout, exponential backoff and optional proxy.
-
-    Returns (payload, final_url, content_type).
-    Raises the last error after all attempts fail.
-    """
-    proxy = proxy or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
     handlers: list = []
     if proxy:
         handlers.append(urllib.request.ProxyHandler({"https": proxy, "http": proxy}))
@@ -113,34 +108,75 @@ def fetch_with_retries(
 
     if force_ipv4:
         socket.getaddrinfo = ipv4_getaddrinfo
-
-    last_error: Exception | None = None
     try:
-        for attempt in range(1, max_attempts + 1):
-            try:
-                with opener.open(request, timeout=timeout) as response:
-                    final_url = response.geturl()
-                    content_type = response.headers.get(
-                        "Content-Type", "application/octet-stream"
-                    )
-                    payload = response.read(max_bytes + 1)
-                if len(payload) > max_bytes:
-                    raise ValueError(f"Response exceeds {max_bytes} byte limit")
-                return payload, final_url, content_type
-            except (urllib.error.URLError, TimeoutError, OSError, ValueError) as err:
-                last_error = err
-                if attempt == max_attempts:
-                    break
-                sleep_s = min(2 ** attempt, 30)
-                print(
-                    f"pravo fetch retry {attempt}/{max_attempts} for {url}: {err}; "
-                    f"sleep {sleep_s}s",
-                    flush=True,
-                )
-                time.sleep(sleep_s)
+        with opener.open(request, timeout=timeout) as response:
+            final_url = response.geturl()
+            content_type = response.headers.get("Content-Type", "application/octet-stream")
+            payload = response.read(max_bytes + 1)
+        if len(payload) > max_bytes:
+            raise ValueError(f"Response exceeds {max_bytes} byte limit")
+        return payload, final_url, content_type
     finally:
         if force_ipv4:
             socket.getaddrinfo = original_getaddrinfo
+
+
+def fetch_with_retries(
+    url: str,
+    *,
+    timeout: float = 60.0,
+    max_attempts: int = 5,
+    user_agent: str = "Zakon-Legal-Source-Capture/1.2 (pravo-adapter)",
+    proxy: str | None = None,
+    proxy_pool: ProxyPool | None = None,
+    force_ipv4: bool = True,
+    max_bytes: int = 25 * 1024 * 1024,
+) -> tuple[bytes, str, str]:
+    """HTTPS fetch with longer timeout, exponential backoff and proxy rotation.
+
+    On each attempt a new proxy is taken from the pool (if any). Successful
+    proxies are marked healthy; failed ones enter a cool-down.
+
+    Returns (payload, final_url, content_type).
+    Raises the last error after all attempts fail.
+    """
+    pool = proxy_pool
+    if pool is None and proxy:
+        pool = ProxyPool.from_sources(single=proxy)
+    if pool is None:
+        pool = ProxyPool.from_sources()
+
+    last_error: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        current_proxy = pool.next() if pool.has_proxies() else proxy
+        try:
+            payload, final_url, content_type = _open_with_proxy(
+                url,
+                current_proxy,
+                timeout=timeout,
+                user_agent=user_agent,
+                max_bytes=max_bytes,
+                force_ipv4=force_ipv4,
+            )
+            if current_proxy:
+                pool.mark_success(current_proxy)
+            return payload, final_url, content_type
+        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as err:
+            last_error = err
+            if current_proxy:
+                pool.mark_failure(current_proxy)
+            if attempt == max_attempts:
+                break
+            sleep_s = min(2 ** attempt, 30)
+            proxy_note = f" via {current_proxy}" if current_proxy else ""
+            print(
+                f"pravo fetch retry {attempt}/{max_attempts} for {url}{proxy_note}: {err}; "
+                f"sleep {sleep_s}s",
+                flush=True,
+            )
+            if pool.has_proxies():
+                print(f"  {pool.status_summary()}", flush=True)
+            time.sleep(sleep_s)
 
     raise RuntimeError(f"Unable to fetch {url} after {max_attempts} attempts: {last_error}")
 
@@ -148,7 +184,7 @@ def fetch_with_retries(
 def geo_restriction_hint() -> str:
     return (
         "pravo.gov.ru (especially /proxy/ips/) is frequently unreachable from "
-        "non-Russian IP ranges. Run capture from a Russian VPS or set HTTPS_PROXY "
-        "to a Russian exit node. Minjust originals remain the preferred primary source "
-        "when pravo is blocked."
+        "non-Russian IP ranges. Use a rotating list of Russian proxies: "
+        "PROXY_LIST, PROXY_LIST_FILE or --proxy-file. Minjust originals remain "
+        "the preferred primary source when pravo is blocked."
     )
