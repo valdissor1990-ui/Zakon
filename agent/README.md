@@ -1,85 +1,65 @@
 # Агент подготовки правовой базы
 
-Агент предназначен для воспроизводимого процесса: получение документов из официальных источников, сохранение исходных копий и реквизитов, нормализация структуры, межисточниковая сверка, валидация и подготовка выпуска.
+## Полная автоматизация (без ручного участия)
+
+Оркестратор `agent/auto_fill.py` и workflow **Content auto-fill**:
+
+1. Capture официальных URL из `content/intake/source-requests.json`
+2. Extract DOCX/RTF → `content/extracted/`
+3. Auto article-index по заголовкам «Статья N»
+4. Сборка `content/records/records.json` (single-source, auto-approved)
+5. Draft SQLite в `dist/content/`
+
+### Запуск локально
+
+```bash
+cd agent
+# только Минюст (без прокси)
+python3 auto_fill.py --skip-capture   # если evidence уже есть
+python3 auto_fill.py                  # полный цикл с сетью
+
+# с ротацией русских прокси (для pravo.gov.ru)
+python3 auto_fill.py --proxy-file proxies.txt
+```
+
+### GitHub Actions
+
+- Workflow: `.github/workflows/content-auto-fill.yml`
+- Расписание: ежедневно 03:15 UTC
+- Ветка: `content/single-source-fill`
+- Ручной запуск: Actions → Content auto-fill → Run workflow
+
+**Секрет (опционально):** `LEGAL_PROXY_LIST`  
+Список прокси по одному на строку (как в `proxies.example.txt`). Без него pravo.gov.ru с runner’а почти всегда timeout; Минюст всё равно наполняется.
+
+Публикация в production по-прежнему через `content-release.yml` + environment `legal-content-approval` (подпись, tag `content-*`).
+
+### Что заполняется автоматически сейчас
+
+| source_key | Документ |
+|------------|----------|
+| advocacy_minjust_rtf | 63-ФЗ |
+| constitution_minjust_rtf | Конституция РФ |
+| uk_minjust_docx | УК РФ (редакция файла Минюста) |
+| gpk_minjust_docx | ГПК РФ |
+| koap_minjust_docx | КоАП РФ |
+| kas_minjust_docx | КАС РФ |
+
+DOCX Минюста могут отставать от текущей редакции закона — в `source_revision` это отмечено. Актуальные тексты с pravo требуют `LEGAL_PROXY_LIST`.
+
+---
 
 ## Жёсткие правила
 
 - Не генерировать отсутствующий текст нормы.
-- Не считать совпадение заголовков доказательством совпадения редакций.
-- Сохранять URL, время получения, реквизиты публикации и SHA-256 исходного файла.
-- Различать дату принятия, официального опубликования и вступления в силу.
-- При расхождении источников отправлять документ на ручную проверку.
-- Не публиковать выпуск при ошибках целостности или неполной проверке.
+- Сохранять URL, время получения, SHA-256 исходного файла.
+- Single-source policy: достаточно одного государственного источника.
 
-`capture_sources.py` сохраняет исходные файлы по URL из подготовленных records.json. Он принимает только HTTPS-хосты из registry.json, проверяет хост каждого перенаправления, ограничивает размер файла и записывает SHA-256 и метаданные получения. Скрипт не распознаёт HTML/PDF, не извлекает нормы и не меняет records.json.
+## Ротация прокси
 
-## Ротация прокси (для pravo.gov.ru)
-
-### Зачем
-
-`pravo.gov.ru/proxy/ips/` часто недоступен с IP вне РФ. Нужен **русский выход**. Один прокси может упасть или быть заблокирован — поэтому есть ротация.
-
-### Как задать список прокси
-
-| Способ | Пример |
-|--------|--------|
-| Файл | `--proxy-file proxies.txt` или `PROXY_LIST_FILE=proxies.txt` |
-| Переменная | `PROXY_LIST="http://a:8080,http://b:8080"` |
-| Один прокси | `--proxy http://user:pass@host:8080` или `HTTPS_PROXY=...` |
-
-Формат строки в файле (см. `proxies.example.txt`):
-
-```
-http://user:pass@1.2.3.4:8080
-http://5.6.7.8:3128
-socks5://user:pass@9.10.11.12:1080
-```
-
-### Поведение ротации
-
-- Round-robin по списку на **каждой** попытке запроса.
-- При ошибке прокси помечается failed и уходит в cool-down (2 мин, после 3 фейлов — 10 мин).
-- Успешный прокси сбрасывает счётчик ошибок.
-- Для pravo: timeout 90 с, до 6 попыток, смена прокси на каждой попытке.
-
-### Пример запуска
+См. `adapters/proxy_pool.py`, `--proxy-file`, `PROXY_LIST`, `LEGAL_PROXY_LIST`.
 
 ```bash
-cd agent
-
-# Список русских residential/datacenter прокси
-cat > proxies.txt << 'EOF'
-http://user:pass@ru1.example:8080
-http://user:pass@ru2.example:8080
-http://user:pass@ru3.example:8080
-EOF
-
-python3 capture_sources.py \
-  --records ../content/records/records.json \
-  --proxy-file proxies.txt
+python3 capture_sources.py --proxy-file proxies.txt \
+  --records ../content/intake/source-requests.json
 ```
-
-Или через env:
-
-```bash
-export PROXY_LIST="http://u:p@ru1:8080,http://u:p@ru2:8080"
-python3 capture_sources.py --records ../content/records/records.json
-```
-
-### Важно
-
-- Прокси должны быть **с российским IP** (residential предпочтительнее).
-- Не коммитьте реальные логины/пароли в репозиторий — только `proxies.example.txt`.
-- Если прокси нет — capture pravo почти наверняка уйдёт в timeout; используйте Минюст как основной источник.
-
-## pravo.gov.ru — ограничения
-
-Эндпоинт `https://pravo.gov.ru/proxy/ips/` IP-ограничен. GitHub Actions из-за рубежа timeout’ит. Стратегия:
-
-1. Основной текст — Минюст (уже работает).
-2. pravo — дополнительная сверка через ротацию русских прокси.
-3. Single-source policy допускает выпуск с одним официальным источником.
-
-## Несколько документов из одного портала
-
-Для каждого документа — отдельная запись в `records.sources` с уникальным `key` и `registry_id` из `content/sources/registry.json`.
