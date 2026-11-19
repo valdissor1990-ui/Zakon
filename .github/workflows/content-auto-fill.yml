@@ -1,0 +1,127 @@
+name: Content auto-fill
+
+on:
+  schedule:
+    # Daily 03:15 UTC
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_capture:
+        description: "Skip network capture (re-index existing evidence only)"
+        required: false
+        type: boolean
+        default: false
+      skip_database:
+        description: "Skip draft SQLite build"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: content-auto-fill
+  cancel-in-progress: false
+
+jobs:
+  auto-fill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout auto-fill branch
+        uses: actions/checkout@v7
+        with:
+          ref: content/single-source-fill
+          persist-credentials: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Optional proxy list from secret
+        env:
+          PROXY_LIST_SECRET: ${{ secrets.LEGAL_PROXY_LIST }}
+        run: |
+          set -euo pipefail
+          if [ -n "${PROXY_LIST_SECRET:-}" ]; then
+            printf '%s\n' "$PROXY_LIST_SECRET" > agent/proxies.runtime.txt
+            echo "Proxy list written (${#PROXY_LIST_SECRET} chars)."
+          else
+            echo "No LEGAL_PROXY_LIST secret — Minjust-only path (pravo may time out)."
+          fi
+
+      - name: Run auto-fill pipeline
+        run: |
+          set -euo pipefail
+          ARGS=()
+          if [ -f agent/proxies.runtime.txt ]; then
+            ARGS+=(--proxy-file agent/proxies.runtime.txt)
+          fi
+          if [ "${{ inputs.skip_capture }}" = "true" ]; then
+            ARGS+=(--skip-capture)
+          fi
+          if [ "${{ inputs.skip_database }}" = "true" ]; then
+            ARGS+=(--skip-database)
+          fi
+          python agent/auto_fill.py "${ARGS[@]}" || true
+
+      - name: Commit pipeline artifacts
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/evidence content/extracted content/intake content/records dist/content || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "content: auto-fill from official captures $(date -u +%Y-%m-%d)"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin content/single-source-fill
+            if ! git rebase FETCH_HEAD; then
+              git rebase --abort || true
+              echo "Rebase conflict; aborting push."
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/content/single-source-fill; then
+              exit 0
+            fi
+            sleep "$((attempt * 2))"
+          done
+          exit 1
+
+      - name: Upload draft content package
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: auto-fill-dist
+          path: |
+            dist/content/
+            content/records/records.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Auto-fill"
+            echo ""
+            if [ -f content/records/records.json ]; then
+              python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("content/records/records.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          print(f"- Documents in records: **{len(d.get('documents', []))}**")
+          for doc in d.get("documents", []):
+              arts = len(doc.get("articles", []))
+              print(f"  - {doc.get('id')}: {arts} articles ({doc.get('verification_status')})")
+          PY
+            else
+              echo "- records.json not produced"
+            fi
+            echo ""
+            echo "Draft SQLite (if built) is in artifact **auto-fill-dist**."
+            echo "Publication still goes through content-release.yml + environment approval."
+          } >> "$GITHUB_STEP_SUMMARY"
