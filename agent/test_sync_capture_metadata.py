@@ -11,7 +11,7 @@ class SyncCaptureMetadataTests(unittest.TestCase):
         records_path = root / "records.json"
         evidence = root / "evidence"
         key = "source_one"
-        source = {"key": key, "official_url": "https://minjust.gov.ru/source"}
+        source = {"key": key, "official_url": "https://minjust.gov.ru/source", "legal_text_extraction_performed": True, "extracted_candidate_sha256": "b" * 64}
         if old_capture:
             source.update({"capture_status": "captured", "sha256": "a" * 64,
                            "retrieved_at": "old", "evidence_file": "old.source"})
@@ -43,6 +43,8 @@ class SyncCaptureMetadataTests(unittest.TestCase):
             self.assertEqual((captured, failed), (1, 0))
             self.assertEqual(data["sources"][0]["sha256"], digest)
             self.assertEqual(data["sources"][0]["capture_status"], "captured")
+            self.assertTrue(data["sources"][0]["legal_text_extraction_performed"])
+            self.assertEqual(data["sources"][0]["extracted_candidate_sha256"], "b" * 64)
 
     def test_failed_current_capture_cannot_reuse_stale_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
