@@ -6,11 +6,11 @@ This is an inventory snapshot, not authorization to delete work. Branch counts a
 
 | Repository | Default | Branches observed | Open PRs | Notes |
 |---|---|---:|---:|---|
-| vladossVPN | main | 204 | 34+ (first 100 PR API page) | Large active feature/fix/dependabot history; do not bulk-delete |
+| vladossVPN | main | 204 | 52 | Large active feature/fix/dependabot history; do not bulk-delete |
 | vladossVPN-patches | main | 1 | 0 | Single-branch private repository |
 | PRAVORF | main | 22 | 4 | One dependent PR chain; several already merged design changes |
 | Zakon | main | 11 | 6 | Main content architecture and security work split across dependent PRs |
-| GALACTIC-FRONTIER | main | 115 | 16+ (first 100 PR API page) | Large integration graph; PRs use non-main base branches |
+| GALACTIC-FRONTIER | main | 115 | 16 | Large integration graph; PRs use non-main base branches |
 | NewRoad | main | 1 | 0 | Single-branch repository |
 | cargo-master | main | 7 | 0 | Four closed-but-unmerged PRs; their branches may still contain useful work |
 
@@ -42,7 +42,7 @@ Additional branch `security/fix-zak-11-12-14-18` is not an open PR head in the c
 ## Other repositories: branch handling
 
 ### vladossVPN — 204 branches
-Open work includes lifecycle/state ownership (#176), URI query normalization (#175), scan-cache reuse (#174), network bucket stability (#173), privacy-safe subscription logging (#170), service teardown (#169), CI/security docs (#168), and recommendation-first connection (#178). There are also open dependency PRs. These are active, distinct changes. Keep them; group by feature area and merge only after individual CI and overlap review. Merged PR branches can be deleted only after checking whether any other open PR or downstream branch uses them.
+There are 52 open PRs. Active recent work includes subscription-cache encryption (#179), recommendation-first connection (#178), lifecycle/state ownership (#176), URI query normalization (#175), scan-cache reuse (#174), network bucket stability (#173), privacy-safe subscription logging (#170), service teardown (#169), and CI/security docs (#168), plus older open PRs and dependency updates. The first 10 PR comparisons show most are only 1 commit behind main, but have diverged; #179 is 2 commits ahead and clean. These are active, distinct changes. Keep them; group by feature area and merge only after individual CI and overlap review. Merged PR branches can be deleted only after checking whether any other open PR or downstream branch uses them.
 
 ### PRAVORF — 22 branches
 - PR #1 (`feat/android-offline-legal-reference`) is the parent of PR #2 (`feat/yandex-account-sync-foundation`).
@@ -50,7 +50,7 @@ Open work includes lifecycle/state ownership (#176), URI query normalization (#1
 - PR #18, #17, #16, #15, #14, #13, #11 and #10 are already merged. Their head branches are cleanup candidates only after checking whether they are referenced by another open PR or used as a base.
 
 ### GALACTIC-FRONTIER — 115 branches
-The active PR graph includes the main integration/vertical-slice branch and dependent ship, cockpit, planet and space-rendering branches. Examples: #111 targets `chatgpt/grok-completion-full-2026-11`; #112 targets `chatgpt/3d-space-volume-pass`; #98/#97/#96 target the Grok completion branch; #94 targets ship UV quality; #93 targets the player-fighter hero branch. This is a staged integration graph, not a flat list. Preserve all active heads and all bases until the graph is mapped. PR #110 and #104 are already merged into main; their branches are possible cleanup candidates after reference checks.
+There are 16 open PRs. The active PR graph includes the main integration/vertical-slice branch and dependent ship, cockpit, planet and space-rendering branches. Examples: #111 targets `chatgpt/grok-completion-full-2026-11`; #112 targets `chatgpt/3d-space-volume-pass`; #98/#97/#96 target the Grok completion branch; #94 targets ship UV quality; #93 targets the player-fighter hero branch. This is a staged integration graph, not a flat list. Comparisons show #113, #112 and #111 are ahead-only relative to their stated bases; #101, #98, #97, #96, #93 and #92 have diverged and need explicit conflict review. Preserve all active heads and all bases until the graph is mapped. PR #110 and #104 are already merged into main; their branches are possible cleanup candidates after reference checks.
 
 ### cargo-master — 7 branches
 PRs #2–#5 are closed without merging. Their branches still exist and include implementation, Android CI, art production and design documentation. Treat these as archived work candidates, not automatically obsolete. Compare each with main and inspect artifacts before any deletion.
@@ -76,3 +76,11 @@ PRs #2–#5 are closed without merging. Their branches still exist and include i
 3. Run CI on each proposed integration target.
 4. Integrate the Zakon parent branch first, then its two dependent child branches.
 5. Prepare explicit safe-delete candidates with proof of merged/duplicate commits; obtain confirmation before destructive deletion.
+
+
+## Additional PR comparison findings
+
+- `vladossVPN`: 52 open PRs. The newest 10 have mostly diverged by one commit from main; PR #179 is 2 commits ahead with no behind commits. No bulk retargeting is safe.
+- `PRAVORF`: PR #19 is 17 commits ahead of main with no behind commits; PR #12 is 1 ahead / 35 behind; PR #2 is 62 ahead of PR #1's branch; PR #1 is 146 ahead / 52 behind main. Preserve the parent-child chain and update the parent first.
+- `GALACTIC-FRONTIER`: PR #113 is 5 ahead of main; #112 is 21 ahead of #111's base; #111 is 39 ahead of its base. These are merge-order candidates after CI. #101 (59 ahead / 80 behind), #98 (20/21), #97 (52/23), #96 (23/21), #93 (3/7), and #92 (13/21) have diverged and require diff-level integration.
+- `Zakon`: PR #3 is 197 ahead / 26 behind main; #9 and #10 are clean children of #3. PR #8 (10/17), #2 (2/117), and #1 (23/157) need separate treatment.
