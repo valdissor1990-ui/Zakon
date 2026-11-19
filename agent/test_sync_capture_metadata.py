@@ -43,8 +43,28 @@ class SyncCaptureMetadataTests(unittest.TestCase):
             self.assertEqual((captured, failed), (1, 0))
             self.assertEqual(data["sources"][0]["sha256"], digest)
             self.assertEqual(data["sources"][0]["capture_status"], "captured")
-            self.assertTrue(data["sources"][0]["legal_text_extraction_performed"])
-            self.assertEqual(data["sources"][0]["extracted_candidate_sha256"], "b" * 64)
+            self.assertNotIn("legal_text_extraction_performed", data["sources"][0])
+            self.assertNotIn("extracted_candidate_sha256", data["sources"][0])
+
+
+    def test_preserves_extraction_only_when_source_hash_is_unchanged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            records, report, evidence, digest = self.fixture(root, old_capture=False)
+            data = json.loads(records.read_text(encoding="utf-8"))
+            data["sources"][0].update({
+                "legal_text_extraction_performed": True,
+                "extracted_candidate_file": "source_one.txt",
+                "extracted_candidate_sha256": "c" * 64,
+                "article_heading_candidates": 12,
+            })
+            records.write_text(json.dumps(data), encoding="utf-8")
+            captured, failed = sync(records, report, evidence)
+            source = json.loads(records.read_text(encoding="utf-8"))["sources"][0]
+            self.assertEqual((captured, failed), (1, 0))
+            self.assertEqual(source["sha256"], digest)
+            self.assertTrue(source["legal_text_extraction_performed"])
+            self.assertEqual(source["extracted_candidate_sha256"], "c" * 64)
 
     def test_failed_current_capture_cannot_reuse_stale_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
