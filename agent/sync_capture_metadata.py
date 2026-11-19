@@ -12,6 +12,10 @@ CAPTURE_FIELDS = (
     "sha256", "retrieved_at", "final_url", "content_type",
     "byte_length", "evidence_file",
 )
+EXTRACTION_FIELDS = (
+    "legal_text_extraction_performed", "extracted_candidate_file",
+    "extracted_candidate_sha256", "article_heading_candidates",
+)
 
 def atomic_json_write(path: Path, data: dict) -> None:
     temporary = path.with_name(path.name + ".tmp")
@@ -47,7 +51,7 @@ def sync(records_path: Path, report_path: Path, evidence_root: Path) -> tuple[in
         if result is None:
             source["capture_status"] = "failed"
             source["capture_error"] = "No result for this source in the current capture run"
-            for field in CAPTURE_FIELDS:
+            for field in CAPTURE_FIELDS + EXTRACTION_FIELDS:
                 source.pop(field, None)
             failed += 1
             continue
@@ -55,7 +59,7 @@ def sync(records_path: Path, report_path: Path, evidence_root: Path) -> tuple[in
         if result.get("capture_status") == "failed":
             source["capture_status"] = "failed"
             source["capture_error"] = result.get("error", "Capture failed")
-            for field in CAPTURE_FIELDS:
+            for field in CAPTURE_FIELDS + EXTRACTION_FIELDS:
                 source.pop(field, None)
             failed += 1
             continue
@@ -87,6 +91,10 @@ def sync(records_path: Path, report_path: Path, evidence_root: Path) -> tuple[in
         for field in ("retrieved_at", "final_url", "content_type", "byte_length", "evidence_file"):
             if metadata.get(field) != result.get(field):
                 raise ValueError(f"{key}: report and evidence metadata disagree on {field}")
+
+        if source.get("sha256") != digest:
+            for field in EXTRACTION_FIELDS:
+                source.pop(field, None)
 
         source.update({
             "capture_status": "captured",
