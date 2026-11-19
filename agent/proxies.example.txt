@@ -1,0 +1,12 @@
+# One proxy URL per line. Lines starting with # are ignored.
+# Supported schemes: http, https, socks5
+#
+# Examples (replace with real Russian residential / datacenter exits):
+# http://user:pass@1.2.3.4:8080
+# http://5.6.7.8:3128
+# socks5://user:pass@9.10.11.12:1080
+#
+# Usage:
+#   python3 capture_sources.py --proxy-file proxies.txt
+#   PROXY_LIST_FILE=proxies.txt python3 capture_sources.py
+#   PROXY_LIST="http://a:8080,http://b:8080" python3 capture_sources.py
