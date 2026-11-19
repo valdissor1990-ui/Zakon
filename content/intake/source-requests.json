@@ -313,6 +313,16 @@
       "extracted_candidate_file": "kas_minjust_docx.txt",
       "extracted_candidate_sha256": "04a949b7d6aa0061cb7ba7e8fa24b5db9f55d5c916bb2c85b27aed1858971eac",
       "article_heading_candidates": 404
+    },
+    {
+      "key": "advocacy_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "name": "63-ФЗ — официальная HTML-страница Минюста России",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/documents/7885/",
+      "source_type": "official_document_page_html",
+      "source_document_id": "7885",
+      "notes": "Сохраняется как первичный снимок официальной карточки документа: заголовок, ссылки на текст и перечень изменяющих актов. Это тот же оператор и система Минюста, что и RTF; источник не считается независимой третьей системой и не заменяет официальный портал опубликования или интегрированный банк."
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
