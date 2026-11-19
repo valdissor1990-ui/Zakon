@@ -73,6 +73,8 @@ internal class CabinetStorage(private val context: Context) {
         }
     }
 
+    fun requiresUserAuthentication() = crypto.requiresUserAuthentication()
+
     fun hasVerifier() = securePrefs.contains("pin_verifier") && securePrefs.contains("pin_salt")
     fun isPinEnabled() = securePrefs.getBoolean("pin_enabled", hasVerifier())
     fun hasPassword() = isPinEnabled() && hasVerifier()
