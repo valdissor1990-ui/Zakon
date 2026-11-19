@@ -1,0 +1,12 @@
+{
+  "source_key": "advocacy_minjust_page",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/documents/7885/",
+  "final_url": "https://minjust.gov.ru/ru/documents/7885/",
+  "retrieved_at": "2026-11-19T09:33:18Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 354624,
+  "sha256": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea",
+  "evidence_file": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea.source",
+  "legal_text_extraction_performed": false
+}
