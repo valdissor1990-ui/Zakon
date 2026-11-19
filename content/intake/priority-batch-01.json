@@ -2,7 +2,7 @@
   "batch_id": "ru-priority-federal-acts-01",
   "scope": "Начальный пакет полного наполнения федеральной правовой базы",
   "as_of": "2026-11-16",
-  "status": "source_intake_in_progress",
+  "status": "review_candidates_extracted_revision_verification_pending",
   "documents": [
     {
       "id": "ru-constitution",
@@ -16,12 +16,14 @@
       "source_page_verified": true,
       "full_text_capture": "pending",
       "revision_verification": "pending",
-      "article_extraction": "pending",
+      "article_extraction": "heading_candidates_only_review_required",
       "cross_check": "pending",
       "release_eligible": false,
       "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
       "text_extraction_tool": "agent/extract_source_text.py",
-      "text_extraction_status": "workflow_pending"
+      "text_extraction_status": "review_candidate_extracted",
+      "extracted_candidate_file": "content/extracted/constitution_minjust_rtf.txt",
+      "article_heading_candidates": 142
     },
     {
       "id": "ru-criminal-code",
@@ -37,12 +39,14 @@
       "source_page_verified": true,
       "full_text_capture": "pending",
       "revision_verification": "pending",
-      "article_extraction": "pending",
+      "article_extraction": "heading_candidates_only_review_required",
       "cross_check": "pending",
       "release_eligible": false,
       "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
       "text_extraction_tool": "agent/extract_source_text.py",
-      "text_extraction_status": "workflow_pending"
+      "text_extraction_status": "review_candidate_extracted",
+      "extracted_candidate_file": "content/extracted/uk_minjust_docx.txt",
+      "article_heading_candidates": 492
     },
     {
       "id": "ru-criminal-procedure-code",
@@ -73,12 +77,14 @@
       "source_page_verified": true,
       "full_text_capture": "pending",
       "revision_verification": "pending",
-      "article_extraction": "pending",
+      "article_extraction": "heading_candidates_only_review_required",
       "cross_check": "pending",
       "release_eligible": false,
       "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
       "text_extraction_tool": "agent/extract_source_text.py",
-      "text_extraction_status": "workflow_pending"
+      "text_extraction_status": "review_candidate_extracted",
+      "extracted_candidate_file": "content/extracted/gpk_minjust_docx.txt",
+      "article_heading_candidates": 486
     },
     {
       "id": "ru-administrative-offences-code",
@@ -94,12 +100,14 @@
       "source_page_verified": true,
       "full_text_capture": "pending",
       "revision_verification": "pending",
-      "article_extraction": "pending",
+      "article_extraction": "heading_candidates_only_review_required",
       "cross_check": "pending",
       "release_eligible": false,
       "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
       "text_extraction_tool": "agent/extract_source_text.py",
-      "text_extraction_status": "workflow_pending"
+      "text_extraction_status": "review_candidate_extracted",
+      "extracted_candidate_file": "content/extracted/koap_minjust_docx.txt",
+      "article_heading_candidates": 1004
     },
     {
       "id": "ru-civil-code",
@@ -156,12 +164,14 @@
       "source_page_verified": true,
       "full_text_capture": "pending",
       "revision_verification": "pending",
-      "article_extraction": "pending",
+      "article_extraction": "heading_candidates_only_review_required",
       "cross_check": "pending",
       "release_eligible": false,
       "captured_evidence_assessment": "Оригинальная страница и/или вложенный файл сохранены в content/evidence. Захват оригинала не подтверждает актуальность редакции. Для кодексов DOCX датированы 2019 годом; для Конституции RTF требует проверки истории поправок. Не использовать как текущий текст без сверки всех изменений по состоянию на дату выпуска.",
       "text_extraction_tool": "agent/extract_source_text.py",
-      "text_extraction_status": "workflow_pending"
+      "text_extraction_status": "review_candidate_extracted",
+      "extracted_candidate_file": "content/extracted/kas_minjust_docx.txt",
+      "article_heading_candidates": 404
     },
     {
       "id": "ru-penal-enforcement-code",
