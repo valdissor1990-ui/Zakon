@@ -10,7 +10,7 @@ HEX64 = re.compile(r"^[0-9a-f]{64}$")
 SAFE_KEY = re.compile(r"^[a-z0-9][a-z0-9_-]{0,100}$")
 CAPTURE_FIELDS = (
     "sha256", "retrieved_at", "final_url", "content_type",
-    "byte_length", "evidence_file", "legal_text_extraction_performed",
+    "byte_length", "evidence_file",
 )
 
 def atomic_json_write(path: Path, data: dict) -> None:
@@ -96,7 +96,6 @@ def sync(records_path: Path, report_path: Path, evidence_root: Path) -> tuple[in
             "content_type": metadata["content_type"],
             "byte_length": len(payload),
             "evidence_file": metadata["evidence_file"],
-            "legal_text_extraction_performed": False,
         })
         source.pop("capture_error", None)
         captured += 1
