@@ -14,7 +14,7 @@ This is an inventory snapshot, not authorization to delete work. Branch counts a
 | NewRoad | main | 1 | 0 | Single-branch repository |
 | cargo-master | main | 7 | 0 | Four closed-but-unmerged PRs; their branches may still contain useful work |
 
-The  means the REST response returned a full 100-item page; the exact open-PR count may be higher. Branch counts are exact for the queried pages.
+All branch and open-PR totals were obtained from paginated GitHub API responses.
 
 ## Zakon: current branch graph
 
@@ -22,18 +22,18 @@ Default branch: `main`.
 
 | PR | Head | Base | Commits ahead of base | Commits behind base | Status |
 |---:|---|---|---:|---:|---|
-| #3 | feature/separate-content-database | main | 197 | 26 | Draft, mergeability unresolved |
+| #3 | feature/separate-content-database | main | 197 | 26 | Draft, mergeable=false |
 | #9 | content/populate-core-acts | feature/separate-content-database | 61 | 0 | Draft, mergeable |
 | #10 | feature/unified-hybrid-legal-search | feature/separate-content-database | 16 | 0 | Draft, mergeable |
-| #8 | fix/cabinet-keystore-auth-flow | main | 10 | 17 | Draft, mergeability unresolved |
-| #2 | design/premium-code-icons | main | 2 | 117 | Draft, mergeability unresolved |
-| #1 | security/cabinet-encryption | main | 23 | 157 | Draft, mergeability unresolved |
+| #8 | fix/cabinet-keystore-auth-flow | main | 10 | 17 | Draft, mergeable=false |
+| #2 | design/premium-code-icons | main | 2 | 117 | Draft, mergeable=false |
+| #1 | security/cabinet-encryption | main | 23 | 157 | Draft, mergeable=false |
 
 Additional branch `security/fix-zak-11-12-14-18` is not an open PR head in the current list; it contains overlapping security, content import and validation changes and must be compared with PR #8/#1/#3 before disposition.
 
 ### Required integration order
 
-1. Review and update `feature/separate-content-database` against current `main` first. It is 26 commits behind and 197 commits ahead; do not merge dependent PRs until its diff is reviewed and CI is green.
+1. Review and update `feature/separate-content-database` against current `main` first. It is 26 commits behind and 197 commits ahead; GitHub currently reports it as not mergeable. The two histories overlap in 30+ files, including Android build/content workflows, CabinetCrypto, CabinetData, ContentUpdate, LegalStore, UtilityScreens, manifest and registry files. Do not merge dependent PRs until this parent is reconciled and CI is green.
 2. Keep PR #9 and PR #10 based on `feature/separate-content-database` until step 1 is complete. They are independent children of PR #3; do not retarget either directly to main without inspecting their full diffs.
 3. After PR #3 is accepted, rebase/update PR #9 and PR #10 against the updated base, rerun CI, then review and merge separately.
 4. Review PR #8 and security branches as a separate security track. Do not merge PR #1 and PR #8 blindly: they both touch cabinet encryption/storage and utility screens.
