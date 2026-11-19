@@ -9,7 +9,7 @@ permissions:
   contents: read
 concurrency:
   group: content-check-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   capture-evidence:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
@@ -47,7 +47,21 @@ jobs:
             exit 0
           fi
           git commit -m "content: capture official source evidence for law 63-FZ"
-          git push origin HEAD:content/populate-core-acts
+          for attempt in 1 2 3 4 5; do
+            git fetch origin content/populate-core-acts
+            if ! git rebase FETCH_HEAD; then
+              git rebase --abort || true
+              echo "Concurrent branch changes conflict with captured evidence; refusing a non-fast-forward or force push."
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/content/populate-core-acts; then
+              exit 0
+            fi
+            echo "Branch moved during push attempt $attempt/5; retrying after fetch/rebase."
+            sleep "$((attempt * 2))"
+          done
+          echo "Unable to push captured evidence after five fetch/rebase attempts."
+          exit 1
 
 
   extract-review-candidates:
@@ -78,7 +92,21 @@ jobs:
             exit 0
           fi
           git commit -m "content: extract captured official texts for review"
-          git push origin HEAD:content/populate-core-acts
+          for attempt in 1 2 3 4 5; do
+            git fetch origin content/populate-core-acts
+            if ! git rebase FETCH_HEAD; then
+              git rebase --abort || true
+              echo "Concurrent branch changes conflict with extracted review candidates; refusing a non-fast-forward or force push."
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/content/populate-core-acts; then
+              exit 0
+            fi
+            echo "Branch moved during push attempt $attempt/5; retrying after fetch/rebase."
+            sleep "$((attempt * 2))"
+          done
+          echo "Unable to push extracted review candidates after five fetch/rebase attempts."
+          exit 1
 
   validate:
     runs-on: ubuntu-latest
