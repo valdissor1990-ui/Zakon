@@ -15,9 +15,10 @@ from urllib.parse import urlparse
 
 try:
     from adapters.pravo import fetch_with_retries, geo_restriction_hint, is_pravo_host
+    from adapters.proxy_pool import ProxyPool
 except ImportError:
-    # Allow running as a standalone script from agent/
     from adapters.pravo import fetch_with_retries, geo_restriction_hint, is_pravo_host  # type: ignore
+    from adapters.proxy_pool import ProxyPool  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "content" / "sources" / "registry.json"
@@ -50,38 +51,53 @@ class AllowlistedRedirectHandler(urllib.request.HTTPRedirectHandler):
         validate_url(new_url, self.hosts)
         return super().redirect_request(request, response, code, message, headers, new_url)
 
-def capture(url: str, hosts: set[str], proxy: str | None = None) -> tuple[bytes, str, str]:
-    """Capture a single HTTPS source. Uses stronger retries for pravo.gov.ru hosts."""
+def capture(
+    url: str,
+    hosts: set[str],
+    *,
+    proxy: str | None = None,
+    proxy_pool: ProxyPool | None = None,
+) -> tuple[bytes, str, str]:
+    """Capture a single HTTPS source. Uses stronger retries + rotation for pravo.gov.ru."""
     if is_pravo_host(url):
-        print(f"Using pravo-aware fetch (timeouts + optional proxy) for {url}", flush=True)
+        print(f"Using pravo-aware fetch (rotation + timeouts) for {url}", flush=True)
+        if proxy_pool and proxy_pool.has_proxies():
+            print(f"  {proxy_pool.status_summary()}", flush=True)
         try:
             payload, final_url, content_type = fetch_with_retries(
                 url,
                 timeout=90.0,
                 max_attempts=6,
                 proxy=proxy,
+                proxy_pool=proxy_pool,
                 max_bytes=MAX_BYTES,
             )
-        except Exception as err:
+        except Exception:
             print(geo_restriction_hint(), flush=True)
             raise
         validate_url(final_url, hosts)
         return payload, final_url, content_type
 
+    # Non-pravo: still allow a single proxy from the pool / env
+    current_proxy = None
+    if proxy_pool and proxy_pool.has_proxies():
+        current_proxy = proxy_pool.next()
+    else:
+        current_proxy = proxy or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
+
     request = urllib.request.Request(
         url,
-        headers={"User-Agent": "Zakon-Legal-Source-Capture/1.1", "Accept": "*/*"},
+        headers={"User-Agent": "Zakon-Legal-Source-Capture/1.2", "Accept": "*/*"},
     )
-    handlers = [AllowlistedRedirectHandler(hosts)]
-    proxy = proxy or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
-    if proxy:
-        handlers.insert(0, urllib.request.ProxyHandler({"https": proxy, "http": proxy}))
+    handlers: list = [AllowlistedRedirectHandler(hosts)]
+    if current_proxy:
+        handlers.insert(0, urllib.request.ProxyHandler({"https": current_proxy, "http": current_proxy}))
     opener = urllib.request.build_opener(*handlers)
-    # Some hosted runners prefer IPv6 routes that are unavailable to selected
-    # government hosts. Force IPv4 only for this bounded HTTPS request.
     original_getaddrinfo = socket.getaddrinfo
+
     def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
         return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
     socket.getaddrinfo = ipv4_getaddrinfo
     try:
         last_error = None
@@ -91,9 +107,24 @@ def capture(url: str, hosts: set[str], proxy: str | None = None) -> tuple[bytes,
                     final_url = response.geturl()
                     content_type = response.headers.get("Content-Type", "application/octet-stream")
                     payload = response.read(MAX_BYTES + 1)
+                if current_proxy and proxy_pool:
+                    proxy_pool.mark_success(current_proxy)
                 break
             except (urllib.error.URLError, TimeoutError, OSError) as error:
                 last_error = error
+                if current_proxy and proxy_pool:
+                    proxy_pool.mark_failure(current_proxy)
+                    current_proxy = proxy_pool.next()
+                    # rebuild opener with next proxy
+                    handlers = [AllowlistedRedirectHandler(hosts)]
+                    if current_proxy:
+                        handlers.insert(
+                            0,
+                            urllib.request.ProxyHandler(
+                                {"https": current_proxy, "http": current_proxy}
+                            ),
+                        )
+                    opener = urllib.request.build_opener(*handlers)
                 if attempt == 4:
                     raise
                 print(f"Retry {attempt}/4 for {url}: {error}", flush=True)
@@ -102,8 +133,6 @@ def capture(url: str, hosts: set[str], proxy: str | None = None) -> tuple[bytes,
             raise RuntimeError(f"Unable to capture {url}: {last_error}")
     finally:
         socket.getaddrinfo = original_getaddrinfo
-    # Do not rely solely on the redirect handler: validate the final response URL too,
-    # including custom openers or transports that do not invoke HTTPRedirectHandler.
     validate_url(final_url, hosts)
     if len(payload) > MAX_BYTES:
         raise ValueError(f"Source exceeds the {MAX_BYTES} byte capture limit")
@@ -116,10 +145,26 @@ def main() -> int:
     parser.add_argument(
         "--proxy",
         default=None,
-        help="Optional HTTPS proxy (e.g. http://user:pass@ru-proxy:8080). "
-             "Also reads HTTPS_PROXY / HTTP_PROXY. Required for most pravo.gov.ru captures from non-RU networks.",
+        help="Single HTTPS proxy (http://user:pass@host:port). Also reads HTTPS_PROXY.",
+    )
+    parser.add_argument(
+        "--proxy-file",
+        default=None,
+        help="File with one proxy URL per line (rotation). Also reads PROXY_LIST_FILE / PROXY_LIST.",
     )
     args = parser.parse_args()
+
+    proxy_pool = ProxyPool.from_sources(
+        single=args.proxy,
+        proxy_file=args.proxy_file,
+    )
+    if proxy_pool.has_proxies():
+        print(proxy_pool.status_summary(), flush=True)
+    else:
+        print(
+            "No proxies configured. pravo.gov.ru captures from non-RU networks will likely time out.",
+            flush=True,
+        )
 
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     records = json.loads(args.records.read_text(encoding="utf-8"))
@@ -142,14 +187,21 @@ def main() -> int:
         validate_url(url, hosts)
         print(f"Capturing {key} from {url}", flush=True)
         try:
-            payload, final_url, content_type = capture(url, hosts, proxy=args.proxy)
+            payload, final_url, content_type = capture(
+                url, hosts, proxy=args.proxy, proxy_pool=proxy_pool
+            )
             validate_url(final_url, hosts)
         except Exception as error:
             if is_pravo_host(url):
                 print(geo_restriction_hint(), flush=True)
             print(f"FAILED {key}: {type(error).__name__}: {error}", flush=True)
-            captured.append({"source_key": key, "registry_id": registry_id, "requested_url": url,
-                             "capture_status": "failed", "error": f"{type(error).__name__}: {error}"})
+            captured.append({
+                "source_key": key,
+                "registry_id": registry_id,
+                "requested_url": url,
+                "capture_status": "failed",
+                "error": f"{type(error).__name__}: {error}",
+            })
             continue
         print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
         digest = hashlib.sha256(payload).hexdigest()
@@ -182,12 +234,15 @@ def main() -> int:
         )
         captured.append(metadata)
 
-    report = {"captured": sum(1 for item in captured if item.get("sha256")),
-              "failed": [item for item in captured if item.get("capture_status") == "failed"],
-              "results": captured}
+    report = {
+        "captured": sum(1 for item in captured if item.get("sha256")),
+        "failed": [item for item in captured if item.get("capture_status") == "failed"],
+        "results": captured,
+    }
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "capture-report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(f"Captured {report['captured']} raw source file(s); failed: {len(report['failed'])}.")
     print("No legal text was parsed, rewritten, or generated.")
     return 0 if report["captured"] else 1
