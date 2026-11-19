@@ -53,7 +53,7 @@ There are 52 open PRs. Active recent work includes subscription-cache encryption
 There are 16 open PRs. The active PR graph includes the main integration/vertical-slice branch and dependent ship, cockpit, planet and space-rendering branches. Examples: #111 targets `chatgpt/grok-completion-full-2026-11`; #112 targets `chatgpt/3d-space-volume-pass`; #98/#97/#96 target the Grok completion branch; #94 targets ship UV quality; #93 targets the player-fighter hero branch. This is a staged integration graph, not a flat list. Comparisons show #113, #112 and #111 are ahead-only relative to their stated bases; #101, #98, #97, #96, #93 and #92 have diverged and need explicit conflict review. Preserve all active heads and all bases until the graph is mapped. PR #110 and #104 are already merged into main; their branches are possible cleanup candidates after reference checks.
 
 ### cargo-master — 7 branches
-PRs #2–#5 are closed without merging. Their branches still exist and include implementation, Android CI, art production and design documentation. Treat these as archived work candidates, not automatically obsolete. Compare each with main and inspect artifacts before any deletion.
+PRs #2–#5 are closed without merging. Their branches still exist and include implementation, Android CI, art production and design documentation. Comparison against main: `grok/implementation` is 0 ahead / 243 behind; `art/greenfield-production-pass-2` is 0 ahead / 155 behind; neither contains commits unique to main's current history. They are the strongest deletion candidates, provided no external workflow or local clone still depends on them. `art/greenfield-living-district` is identical to main but was used by the latest successful APK and Godot runs, so retain it for now. `build/android-apk-ci` (20 ahead / 283 behind) and `docs/design` (56 ahead / 313 behind) contain unique commits and must be preserved.
 
 ### Single-branch repositories
 - `vladossVPN-patches`: only main.
@@ -84,3 +84,18 @@ PRs #2–#5 are closed without merging. Their branches still exist and include i
 - `PRAVORF`: PR #19 is 17 commits ahead of main with no behind commits; PR #12 is 1 ahead / 35 behind; PR #2 is 62 ahead of PR #1's branch; PR #1 is 146 ahead / 52 behind main. Preserve the parent-child chain and update the parent first.
 - `GALACTIC-FRONTIER`: PR #113 is 5 ahead of main; #112 is 21 ahead of #111's base; #111 is 39 ahead of its base. These are merge-order candidates after CI. #101 (59 ahead / 80 behind), #98 (20/21), #97 (52/23), #96 (23/21), #93 (3/7), and #92 (13/21) have diverged and require diff-level integration.
 - `Zakon`: PR #3 is 197 ahead / 26 behind main; #9 and #10 are clean children of #3. PR #8 (10/17), #2 (2/117), and #1 (23/157) need separate treatment.
+
+
+## Safe-cleanup candidates (not yet deleted)
+
+- `cargo-master:grok/implementation`: 0 commits ahead of main, 243 behind; no open PR uses it as a base. Closed PR references remain in GitHub history.
+- `cargo-master:art/greenfield-production-pass-2`: 0 ahead, 155 behind; no open PR uses it as a base. Closed PR references remain in GitHub history.
+
+These two refs appear redundant with current main by commit reachability. They can be removed after explicit confirmation. No delete-ref action is available through the connected GitHub interface in this session, so no destructive branch deletion has been attempted.
+
+## Not safe to delete based on current evidence
+
+- All active PR heads and all branches used as bases by open PRs.
+- Branches in Zakon/PRAVORF/GALACTIC-FRONTIER whose heads still contain commits not reachable from main, even when a PR was previously marked merged.
+- `cargo-master:build/android-apk-ci` and `cargo-master:docs/design`, which contain unique commits.
+- `cargo-master:art/greenfield-living-district`, which currently matches main but remains the latest validated build source.
