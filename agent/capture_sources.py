@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import re
 import socket
 import time
@@ -11,6 +12,12 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
+
+try:
+    from adapters.pravo import fetch_with_retries, geo_restriction_hint, is_pravo_host
+except ImportError:
+    # Allow running as a standalone script from agent/
+    from adapters.pravo import fetch_with_retries, geo_restriction_hint, is_pravo_host  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "content" / "sources" / "registry.json"
@@ -43,12 +50,33 @@ class AllowlistedRedirectHandler(urllib.request.HTTPRedirectHandler):
         validate_url(new_url, self.hosts)
         return super().redirect_request(request, response, code, message, headers, new_url)
 
-def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
+def capture(url: str, hosts: set[str], proxy: str | None = None) -> tuple[bytes, str, str]:
+    """Capture a single HTTPS source. Uses stronger retries for pravo.gov.ru hosts."""
+    if is_pravo_host(url):
+        print(f"Using pravo-aware fetch (timeouts + optional proxy) for {url}", flush=True)
+        try:
+            payload, final_url, content_type = fetch_with_retries(
+                url,
+                timeout=90.0,
+                max_attempts=6,
+                proxy=proxy,
+                max_bytes=MAX_BYTES,
+            )
+        except Exception as err:
+            print(geo_restriction_hint(), flush=True)
+            raise
+        validate_url(final_url, hosts)
+        return payload, final_url, content_type
+
     request = urllib.request.Request(
         url,
-        headers={"User-Agent": "Zakon-Legal-Source-Capture/1.0", "Accept": "*/*"},
+        headers={"User-Agent": "Zakon-Legal-Source-Capture/1.1", "Accept": "*/*"},
     )
-    opener = urllib.request.build_opener(AllowlistedRedirectHandler(hosts))
+    handlers = [AllowlistedRedirectHandler(hosts)]
+    proxy = proxy or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
+    if proxy:
+        handlers.insert(0, urllib.request.ProxyHandler({"https": proxy, "http": proxy}))
+    opener = urllib.request.build_opener(*handlers)
     # Some hosted runners prefer IPv6 routes that are unavailable to selected
     # government hosts. Force IPv4 only for this bounded HTTPS request.
     original_getaddrinfo = socket.getaddrinfo
@@ -57,18 +85,18 @@ def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
     socket.getaddrinfo = ipv4_getaddrinfo
     try:
         last_error = None
-        for attempt in range(1, 4):
+        for attempt in range(1, 5):
             try:
-                with opener.open(request, timeout=30) as response:
+                with opener.open(request, timeout=45) as response:
                     final_url = response.geturl()
                     content_type = response.headers.get("Content-Type", "application/octet-stream")
                     payload = response.read(MAX_BYTES + 1)
                 break
             except (urllib.error.URLError, TimeoutError, OSError) as error:
                 last_error = error
-                if attempt == 3:
+                if attempt == 4:
                     raise
-                print(f"Retry {attempt}/3 for {url}: {error}", flush=True)
+                print(f"Retry {attempt}/4 for {url}: {error}", flush=True)
                 time.sleep(attempt * 2)
         else:
             raise RuntimeError(f"Unable to capture {url}: {last_error}")
@@ -85,6 +113,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, default=ROOT / "content" / "records" / "records.json")
     parser.add_argument("--output", type=Path, default=ROOT / "content" / "evidence")
+    parser.add_argument(
+        "--proxy",
+        default=None,
+        help="Optional HTTPS proxy (e.g. http://user:pass@ru-proxy:8080). "
+             "Also reads HTTPS_PROXY / HTTP_PROXY. Required for most pravo.gov.ru captures from non-RU networks.",
+    )
     args = parser.parse_args()
 
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -108,9 +142,11 @@ def main() -> int:
         validate_url(url, hosts)
         print(f"Capturing {key} from {url}", flush=True)
         try:
-            payload, final_url, content_type = capture(url, hosts)
+            payload, final_url, content_type = capture(url, hosts, proxy=args.proxy)
             validate_url(final_url, hosts)
         except Exception as error:
+            if is_pravo_host(url):
+                print(geo_restriction_hint(), flush=True)
             print(f"FAILED {key}: {type(error).__name__}: {error}", flush=True)
             captured.append({"source_key": key, "registry_id": registry_id, "requested_url": url,
                              "capture_status": "failed", "error": f"{type(error).__name__}: {error}"})
