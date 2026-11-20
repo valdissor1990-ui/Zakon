@@ -17,7 +17,8 @@
       ],
       "state_operated": true,
       "system_id": "official_publication_portal",
-      "operator_id": "gspi"
+      "operator_id": "gspi",
+      "access_url": "https://pravo.gov.ru/novye-postupleniya/"
     },
     {
       "id": "pravo_law_bank",
