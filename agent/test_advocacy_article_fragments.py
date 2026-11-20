@@ -40,6 +40,19 @@ class AdvocacyLawArticleFragmentsTests(unittest.TestCase):
         self.assertEqual(self.candidate["source"]["extracted_sha256"],
                          self.article_index["source"]["extracted_sha256"])
 
+    def test_source_provenance_matches_latest_capture_and_review_index(self):
+        sidecar = load_json(
+            ROOT / "content" / "evidence" / "advocacy_minjust_rtf" /
+            "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.json"
+        )
+        source = self.candidate["source"]
+        self.assertEqual(source["sha256"], sidecar["sha256"])
+        self.assertEqual(source["retrieved_at"], sidecar["retrieved_at"])
+        self.assertEqual(source["byte_length"], sidecar["byte_length"])
+        self.assertEqual(source["official_url"], sidecar["final_url"])
+        self.assertEqual(source["extracted_sha256"],
+                         self.article_index["source"]["extracted_sha256"])
+
     def test_article_ranges_reconstruct_every_source_line_without_gaps(self):
         reconstructed = []
         line_numbers = []
