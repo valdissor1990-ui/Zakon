@@ -369,6 +369,14 @@ def build_structure_candidate(
     }
 
 
+def write_json(path: Path, value: dict) -> None:
+    """Write a UTF-8 JSON artifact with a real newline terminator."""
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, default=INTAKE)
@@ -409,7 +417,7 @@ def main():
         refresh_annotation_index(annotation_index_path, source, target.name, extracted_hash, text)
         structure_data = build_structure_candidate(source, target.name, extracted_hash, text, articles)
         structure_path = args.output / f"{key}.structure-candidate.json"
-        structure_path.write_text(json.dumps(structure_data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        write_json(structure_path, structure_data)
         source["legal_text_extraction_performed"] = True
         source["extracted_candidate_file"] = target.name
         source["extracted_candidate_sha256"] = extracted_hash
