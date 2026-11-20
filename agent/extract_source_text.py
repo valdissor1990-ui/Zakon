@@ -275,6 +275,82 @@ def refresh_annotation_index(
     )
 
 
+def refresh_article_fragments_candidate(
+    candidate_path: Path,
+    source: dict,
+    extracted_file: str,
+    extracted_hash: str,
+    text: str,
+) -> None:
+    """Refresh provenance for the custom 63-FZ line-fragment candidate without rewriting its text."""
+    if not candidate_path.is_file():
+        return
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    if candidate.get("artifact_type") != "review_only_article_text_fragments":
+        raise ValueError(f"{candidate_path}: unsupported article-fragments artifact type")
+    if candidate.get("status") != "review_only_not_legal_record":
+        raise ValueError(f"{candidate_path}: article fragments must remain non-publishable")
+
+    candidate_source = candidate.get("source")
+    if not isinstance(candidate_source, dict):
+        raise ValueError(f"{candidate_path}: source provenance is missing")
+    if candidate_source.get("sha256") != source.get("sha256"):
+        raise ValueError(f"{candidate_path}: source SHA-256 changed; rebuild and review article fragments")
+    if candidate_source.get("extracted_sha256") != extracted_hash:
+        raise ValueError(f"{candidate_path}: extracted text changed; rebuild and review article fragments")
+
+    lines = text.split("\n")
+    lines = [line[:-1] if line.endswith("\r") else line for line in lines]
+    rows = list(candidate.get("preamble_lines", []))
+    articles = candidate.get("articles")
+    if not isinstance(articles, list) or candidate.get("extraction", {}).get("article_count") != len(articles):
+        raise ValueError(f"{candidate_path}: article count is inconsistent")
+    for article in articles:
+        line_range = article.get("source_line_range", {})
+        start = line_range.get("start_inclusive")
+        end = line_range.get("end_exclusive")
+        raw_lines = article.get("raw_lines")
+        if not isinstance(start, int) or not isinstance(end, int) or not isinstance(raw_lines, list):
+            raise ValueError(f"{candidate_path}: article line range is invalid")
+        if end <= start or len(raw_lines) != end - start:
+            raise ValueError(f"{candidate_path}: article {article.get('number')} line range is inconsistent")
+        for offset, item in enumerate(raw_lines):
+            expected_line = start + offset
+            if item.get("line_number") != expected_line:
+                raise ValueError(f"{candidate_path}: article {article.get('number')} line numbering changed")
+            rows.append(item)
+    rows.extend(candidate.get("trailing_lines", []))
+
+    by_number = {}
+    for item in rows:
+        number = item.get("line_number")
+        if not isinstance(number, int) or number in by_number:
+            raise ValueError(f"{candidate_path}: source line numbers are missing or duplicated")
+        by_number[number] = item.get("text")
+    if sorted(by_number) != list(range(1, len(lines) + 1)):
+        raise ValueError(f"{candidate_path}: article fragments no longer cover every extracted source line")
+    for number, current_line in enumerate(lines, start=1):
+        if by_number[number] != current_line:
+            raise ValueError(f"{candidate_path}: source line mismatch at line {number}")
+
+    candidate_source.update({
+        "source_key": source["key"],
+        "registry_id": source.get("registry_id"),
+        "official_url": source.get("official_url"),
+        "retrieved_at": source.get("retrieved_at"),
+        "byte_length": source.get("byte_length"),
+        "sha256": source.get("sha256"),
+        "extracted_file": extracted_file,
+        "extracted_sha256": extracted_hash,
+    })
+    candidate["extraction"]["extracted_line_count"] = len(lines)
+    candidate["validation"] = {"contiguous_article_ranges": True, "errors": []}
+    candidate_path.write_text(
+        json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def build_structure_candidate(
     source: dict,
     extracted_file: str,
@@ -415,6 +491,8 @@ def main():
         refresh_review_index(review_index_path, source, target.name, extracted_hash, text, articles)
         annotation_index_path = args.output / f"{key}.annotation-index.json"
         refresh_annotation_index(annotation_index_path, source, target.name, extracted_hash, text)
+        fragments_path = args.output / f"{key}.article-fragments-candidate.json"
+        refresh_article_fragments_candidate(fragments_path, source, target.name, extracted_hash, text)
         structure_data = build_structure_candidate(source, target.name, extracted_hash, text, articles)
         structure_path = args.output / f"{key}.structure-candidate.json"
         write_json(structure_path, structure_data)
