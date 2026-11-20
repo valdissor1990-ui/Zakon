@@ -216,6 +216,64 @@ def refresh_review_index(
         encoding="utf-8",
     )
 
+
+def refresh_annotation_index(
+    index_path: Path,
+    source: dict,
+    extracted_file: str,
+    extracted_hash: str,
+    text: str,
+) -> None:
+    """Refresh provenance for third-party notes without changing their wording."""
+    if not index_path.is_file():
+        return
+    index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    if index_data.get("artifact_type") != "review_only_third_party_annotation_index":
+        raise ValueError(f"{index_path}: unsupported annotation index artifact type")
+    if index_data.get("status") != "review_only_not_legal_record":
+        raise ValueError(f"{index_path}: annotation index must remain non-publishable")
+
+    index_source = index_data.get("source")
+    if not isinstance(index_source, dict):
+        raise ValueError(f"{index_path}: source provenance is missing")
+    if index_source.get("sha256") != source.get("sha256"):
+        raise ValueError(f"{index_path}: source SHA-256 changed; rebuild and review annotations")
+    if index_source.get("extracted_sha256") != extracted_hash:
+        raise ValueError(f"{index_path}: extracted text changed; rebuild and review annotations")
+
+    annotations = index_data.get("annotations")
+    if not isinstance(annotations, list) or index_data.get("annotation_count") != len(annotations):
+        raise ValueError(f"{index_path}: annotation count is inconsistent")
+    lines = text.splitlines()
+    for annotation in annotations:
+        marker_line = annotation.get("marker_line")
+        start_line = annotation.get("annotation_line_start")
+        end_line = annotation.get("annotation_line_end")
+        if not all(isinstance(value, int) for value in (marker_line, start_line, end_line)):
+            raise ValueError(f"{index_path}: annotation line coordinates are invalid")
+        if marker_line < 1 or start_line < 1 or end_line < start_line or end_line > len(lines):
+            raise ValueError(f"{index_path}: annotation line coordinates are out of range")
+        if lines[marker_line - 1] != annotation.get("marker_text_raw"):
+            raise ValueError(f"{index_path}: third-party marker changed at line {marker_line}")
+        current_text = "\n".join(lines[start_line - 1:end_line])
+        if current_text != annotation.get("annotation_text_raw"):
+            raise ValueError(f"{index_path}: annotation text changed at lines {start_line}-{end_line}")
+
+    index_source.update({
+        "source_key": source["key"],
+        "registry_id": source.get("registry_id"),
+        "official_url": source.get("official_url"),
+        "retrieved_at": source.get("retrieved_at"),
+        "byte_length": source.get("byte_length"),
+        "sha256": source.get("sha256"),
+        "extracted_file": extracted_file,
+        "extracted_sha256": extracted_hash,
+    })
+    index_path.write_text(
+        json.dumps(index_data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, default=INTAKE)
@@ -252,6 +310,8 @@ def main():
         extracted_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
         review_index_path = args.output / f"{key}.article-index.json"
         refresh_review_index(review_index_path, source, target.name, extracted_hash, text, articles)
+        annotation_index_path = args.output / f"{key}.annotation-index.json"
+        refresh_annotation_index(annotation_index_path, source, target.name, extracted_hash, text)
         source["legal_text_extraction_performed"] = True
         source["extracted_candidate_file"] = target.name
         source["extracted_candidate_sha256"] = extracted_hash
