@@ -8,7 +8,7 @@
     "source_key": "advocacy_minjust_rtf",
     "registry_id": "minjust_official_documents",
     "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
-    "retrieved_at": "2026-11-20T08:32:40Z",
+    "retrieved_at": "2026-11-20T08:47:07Z",
     "byte_length": 1141873,
     "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
     "extracted_file": "advocacy_minjust_rtf.txt",
@@ -4006,9 +4006,9 @@
   ],
   "review_notes": [
     "Markers are line-level candidates only. Their legal role and parent-child hierarchy have not been manually approved.",
-    "Numeric dot markers are likely article parts; numeric parenthesis markers are likely numbered subitems, but this index does not assert that relationship.",
-    "The existing broad letter-marker heuristic reports one candidate in Article 41 at line 953: «П. 6 ст. 41 ...». This is an abbreviation in a third-party explanatory note, not a lettered legal subitem; the conservative lowercase-letter-plus-parenthesis detector therefore records zero lettered subitems.",
-    "No normative text is copied into this index. Consult the exact source line in the linked extracted text.",
+    "Numeric dot markers may represent parts; numeric parenthesis markers may represent subitems. This index does not assert parent-child relationships.",
+    "A broad single-letter-plus-dot heuristic can mistake abbreviations such as «П.» in explanatory notes for list markers. The conservative Cyrillic-letter-plus-parenthesis detector is used here.",
+    "No normative text is copied into this index. Consult the exact source line in the extracted text.",
     "Third-party annotations and editorial revision notes remain separate from the normative text and are not approved by this index."
   ]
-}
+}\n

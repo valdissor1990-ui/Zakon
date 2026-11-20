@@ -1,0 +1,4831 @@
+{
+  "schema_version": 1,
+  "artifact_type": "review_only_structure_marker_index",
+  "status": "review_only_not_legal_record",
+  "document_id": "ru-advocacy-law",
+  "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+  "source": {
+    "source_key": "constitution_minjust_rtf",
+    "registry_id": "minjust_official_documents_www",
+    "official_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+    "retrieved_at": "2026-11-20T08:53:36Z",
+    "byte_length": 953243,
+    "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
+    "extracted_file": "constitution_minjust_rtf.txt",
+    "extracted_sha256": "5b3d17331bab7306e630da1455f921a2dd6cc38ae2d3ea1066bd2df8d0862a18"
+  },
+  "article_count": 142,
+  "totals": {
+    "numeric_dot_candidate": 345,
+    "numeric_parenthesis_candidate": 0,
+    "cyrillic_letter_parenthesis_candidate": 105,
+    "numeric_marker_total": 345
+  },
+  "articles": [
+    {
+      "article_number": "1",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 26,
+        "end_exclusive": 31
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 28
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 29
+        }
+      ]
+    },
+    {
+      "article_number": "2",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 31,
+        "end_exclusive": 35
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "3",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 35,
+        "end_exclusive": 42
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 37
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 38
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 39
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 40
+        }
+      ]
+    },
+    {
+      "article_number": "4",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 42,
+        "end_exclusive": 48
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 44
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 45
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 46
+        }
+      ]
+    },
+    {
+      "article_number": "5",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 48,
+        "end_exclusive": 55
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 50
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 51
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 52
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 53
+        }
+      ]
+    },
+    {
+      "article_number": "6",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 55,
+        "end_exclusive": 61
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 57
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 58
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 59
+        }
+      ]
+    },
+    {
+      "article_number": "7",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 61,
+        "end_exclusive": 66
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 63
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 64
+        }
+      ]
+    },
+    {
+      "article_number": "8",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 66,
+        "end_exclusive": 71
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 68
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 69
+        }
+      ]
+    },
+    {
+      "article_number": "9",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 71,
+        "end_exclusive": 76
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 73
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 74
+        }
+      ]
+    },
+    {
+      "article_number": "10",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 76,
+        "end_exclusive": 80
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "11",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 80,
+        "end_exclusive": 86
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 82
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 83
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 84
+        }
+      ]
+    },
+    {
+      "article_number": "12",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 86,
+        "end_exclusive": 90
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "13",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 90,
+        "end_exclusive": 98
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 92
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 93
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 94
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 95
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 96
+        }
+      ]
+    },
+    {
+      "article_number": "14",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 98,
+        "end_exclusive": 103
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 100
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 101
+        }
+      ]
+    },
+    {
+      "article_number": "15",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 103,
+        "end_exclusive": 110
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 105
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 106
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 107
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 108
+        }
+      ]
+    },
+    {
+      "article_number": "16",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 110,
+        "end_exclusive": 118
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 112
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 113
+        }
+      ]
+    },
+    {
+      "article_number": "17",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 118,
+        "end_exclusive": 124
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 120
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 121
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 122
+        }
+      ]
+    },
+    {
+      "article_number": "18",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 124,
+        "end_exclusive": 128
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "19",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 128,
+        "end_exclusive": 134
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 130
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 131
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 132
+        }
+      ]
+    },
+    {
+      "article_number": "20",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 134,
+        "end_exclusive": 139
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 136
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 137
+        }
+      ]
+    },
+    {
+      "article_number": "21",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 139,
+        "end_exclusive": 144
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 141
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 142
+        }
+      ]
+    },
+    {
+      "article_number": "22",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 144,
+        "end_exclusive": 149
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 146
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 147
+        }
+      ]
+    },
+    {
+      "article_number": "23",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 149,
+        "end_exclusive": 154
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 151
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 152
+        }
+      ]
+    },
+    {
+      "article_number": "24",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 154,
+        "end_exclusive": 159
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 156
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 157
+        }
+      ]
+    },
+    {
+      "article_number": "25",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 159,
+        "end_exclusive": 163
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "26",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 163,
+        "end_exclusive": 168
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 165
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 166
+        }
+      ]
+    },
+    {
+      "article_number": "27",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 168,
+        "end_exclusive": 173
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 170
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 171
+        }
+      ]
+    },
+    {
+      "article_number": "28",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 173,
+        "end_exclusive": 177
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "29",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 177,
+        "end_exclusive": 185
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 179
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 180
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 181
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 182
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 183
+        }
+      ]
+    },
+    {
+      "article_number": "30",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 185,
+        "end_exclusive": 190
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 187
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 188
+        }
+      ]
+    },
+    {
+      "article_number": "31",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 190,
+        "end_exclusive": 194
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "32",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 194,
+        "end_exclusive": 202
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 196
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 197
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 198
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 199
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 200
+        }
+      ]
+    },
+    {
+      "article_number": "33",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 202,
+        "end_exclusive": 206
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "34",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 206,
+        "end_exclusive": 211
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 208
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 209
+        }
+      ]
+    },
+    {
+      "article_number": "35",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 211,
+        "end_exclusive": 218
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 213
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 214
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 215
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 216
+        }
+      ]
+    },
+    {
+      "article_number": "36",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 218,
+        "end_exclusive": 224
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 220
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 221
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 222
+        }
+      ]
+    },
+    {
+      "article_number": "37",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 224,
+        "end_exclusive": 232
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 226
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 227
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 228
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 229
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 230
+        }
+      ]
+    },
+    {
+      "article_number": "38",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 232,
+        "end_exclusive": 238
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 234
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 235
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 236
+        }
+      ]
+    },
+    {
+      "article_number": "39",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 238,
+        "end_exclusive": 244
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 240
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 241
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 242
+        }
+      ]
+    },
+    {
+      "article_number": "40",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 244,
+        "end_exclusive": 250
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 246
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 247
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 248
+        }
+      ]
+    },
+    {
+      "article_number": "41",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 250,
+        "end_exclusive": 256
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 252
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 253
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 254
+        }
+      ]
+    },
+    {
+      "article_number": "42",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 256,
+        "end_exclusive": 260
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "43",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 260,
+        "end_exclusive": 268
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 262
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 263
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 264
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 265
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 266
+        }
+      ]
+    },
+    {
+      "article_number": "44",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 268,
+        "end_exclusive": 274
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 270
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 271
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 272
+        }
+      ]
+    },
+    {
+      "article_number": "45",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 274,
+        "end_exclusive": 279
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 276
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 277
+        }
+      ]
+    },
+    {
+      "article_number": "46",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 279,
+        "end_exclusive": 285
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 281
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 282
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 283
+        }
+      ]
+    },
+    {
+      "article_number": "47",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 285,
+        "end_exclusive": 290
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 287
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 288
+        }
+      ]
+    },
+    {
+      "article_number": "48",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 290,
+        "end_exclusive": 295
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 292
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 293
+        }
+      ]
+    },
+    {
+      "article_number": "49",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 295,
+        "end_exclusive": 301
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 297
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 298
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 299
+        }
+      ]
+    },
+    {
+      "article_number": "50",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 301,
+        "end_exclusive": 307
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 303
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 304
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 305
+        }
+      ]
+    },
+    {
+      "article_number": "51",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 307,
+        "end_exclusive": 312
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 309
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 310
+        }
+      ]
+    },
+    {
+      "article_number": "52",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 312,
+        "end_exclusive": 316
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "53",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 316,
+        "end_exclusive": 320
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "54",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 320,
+        "end_exclusive": 325
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 322
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 323
+        }
+      ]
+    },
+    {
+      "article_number": "55",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 325,
+        "end_exclusive": 331
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 327
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 328
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 329
+        }
+      ]
+    },
+    {
+      "article_number": "56",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 331,
+        "end_exclusive": 337
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 333
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 334
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 335
+        }
+      ]
+    },
+    {
+      "article_number": "57",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 337,
+        "end_exclusive": 341
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "58",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 341,
+        "end_exclusive": 345
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "59",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 345,
+        "end_exclusive": 351
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 347
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 348
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 349
+        }
+      ]
+    },
+    {
+      "article_number": "60",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 351,
+        "end_exclusive": 355
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "61",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 355,
+        "end_exclusive": 360
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 357
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 358
+        }
+      ]
+    },
+    {
+      "article_number": "62",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 360,
+        "end_exclusive": 366
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 362
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 363
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 364
+        }
+      ]
+    },
+    {
+      "article_number": "63",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 366,
+        "end_exclusive": 371
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 368
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 369
+        }
+      ]
+    },
+    {
+      "article_number": "64",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 371,
+        "end_exclusive": 378
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "65",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 378,
+        "end_exclusive": 407
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 380
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 387
+        }
+      ]
+    },
+    {
+      "article_number": "66",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 407,
+        "end_exclusive": 415
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 409
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 410
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 411
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 412
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 413
+        }
+      ]
+    },
+    {
+      "article_number": "67",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 415,
+        "end_exclusive": 422
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 417
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 418
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.1.",
+          "line_number": 419
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 420
+        }
+      ]
+    },
+    {
+      "article_number": "67.1",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 422,
+        "end_exclusive": 429
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 424
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 425
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 426
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 427
+        }
+      ]
+    },
+    {
+      "article_number": "68",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 429,
+        "end_exclusive": 436
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 431
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 432
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 433
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 434
+        }
+      ]
+    },
+    {
+      "article_number": "69",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 436,
+        "end_exclusive": 442
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 438
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 439
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 440
+        }
+      ]
+    },
+    {
+      "article_number": "70",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 442,
+        "end_exclusive": 447
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 444
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 445
+        }
+      ]
+    },
+    {
+      "article_number": "71",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 447,
+        "end_exclusive": 471
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 18
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 450
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 451
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 452
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 453
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 454
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 455
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 456
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "з)",
+          "line_number": 457
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "и)",
+          "line_number": 458
+        },
+        {
+          "ordinal": 10,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "к)",
+          "line_number": 459
+        },
+        {
+          "ordinal": 11,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "л)",
+          "line_number": 460
+        },
+        {
+          "ordinal": 12,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "м)",
+          "line_number": 461
+        },
+        {
+          "ordinal": 13,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "н)",
+          "line_number": 462
+        },
+        {
+          "ordinal": 14,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "о)",
+          "line_number": 463
+        },
+        {
+          "ordinal": 15,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "п)",
+          "line_number": 464
+        },
+        {
+          "ordinal": 16,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "р)",
+          "line_number": 465
+        },
+        {
+          "ordinal": 17,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "с)",
+          "line_number": 466
+        },
+        {
+          "ordinal": 18,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "т)",
+          "line_number": 467
+        }
+      ]
+    },
+    {
+      "article_number": "72",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 471,
+        "end_exclusive": 491
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 14
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 473
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 474
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 475
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 476
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 477
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 478
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 479
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 480
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "з)",
+          "line_number": 482
+        },
+        {
+          "ordinal": 10,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "и)",
+          "line_number": 483
+        },
+        {
+          "ordinal": 11,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "к)",
+          "line_number": 484
+        },
+        {
+          "ordinal": 12,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "л)",
+          "line_number": 485
+        },
+        {
+          "ordinal": 13,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "м)",
+          "line_number": 486
+        },
+        {
+          "ordinal": 14,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "н)",
+          "line_number": 487
+        },
+        {
+          "ordinal": 15,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "о)",
+          "line_number": 488
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 489
+        }
+      ]
+    },
+    {
+      "article_number": "73",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 491,
+        "end_exclusive": 495
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "74",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 495,
+        "end_exclusive": 500
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 497
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 498
+        }
+      ]
+    },
+    {
+      "article_number": "75",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 500,
+        "end_exclusive": 510
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 502
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 503
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 504
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 505
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 506
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 507
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 508
+        }
+      ]
+    },
+    {
+      "article_number": "75.1",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 510,
+        "end_exclusive": 514
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "76",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 514,
+        "end_exclusive": 523
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 516
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 517
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 518
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 519
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 520
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 521
+        }
+      ]
+    },
+    {
+      "article_number": "77",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 523,
+        "end_exclusive": 529
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 525
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 526
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 527
+        }
+      ]
+    },
+    {
+      "article_number": "78",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 529,
+        "end_exclusive": 537
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 531
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 532
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 533
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 534
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 535
+        }
+      ]
+    },
+    {
+      "article_number": "79",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 537,
+        "end_exclusive": 541
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "79.1",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 541,
+        "end_exclusive": 548
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "80",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 548,
+        "end_exclusive": 555
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 550
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 551
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 552
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 553
+        }
+      ]
+    },
+    {
+      "article_number": "81",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 555,
+        "end_exclusive": 566
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 557
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 558
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 562
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.1.",
+          "line_number": 563
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 564
+        }
+      ]
+    },
+    {
+      "article_number": "82",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 566,
+        "end_exclusive": 572
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 568
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 570
+        }
+      ]
+    },
+    {
+      "article_number": "83",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 572,
+        "end_exclusive": 598
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 12
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 575
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 576
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 578
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 580
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 581
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 583
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 589
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "з)",
+          "line_number": 590
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "и)",
+          "line_number": 591
+        },
+        {
+          "ordinal": 10,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "к)",
+          "line_number": 592
+        },
+        {
+          "ordinal": 11,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "л)",
+          "line_number": 593
+        },
+        {
+          "ordinal": 12,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "м)",
+          "line_number": 594
+        }
+      ]
+    },
+    {
+      "article_number": "84",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 598,
+        "end_exclusive": 608
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 6
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 601
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 602
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 603
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 604
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 605
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 606
+        }
+      ]
+    },
+    {
+      "article_number": "85",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 608,
+        "end_exclusive": 613
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 610
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 611
+        }
+      ]
+    },
+    {
+      "article_number": "86",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 613,
+        "end_exclusive": 621
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 4
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 616
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 617
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 618
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 619
+        }
+      ]
+    },
+    {
+      "article_number": "87",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 621,
+        "end_exclusive": 627
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 623
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 624
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 625
+        }
+      ]
+    },
+    {
+      "article_number": "88",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 627,
+        "end_exclusive": 631
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "89",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 631,
+        "end_exclusive": 638
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 3
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 634
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 635
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 636
+        }
+      ]
+    },
+    {
+      "article_number": "90",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 638,
+        "end_exclusive": 644
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 640
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 641
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 642
+        }
+      ]
+    },
+    {
+      "article_number": "91",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 644,
+        "end_exclusive": 648
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "92",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 648,
+        "end_exclusive": 654
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 650
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 651
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 652
+        }
+      ]
+    },
+    {
+      "article_number": "92.1",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 654,
+        "end_exclusive": 660
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 656
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 657
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 658
+        }
+      ]
+    },
+    {
+      "article_number": "93",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 660,
+        "end_exclusive": 669
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 662
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 663
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 664
+        }
+      ]
+    },
+    {
+      "article_number": "94",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 669,
+        "end_exclusive": 673
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "95",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 673,
+        "end_exclusive": 687
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 3
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 675
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 676
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 678
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 679
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 680
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 681
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 682
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 683
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 684
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 685
+        }
+      ]
+    },
+    {
+      "article_number": "96",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 687,
+        "end_exclusive": 694
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 689
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 690
+        }
+      ]
+    },
+    {
+      "article_number": "97",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 694,
+        "end_exclusive": 700
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 696
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 697
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 698
+        }
+      ]
+    },
+    {
+      "article_number": "98",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 700,
+        "end_exclusive": 705
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 702
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 703
+        }
+      ]
+    },
+    {
+      "article_number": "99",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 705,
+        "end_exclusive": 712
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 707
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 708
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 709
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 710
+        }
+      ]
+    },
+    {
+      "article_number": "100",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 712,
+        "end_exclusive": 718
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 714
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 715
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 716
+        }
+      ]
+    },
+    {
+      "article_number": "101",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 718,
+        "end_exclusive": 726
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 720
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 721
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 722
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 723
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 724
+        }
+      ]
+    },
+    {
+      "article_number": "102",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 726,
+        "end_exclusive": 744
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 12
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 728
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 729
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 730
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 731
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 732
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 733
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 734
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 735
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "з)",
+          "line_number": 736
+        },
+        {
+          "ordinal": 10,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "и)",
+          "line_number": 737
+        },
+        {
+          "ordinal": 11,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "к)",
+          "line_number": 738
+        },
+        {
+          "ordinal": 12,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "л)",
+          "line_number": 739
+        },
+        {
+          "ordinal": 13,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "м)",
+          "line_number": 740
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 741
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 742
+        }
+      ]
+    },
+    {
+      "article_number": "103",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 744,
+        "end_exclusive": 762
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 8
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 746
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 747
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 749
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 750
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 751
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 753
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 754
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 755
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "з)",
+          "line_number": 756
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 757
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 758
+        }
+      ]
+    },
+    {
+      "article_number": "103.1",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 762,
+        "end_exclusive": 766
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "104",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 766,
+        "end_exclusive": 772
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 768
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 769
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 770
+        }
+      ]
+    },
+    {
+      "article_number": "105",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 772,
+        "end_exclusive": 780
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 774
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 775
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 776
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 777
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 778
+        }
+      ]
+    },
+    {
+      "article_number": "106",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 780,
+        "end_exclusive": 790
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 6
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 783
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 784
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 785
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 786
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 787
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 788
+        }
+      ]
+    },
+    {
+      "article_number": "107",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 790,
+        "end_exclusive": 796
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 792
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 793
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 794
+        }
+      ]
+    },
+    {
+      "article_number": "108",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 796,
+        "end_exclusive": 801
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 798
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 799
+        }
+      ]
+    },
+    {
+      "article_number": "109",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 801,
+        "end_exclusive": 812
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 803
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 804
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 805
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 806
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 807
+        }
+      ]
+    },
+    {
+      "article_number": "110",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 812,
+        "end_exclusive": 819
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 814
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 815
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 816
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 817
+        }
+      ]
+    },
+    {
+      "article_number": "111",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 819,
+        "end_exclusive": 826
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 821
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 822
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 823
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 824
+        }
+      ]
+    },
+    {
+      "article_number": "112",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 826,
+        "end_exclusive": 834
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 828
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 829
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 830
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 831
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 832
+        }
+      ]
+    },
+    {
+      "article_number": "113",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 834,
+        "end_exclusive": 838
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "114",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 838,
+        "end_exclusive": 860
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 7
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 840
+        },
+        {
+          "ordinal": 2,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 841
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 842
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 843
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 846
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "д)",
+          "line_number": 847
+        },
+        {
+          "ordinal": 7,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "е)",
+          "line_number": 848
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "ж)",
+          "line_number": 855
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 856
+        }
+      ]
+    },
+    {
+      "article_number": "115",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 860,
+        "end_exclusive": 866
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 862
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 863
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 864
+        }
+      ]
+    },
+    {
+      "article_number": "116",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 866,
+        "end_exclusive": 870
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "117",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 870,
+        "end_exclusive": 886
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 872
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 873
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 874
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 875
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.1.",
+          "line_number": 876
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 877
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 878
+        }
+      ]
+    },
+    {
+      "article_number": "118",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 886,
+        "end_exclusive": 892
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 888
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 889
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 890
+        }
+      ]
+    },
+    {
+      "article_number": "119",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 892,
+        "end_exclusive": 896
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "120",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 896,
+        "end_exclusive": 901
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 898
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 899
+        }
+      ]
+    },
+    {
+      "article_number": "121",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 901,
+        "end_exclusive": 906
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 903
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 904
+        }
+      ]
+    },
+    {
+      "article_number": "122",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 906,
+        "end_exclusive": 911
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 908
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 909
+        }
+      ]
+    },
+    {
+      "article_number": "123",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 911,
+        "end_exclusive": 918
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 913
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 914
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 915
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 916
+        }
+      ]
+    },
+    {
+      "article_number": "124",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 918,
+        "end_exclusive": 922
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "125",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 922,
+        "end_exclusive": 948
+      },
+      "marker_counts": {
+        "numeric_dot": 9,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 12
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 926
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 927
+        },
+        {
+          "ordinal": 3,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 928
+        },
+        {
+          "ordinal": 4,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 929
+        },
+        {
+          "ordinal": 5,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 930
+        },
+        {
+          "ordinal": 6,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "г)",
+          "line_number": 931
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 932
+        },
+        {
+          "ordinal": 8,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 933
+        },
+        {
+          "ordinal": 9,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 934
+        },
+        {
+          "ordinal": 10,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 935
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 936
+        },
+        {
+          "ordinal": 12,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 937
+        },
+        {
+          "ordinal": 13,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 938
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 939
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.1.",
+          "line_number": 940
+        },
+        {
+          "ordinal": 16,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "а)",
+          "line_number": 941
+        },
+        {
+          "ordinal": 17,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "б)",
+          "line_number": 942
+        },
+        {
+          "ordinal": 18,
+          "kind": "cyrillic_letter_parenthesis_candidate",
+          "marker": "в)",
+          "line_number": 943
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 944
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 945
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 946
+        }
+      ]
+    },
+    {
+      "article_number": "126",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 948,
+        "end_exclusive": 952
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "127",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 952,
+        "end_exclusive": 958
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "128",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 958,
+        "end_exclusive": 964
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 960
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 961
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 962
+        }
+      ]
+    },
+    {
+      "article_number": "129",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 964,
+        "end_exclusive": 976
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 966
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 967
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 968
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 969
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 970
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 971
+        }
+      ]
+    },
+    {
+      "article_number": "130",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 976,
+        "end_exclusive": 981
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 978
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 979
+        }
+      ]
+    },
+    {
+      "article_number": "131",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 981,
+        "end_exclusive": 988
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 983
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.1.",
+          "line_number": 984
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 985
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 986
+        }
+      ]
+    },
+    {
+      "article_number": "132",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 988,
+        "end_exclusive": 994
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 990
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 991
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 992
+        }
+      ]
+    },
+    {
+      "article_number": "133",
+      "article_heading": "<*>",
+      "source_line_range": {
+        "start": 994,
+        "end_exclusive": 1001
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "134",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 1001,
+        "end_exclusive": 1005
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "135",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 1005,
+        "end_exclusive": 1011
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 1007
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 1008
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 1009
+        }
+      ]
+    },
+    {
+      "article_number": "136",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 1011,
+        "end_exclusive": 1015
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "137",
+      "article_heading": "",
+      "source_line_range": {
+        "start": 1015,
+        "end_exclusive": 1041
+      },
+      "marker_counts": {
+        "numeric_dot": 11,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 1017
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 1018
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 1024
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 1028
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 1029
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 1030
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 1031
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 1033
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 1035
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 1036
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 1037
+        }
+      ]
+    }
+  ],
+  "review_notes": [
+    "Markers are line-level candidates only. Their legal role and parent-child hierarchy have not been manually approved.",
+    "Numeric dot markers may represent parts; numeric parenthesis markers may represent subitems. This index does not assert parent-child relationships.",
+    "A broad single-letter-plus-dot heuristic can mistake abbreviations such as «П.» in explanatory notes for list markers. The conservative Cyrillic-letter-plus-parenthesis detector is used here.",
+    "No normative text is copied into this index. Consult the exact source line in the extracted text.",
+    "Third-party annotations and editorial revision notes remain separate from the normative text and are not approved by this index."
+  ]
+}\n
