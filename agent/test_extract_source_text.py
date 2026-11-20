@@ -6,10 +6,20 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_review_index, rtf_text
+from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_review_index, rtf_text, write_json
 
 
 class SourceExtractionTests(unittest.TestCase):
+    def test_write_json_emits_parseable_json_with_real_newline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.json"
+            expected = {"status": "review_only", "title": "63-ФЗ"}
+            write_json(path, expected)
+            raw = path.read_bytes()
+            self.assertTrue(raw.endswith(b"\n"))
+            self.assertFalse(raw.endswith(b"\\n"))
+            self.assertEqual(json.loads(raw.decode("utf-8")), expected)
+
     def test_rtf_unicode_and_paragraphs(self):
         source = (
             r"{\rtf1\ansi\ansicpg1251\uc1 "
