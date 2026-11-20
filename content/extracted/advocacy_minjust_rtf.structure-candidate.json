@@ -1,0 +1,4014 @@
+{
+  "schema_version": 1,
+  "artifact_type": "review_only_structure_marker_index",
+  "status": "review_only_not_legal_record",
+  "document_id": "ru-advocacy-law",
+  "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+  "source": {
+    "source_key": "advocacy_minjust_rtf",
+    "registry_id": "minjust_official_documents",
+    "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+    "retrieved_at": "2026-11-20T08:32:40Z",
+    "byte_length": 1141873,
+    "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+    "extracted_file": "advocacy_minjust_rtf.txt",
+    "extracted_sha256": "67113c7326f58c493c3e835490c97b8d5643f47b2f1e1cd9dd50382fa92f59a4"
+  },
+  "article_count": 54,
+  "totals": {
+    "numeric_dot_candidate": 305,
+    "numeric_parenthesis_candidate": 224,
+    "cyrillic_letter_parenthesis_candidate": 0,
+    "numeric_marker_total": 529
+  },
+  "articles": [
+    {
+      "article_number": "1",
+      "article_heading": "Адвокатская деятельность",
+      "source_line_range": {
+        "start": 32,
+        "end_exclusive": 42
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 34
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 35
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 36
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 40
+        }
+      ]
+    },
+    {
+      "article_number": "2",
+      "article_heading": "Адвокат",
+      "source_line_range": {
+        "start": 42,
+        "end_exclusive": 68
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 10,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 46
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 49
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 50
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 51
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 52
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 53
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 54
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 55
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 56
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 57
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 58
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 59
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 60
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 61
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 62
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 64
+        }
+      ]
+    },
+    {
+      "article_number": "3",
+      "article_heading": "Адвокатура и государство",
+      "source_line_range": {
+        "start": 68,
+        "end_exclusive": 75
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 70
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 71
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 72
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 73
+        }
+      ]
+    },
+    {
+      "article_number": "4",
+      "article_heading": "Законодательство об адвокатской деятельности и адвокатуре",
+      "source_line_range": {
+        "start": 75,
+        "end_exclusive": 82
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 77
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 79
+        }
+      ]
+    },
+    {
+      "article_number": "5",
+      "article_heading": "Использование терминов, применяемых в настоящем Федеральном законе",
+      "source_line_range": {
+        "start": 82,
+        "end_exclusive": 89
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "6",
+      "article_heading": "Полномочия адвоката",
+      "source_line_range": {
+        "start": 89,
+        "end_exclusive": 116
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 13,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 91
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 92
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 94
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 95
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 97
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 98
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 99
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 100
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 101
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 102
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 103
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 104
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 105
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 110
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 111
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 112
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 113
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 114
+        }
+      ]
+    },
+    {
+      "article_number": "6.1",
+      "article_heading": "Адвокатский запрос",
+      "source_line_range": {
+        "start": 116,
+        "end_exclusive": 135
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 4,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 119
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 122
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 123
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 124
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 125
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 126
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 127
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 128
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.1.",
+          "line_number": 130
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 132
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 133
+        }
+      ]
+    },
+    {
+      "article_number": "7",
+      "article_heading": "Обязанности адвоката",
+      "source_line_range": {
+        "start": 135,
+        "end_exclusive": 155
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 7,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 137
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 138
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 139
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 141
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 143
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 145
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 150
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 151
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 153
+        }
+      ]
+    },
+    {
+      "article_number": "8",
+      "article_heading": "Адвокатская тайна",
+      "source_line_range": {
+        "start": 155,
+        "end_exclusive": 164
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 157
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 158
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 159
+        }
+      ]
+    },
+    {
+      "article_number": "9",
+      "article_heading": "Приобретение статуса адвоката",
+      "source_line_range": {
+        "start": 164,
+        "end_exclusive": 197
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 13,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 168
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 174
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 175
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 176
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 177
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 181
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 182
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 183
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 184
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 185
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 186
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 187
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 188
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 189
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 191
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 192
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "11)",
+          "line_number": 193
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 194
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 195
+        }
+      ]
+    },
+    {
+      "article_number": "10",
+      "article_heading": "Допуск к квалификационному экзамену",
+      "source_line_range": {
+        "start": 197,
+        "end_exclusive": 208
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 199
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 201
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 204
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 205
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 206
+        }
+      ]
+    },
+    {
+      "article_number": "11",
+      "article_heading": "Квалификационный экзамен",
+      "source_line_range": {
+        "start": 208,
+        "end_exclusive": 222
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 210
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 212
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 217
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 219
+        }
+      ]
+    },
+    {
+      "article_number": "12",
+      "article_heading": "Присвоение статуса адвоката",
+      "source_line_range": {
+        "start": 222,
+        "end_exclusive": 231
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 224
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 226
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 227
+        }
+      ]
+    },
+    {
+      "article_number": "13",
+      "article_heading": "Присяга адвоката",
+      "source_line_range": {
+        "start": 231,
+        "end_exclusive": 241
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 233
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 236
+        }
+      ]
+    },
+    {
+      "article_number": "14",
+      "article_heading": "Единый государственный реестр адвокатов",
+      "source_line_range": {
+        "start": 241,
+        "end_exclusive": 254
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 244
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 245
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 246
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 247
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 248
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 249
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 250
+        }
+      ]
+    },
+    {
+      "article_number": "15",
+      "article_heading": "Внесение сведений в Единый государственный реестр адвокатов",
+      "source_line_range": {
+        "start": 254,
+        "end_exclusive": 280
+      },
+      "marker_counts": {
+        "numeric_dot": 10,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 257
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 262
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 263
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 267
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 268
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 274
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 275
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 276
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 277
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 278
+        }
+      ]
+    },
+    {
+      "article_number": "16",
+      "article_heading": "Приостановление статуса адвоката",
+      "source_line_range": {
+        "start": 280,
+        "end_exclusive": 310
+      },
+      "marker_counts": {
+        "numeric_dot": 8,
+        "numeric_parenthesis": 5,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 282
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 284
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 286
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 287
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 288
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 289
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 291
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 292
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.1.",
+          "line_number": 295
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 297
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 299
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.1.",
+          "line_number": 303
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 305
+        }
+      ]
+    },
+    {
+      "article_number": "17",
+      "article_heading": "Прекращение статуса адвоката",
+      "source_line_range": {
+        "start": 310,
+        "end_exclusive": 351
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 15,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 313
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 315
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 316
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 317
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 318
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 319
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 320
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 321
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 323
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 325
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 327
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2.1)",
+          "line_number": 328
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 330
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 331
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 332
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 333
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 335
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 337
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 342
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 344
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 347
+        }
+      ]
+    },
+    {
+      "article_number": "17.1",
+      "article_heading": "Представления федерального органа юстиции или территориального органа юстиции",
+      "source_line_range": {
+        "start": 351,
+        "end_exclusive": 358
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 354
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 355
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 356
+        }
+      ]
+    },
+    {
+      "article_number": "18",
+      "article_heading": "Гарантии независимости адвоката",
+      "source_line_range": {
+        "start": 358,
+        "end_exclusive": 369
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 360
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 361
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 363
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 364
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 365
+        }
+      ]
+    },
+    {
+      "article_number": "19",
+      "article_heading": "Страхование риска ответственности адвоката",
+      "source_line_range": {
+        "start": 369,
+        "end_exclusive": 376
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "20",
+      "article_heading": "Формы адвокатских образований",
+      "source_line_range": {
+        "start": 376,
+        "end_exclusive": 382
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 378
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 379
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 380
+        }
+      ]
+    },
+    {
+      "article_number": "21",
+      "article_heading": "Адвокатский кабинет",
+      "source_line_range": {
+        "start": 382,
+        "end_exclusive": 393
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 384
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 386
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 387
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 388
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 389
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 390
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 391
+        }
+      ]
+    },
+    {
+      "article_number": "22",
+      "article_heading": "Коллегия адвокатов",
+      "source_line_range": {
+        "start": 393,
+        "end_exclusive": 446
+      },
+      "marker_counts": {
+        "numeric_dot": 18,
+        "numeric_parenthesis": 10,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 395
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 400
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 402
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 404
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 406
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 407
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 408
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 409
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3.1)",
+          "line_number": 410
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 412
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 414
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 415
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 416
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 418
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 419
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 420
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 422
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 424
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 425
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 426
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_dot_candidate",
+          "marker": "11.",
+          "line_number": 434
+        },
+        {
+          "ordinal": 22,
+          "kind": "numeric_dot_candidate",
+          "marker": "12.",
+          "line_number": 435
+        },
+        {
+          "ordinal": 23,
+          "kind": "numeric_dot_candidate",
+          "marker": "13.",
+          "line_number": 436
+        },
+        {
+          "ordinal": 24,
+          "kind": "numeric_dot_candidate",
+          "marker": "14.",
+          "line_number": 439
+        },
+        {
+          "ordinal": 25,
+          "kind": "numeric_dot_candidate",
+          "marker": "15.",
+          "line_number": 440
+        },
+        {
+          "ordinal": 26,
+          "kind": "numeric_dot_candidate",
+          "marker": "16.",
+          "line_number": 441
+        },
+        {
+          "ordinal": 27,
+          "kind": "numeric_dot_candidate",
+          "marker": "17.",
+          "line_number": 442
+        },
+        {
+          "ordinal": 28,
+          "kind": "numeric_dot_candidate",
+          "marker": "18.",
+          "line_number": 443
+        }
+      ]
+    },
+    {
+      "article_number": "23",
+      "article_heading": "Адвокатское бюро",
+      "source_line_range": {
+        "start": 446,
+        "end_exclusive": 491
+      },
+      "marker_counts": {
+        "numeric_dot": 13,
+        "numeric_parenthesis": 15,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 448
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 452
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.1.",
+          "line_number": 453
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 455
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 458
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 459
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 460
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 461
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 462
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 463
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 464
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 465
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 466
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 468
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 470
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 471
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 472
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 473
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 474
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 476
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 478
+        },
+        {
+          "ordinal": 22,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 480
+        },
+        {
+          "ordinal": 23,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 482
+        },
+        {
+          "ordinal": 24,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 483
+        },
+        {
+          "ordinal": 25,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 484
+        },
+        {
+          "ordinal": 26,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 485
+        },
+        {
+          "ordinal": 27,
+          "kind": "numeric_dot_candidate",
+          "marker": "11.",
+          "line_number": 486
+        },
+        {
+          "ordinal": 28,
+          "kind": "numeric_dot_candidate",
+          "marker": "12.",
+          "line_number": 487
+        }
+      ]
+    },
+    {
+      "article_number": "24",
+      "article_heading": "Юридическая консультация",
+      "source_line_range": {
+        "start": 491,
+        "end_exclusive": 508
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 4,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 493
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 495
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 497
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 498
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 499
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 500
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 501
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 503
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 505
+        }
+      ]
+    },
+    {
+      "article_number": "25",
+      "article_heading": "Соглашение об оказании юридической помощи",
+      "source_line_range": {
+        "start": 508,
+        "end_exclusive": 544
+      },
+      "marker_counts": {
+        "numeric_dot": 11,
+        "numeric_parenthesis": 9,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 510
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 511
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 514
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 516
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 517
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 518
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 519
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 521
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 523
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.1.",
+          "line_number": 524
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 526
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 527
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 528
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 530
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 531
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 532
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 533
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 534
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 538
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 541
+        }
+      ]
+    },
+    {
+      "article_number": "26",
+      "article_heading": "Оказание юридической помощи гражданам Российской Федерации бесплатно",
+      "source_line_range": {
+        "start": 544,
+        "end_exclusive": 550
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 547
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 548
+        }
+      ]
+    },
+    {
+      "article_number": "27",
+      "article_heading": "Помощник адвоката",
+      "source_line_range": {
+        "start": 550,
+        "end_exclusive": 559
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 552
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 553
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 554
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 555
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 557
+        }
+      ]
+    },
+    {
+      "article_number": "28",
+      "article_heading": "Стажер адвоката",
+      "source_line_range": {
+        "start": 559,
+        "end_exclusive": 568
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 561
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 562
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 563
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 564
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 566
+        }
+      ]
+    },
+    {
+      "article_number": "29",
+      "article_heading": "Адвокатская палата субъекта Российской Федерации",
+      "source_line_range": {
+        "start": 568,
+        "end_exclusive": 593
+      },
+      "marker_counts": {
+        "numeric_dot": 12,
+        "numeric_parenthesis": 3,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 570
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 574
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 576
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 577
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 578
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 580
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 581
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.1.",
+          "line_number": 582
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 584
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 585
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 586
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "11.",
+          "line_number": 587
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 588
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 589
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 590
+        }
+      ]
+    },
+    {
+      "article_number": "30",
+      "article_heading": "Собрание (конференция) адвокатов",
+      "source_line_range": {
+        "start": 593,
+        "end_exclusive": 616
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 12,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 595
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 598
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 599
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 601
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 602
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 603
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 604
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 605
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 606
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 607
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 608
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 609
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "11)",
+          "line_number": 610
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "12)",
+          "line_number": 612
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 614
+        }
+      ]
+    },
+    {
+      "article_number": "31",
+      "article_heading": "Совет адвокатской палаты",
+      "source_line_range": {
+        "start": 616,
+        "end_exclusive": 677
+      },
+      "marker_counts": {
+        "numeric_dot": 13,
+        "numeric_parenthesis": 21,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 618
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 619
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 626
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 627
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 629
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 630
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 631
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 632
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5.1)",
+          "line_number": 634
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 636
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 638
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 639
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 641
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 642
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "11)",
+          "line_number": 643
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "12)",
+          "line_number": 644
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "13)",
+          "line_number": 645
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "14)",
+          "line_number": 646
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "15)",
+          "line_number": 647
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "16)",
+          "line_number": 648
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "17)",
+          "line_number": 649
+        },
+        {
+          "ordinal": 22,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "18)",
+          "line_number": 650
+        },
+        {
+          "ordinal": 23,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "19)",
+          "line_number": 651
+        },
+        {
+          "ordinal": 24,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "20)",
+          "line_number": 652
+        },
+        {
+          "ordinal": 25,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 655
+        },
+        {
+          "ordinal": 26,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.1.",
+          "line_number": 657
+        },
+        {
+          "ordinal": 27,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.2.",
+          "line_number": 659
+        },
+        {
+          "ordinal": 28,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.3.",
+          "line_number": 661
+        },
+        {
+          "ordinal": 29,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 663
+        },
+        {
+          "ordinal": 30,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 664
+        },
+        {
+          "ordinal": 31,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.1.",
+          "line_number": 665
+        },
+        {
+          "ordinal": 32,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 670
+        },
+        {
+          "ordinal": 33,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 673
+        },
+        {
+          "ordinal": 34,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 675
+        }
+      ]
+    },
+    {
+      "article_number": "32",
+      "article_heading": "Ревизионная комиссия",
+      "source_line_range": {
+        "start": 677,
+        "end_exclusive": 685
+      },
+      "marker_counts": {
+        "numeric_dot": 3,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 679
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 681
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 682
+        }
+      ]
+    },
+    {
+      "article_number": "33",
+      "article_heading": "Квалификационная комиссия",
+      "source_line_range": {
+        "start": 685,
+        "end_exclusive": 713
+      },
+      "marker_counts": {
+        "numeric_dot": 8,
+        "numeric_parenthesis": 6,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 687
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 688
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 690
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 692
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 693
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 694
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 695
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 696
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 698
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 700
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 701
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 705
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 707
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 710
+        }
+      ]
+    },
+    {
+      "article_number": "34",
+      "article_heading": "Имущество адвокатской палаты",
+      "source_line_range": {
+        "start": 713,
+        "end_exclusive": 719
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 715
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 716
+        }
+      ]
+    },
+    {
+      "article_number": "35",
+      "article_heading": "Федеральная палата адвокатов Российской Федерации",
+      "source_line_range": {
+        "start": 719,
+        "end_exclusive": 740
+      },
+      "marker_counts": {
+        "numeric_dot": 9,
+        "numeric_parenthesis": 3,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 721
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 723
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 727
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 728
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 729
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 730
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.1.",
+          "line_number": 731
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 733
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 734
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 735
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 736
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 737
+        }
+      ]
+    },
+    {
+      "article_number": "36",
+      "article_heading": "Всероссийский съезд адвокатов",
+      "source_line_range": {
+        "start": 740,
+        "end_exclusive": 760
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 11,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 743
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 745
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 746
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 747
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2.1)",
+          "line_number": 748
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 750
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 752
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 753
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 754
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 755
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 756
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 757
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 758
+        }
+      ]
+    },
+    {
+      "article_number": "37",
+      "article_heading": "Совет Федеральной палаты адвокатов",
+      "source_line_range": {
+        "start": 760,
+        "end_exclusive": 818
+      },
+      "marker_counts": {
+        "numeric_dot": 11,
+        "numeric_parenthesis": 19,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 762
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 763
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 770
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 771
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 773
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 774
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3.1)",
+          "line_number": 775
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 777
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 779
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5.1)",
+          "line_number": 781
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5.2)",
+          "line_number": 783
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 785
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 786
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 787
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "9)",
+          "line_number": 788
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "10)",
+          "line_number": 790
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "11)",
+          "line_number": 791
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "12)",
+          "line_number": 792
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "13)",
+          "line_number": 793
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "14)",
+          "line_number": 794
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "15)",
+          "line_number": 796
+        },
+        {
+          "ordinal": 22,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "16)",
+          "line_number": 798
+        },
+        {
+          "ordinal": 23,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 801
+        },
+        {
+          "ordinal": 24,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 802
+        },
+        {
+          "ordinal": 25,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 804
+        },
+        {
+          "ordinal": 26,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.1.",
+          "line_number": 805
+        },
+        {
+          "ordinal": 27,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 810
+        },
+        {
+          "ordinal": 28,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.1.",
+          "line_number": 812
+        },
+        {
+          "ordinal": 29,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 814
+        },
+        {
+          "ordinal": 30,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 816
+        }
+      ]
+    },
+    {
+      "article_number": "37.1",
+      "article_heading": "Комиссия по этике и стандартам",
+      "source_line_range": {
+        "start": 818,
+        "end_exclusive": 837
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 8,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 821
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 823
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 824
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 825
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 826
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 827
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 828
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 829
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 830
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 831
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 833
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 834
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 835
+        }
+      ]
+    },
+    {
+      "article_number": "37.2",
+      "article_heading": "Рассмотрение дисциплинарного дела в Федеральной палате адвокатов",
+      "source_line_range": {
+        "start": 837,
+        "end_exclusive": 849
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 3,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 840
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 841
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 842
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 843
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 844
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 845
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 846
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 847
+        }
+      ]
+    },
+    {
+      "article_number": "38",
+      "article_heading": "Имущество Федеральной палаты адвокатов",
+      "source_line_range": {
+        "start": 849,
+        "end_exclusive": 855
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 851
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 852
+        }
+      ]
+    },
+    {
+      "article_number": "39",
+      "article_heading": "Общественные объединения адвокатов",
+      "source_line_range": {
+        "start": 855,
+        "end_exclusive": 863
+      },
+      "marker_counts": {
+        "numeric_dot": 0,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": []
+    },
+    {
+      "article_number": "39.1",
+      "article_heading": "Комплексная информационная система адвокатуры России",
+      "source_line_range": {
+        "start": 863,
+        "end_exclusive": 874
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 866
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 867
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 868
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 869
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 871
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 872
+        }
+      ]
+    },
+    {
+      "article_number": "39.2",
+      "article_heading": "Состав комплексной информационной системы адвокатуры России",
+      "source_line_range": {
+        "start": 874,
+        "end_exclusive": 888
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 8,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 877
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 878
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 879
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 880
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 881
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 882
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 883
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "7)",
+          "line_number": 884
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "8)",
+          "line_number": 885
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 886
+        }
+      ]
+    },
+    {
+      "article_number": "39.3",
+      "article_heading": "Состав и порядок предоставления сведений, содержащихся в комплексной информационной системе адвокатуры России",
+      "source_line_range": {
+        "start": 888,
+        "end_exclusive": 911
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 11,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 891
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 892
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 893
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 894
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 895
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 896
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 897
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 898
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 899
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 900
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 901
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 902
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 903
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 904
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 905
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 907
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 908
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 909
+        }
+      ]
+    },
+    {
+      "article_number": "39.4",
+      "article_heading": "Информационное взаимодействие комплексной информационной системы адвокатуры России с иными информационными системами",
+      "source_line_range": {
+        "start": 911,
+        "end_exclusive": 919
+      },
+      "marker_counts": {
+        "numeric_dot": 4,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 914
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 915
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 916
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 917
+        }
+      ]
+    },
+    {
+      "article_number": "39.5",
+      "article_heading": "Конфиденциальность и защита информации",
+      "source_line_range": {
+        "start": 919,
+        "end_exclusive": 927
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 922
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 923
+        }
+      ]
+    },
+    {
+      "article_number": "40",
+      "article_heading": "Сохранение статуса адвоката",
+      "source_line_range": {
+        "start": 927,
+        "end_exclusive": 943
+      },
+      "marker_counts": {
+        "numeric_dot": 6,
+        "numeric_parenthesis": 6,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 929
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 930
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 931
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 932
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 933
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 934
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 935
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "5)",
+          "line_number": 937
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "6)",
+          "line_number": 938
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 939
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 940
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 941
+        }
+      ]
+    },
+    {
+      "article_number": "41",
+      "article_heading": "Проведение учредительных собраний (конференций) адвокатов",
+      "source_line_range": {
+        "start": 943,
+        "end_exclusive": 957
+      },
+      "marker_counts": {
+        "numeric_dot": 7,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 945
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 947
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 948
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 949
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 950
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 954
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 955
+        }
+      ]
+    },
+    {
+      "article_number": "42",
+      "article_heading": "Проведение первого Всероссийского съезда адвокатов",
+      "source_line_range": {
+        "start": 957,
+        "end_exclusive": 965
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 959
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 960
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 961
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 962
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 963
+        }
+      ]
+    },
+    {
+      "article_number": "43",
+      "article_heading": "Приведение организационно-правовых форм коллегий адвокатов, образованных до вступления в силу настоящего Федерального закона, в соответствие с настоящим Федеральным законом",
+      "source_line_range": {
+        "start": 965,
+        "end_exclusive": 996
+      },
+      "marker_counts": {
+        "numeric_dot": 23,
+        "numeric_parenthesis": 4,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 967
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 968
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 969
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 970
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 971
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "6.",
+          "line_number": 972
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_dot_candidate",
+          "marker": "7.",
+          "line_number": 974
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_dot_candidate",
+          "marker": "8.",
+          "line_number": 975
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "9.",
+          "line_number": 976
+        },
+        {
+          "ordinal": 10,
+          "kind": "numeric_dot_candidate",
+          "marker": "10.",
+          "line_number": 977
+        },
+        {
+          "ordinal": 11,
+          "kind": "numeric_dot_candidate",
+          "marker": "11.",
+          "line_number": 978
+        },
+        {
+          "ordinal": 12,
+          "kind": "numeric_dot_candidate",
+          "marker": "12.",
+          "line_number": 979
+        },
+        {
+          "ordinal": 13,
+          "kind": "numeric_dot_candidate",
+          "marker": "13.",
+          "line_number": 980
+        },
+        {
+          "ordinal": 14,
+          "kind": "numeric_dot_candidate",
+          "marker": "14.",
+          "line_number": 981
+        },
+        {
+          "ordinal": 15,
+          "kind": "numeric_dot_candidate",
+          "marker": "15.",
+          "line_number": 982
+        },
+        {
+          "ordinal": 16,
+          "kind": "numeric_dot_candidate",
+          "marker": "16.",
+          "line_number": 983
+        },
+        {
+          "ordinal": 17,
+          "kind": "numeric_dot_candidate",
+          "marker": "17.",
+          "line_number": 984
+        },
+        {
+          "ordinal": 18,
+          "kind": "numeric_dot_candidate",
+          "marker": "18.",
+          "line_number": 985
+        },
+        {
+          "ordinal": 19,
+          "kind": "numeric_dot_candidate",
+          "marker": "19.",
+          "line_number": 986
+        },
+        {
+          "ordinal": 20,
+          "kind": "numeric_dot_candidate",
+          "marker": "20.",
+          "line_number": 987
+        },
+        {
+          "ordinal": 21,
+          "kind": "numeric_dot_candidate",
+          "marker": "21.",
+          "line_number": 988
+        },
+        {
+          "ordinal": 22,
+          "kind": "numeric_dot_candidate",
+          "marker": "22.",
+          "line_number": 989
+        },
+        {
+          "ordinal": 23,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 990
+        },
+        {
+          "ordinal": 24,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 991
+        },
+        {
+          "ordinal": 25,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "3)",
+          "line_number": 992
+        },
+        {
+          "ordinal": 26,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "4)",
+          "line_number": 993
+        },
+        {
+          "ordinal": 27,
+          "kind": "numeric_dot_candidate",
+          "marker": "23.",
+          "line_number": 994
+        }
+      ]
+    },
+    {
+      "article_number": "44",
+      "article_heading": "Обеспечение оказания гражданам Российской Федерации юридической помощи бесплатно, а также юридической помощи по назначению",
+      "source_line_range": {
+        "start": 996,
+        "end_exclusive": 1003
+      },
+      "marker_counts": {
+        "numeric_dot": 2,
+        "numeric_parenthesis": 0,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 998
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 1000
+        }
+      ]
+    },
+    {
+      "article_number": "45",
+      "article_heading": "Вступление в силу настоящего Федерального закона",
+      "source_line_range": {
+        "start": 1003,
+        "end_exclusive": 1023
+      },
+      "marker_counts": {
+        "numeric_dot": 5,
+        "numeric_parenthesis": 4,
+        "cyrillic_letter_parenthesis": 0
+      },
+      "markers": [
+        {
+          "ordinal": 1,
+          "kind": "numeric_dot_candidate",
+          "marker": "1.",
+          "line_number": 1005
+        },
+        {
+          "ordinal": 2,
+          "kind": "numeric_dot_candidate",
+          "marker": "2.",
+          "line_number": 1006
+        },
+        {
+          "ordinal": 3,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 1007
+        },
+        {
+          "ordinal": 4,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 1008
+        },
+        {
+          "ordinal": 5,
+          "kind": "numeric_dot_candidate",
+          "marker": "3.",
+          "line_number": 1011
+        },
+        {
+          "ordinal": 6,
+          "kind": "numeric_dot_candidate",
+          "marker": "4.",
+          "line_number": 1012
+        },
+        {
+          "ordinal": 7,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "1)",
+          "line_number": 1013
+        },
+        {
+          "ordinal": 8,
+          "kind": "numeric_parenthesis_candidate",
+          "marker": "2)",
+          "line_number": 1014
+        },
+        {
+          "ordinal": 9,
+          "kind": "numeric_dot_candidate",
+          "marker": "5.",
+          "line_number": 1015
+        }
+      ]
+    }
+  ],
+  "review_notes": [
+    "Markers are line-level candidates only. Their legal role and parent-child hierarchy have not been manually approved.",
+    "Numeric dot markers are likely article parts; numeric parenthesis markers are likely numbered subitems, but this index does not assert that relationship.",
+    "The existing broad letter-marker heuristic reports one candidate in Article 41 at line 953: «П. 6 ст. 41 ...». This is an abbreviation in a third-party explanatory note, not a lettered legal subitem; the conservative lowercase-letter-plus-parenthesis detector therefore records zero lettered subitems.",
+    "No normative text is copied into this index. Consult the exact source line in the linked extracted text.",
+    "Third-party annotations and editorial revision notes remain separate from the normative text and are not approved by this index."
+  ]
+}
