@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_review_index, rtf_text, write_json
+from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_article_fragments_candidate, refresh_review_index, rtf_text, write_json
 
 
 class SourceExtractionTests(unittest.TestCase):
@@ -210,6 +210,84 @@ class SourceExtractionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "annotation text changed"):
                 refresh_annotation_index(path, source, "test_source.txt", "b" * 64, text)
 
+
+    def test_article_fragments_refresh_provenance_without_rewriting_source_lines(self):
+        text = "Preamble\nСтатья 1. Заголовок\n1. Норма\nFooter\n"
+        source = {
+            "key": "advocacy_minjust_rtf",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T09:10:33Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        candidate = {
+            "artifact_type": "review_only_article_text_fragments",
+            "status": "review_only_not_legal_record",
+            "source": {"sha256": source["sha256"], "extracted_sha256": "b" * 64,
+                       "retrieved_at": "2026-11-20T09:01:16Z"},
+            "extraction": {"article_count": 1, "extracted_line_count": 5},
+            "preamble_lines": [{"line_number": 1, "text": "Preamble"}],
+            "articles": [{
+                "number": "1",
+                "source_line_range": {"start_inclusive": 2, "end_exclusive": 4},
+                "raw_lines": [
+                    {"line_number": 2, "text": "Статья 1. Заголовок"},
+                    {"line_number": 3, "text": "1. Норма"},
+                ],
+            }],
+            "trailing_lines": [
+                {"line_number": 4, "text": "Footer"},
+                {"line_number": 5, "text": ""},
+            ],
+            "validation": {"contiguous_article_ranges": True, "errors": []},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "article-fragments.json"
+            path.write_text(json.dumps(candidate, ensure_ascii=False), encoding="utf-8")
+            before = json.loads(path.read_text(encoding="utf-8"))["articles"]
+            refresh_article_fragments_candidate(path, source, "advocacy_minjust_rtf.txt", "b" * 64, text)
+            updated = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(updated["source"]["retrieved_at"], source["retrieved_at"])
+        self.assertEqual(updated["source"]["byte_length"], 123)
+        self.assertEqual(updated["source"]["extracted_file"], "advocacy_minjust_rtf.txt")
+        self.assertEqual(updated["articles"], before)
+        self.assertTrue(updated["validation"]["contiguous_article_ranges"])
+
+    def test_article_fragments_refuse_changed_source_lines(self):
+        text = "Preamble\nСтатья 1. Заголовок\n1. Норма\nFooter\n"
+        source = {
+            "key": "advocacy_minjust_rtf",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T09:10:33Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        candidate = {
+            "artifact_type": "review_only_article_text_fragments",
+            "status": "review_only_not_legal_record",
+            "source": {"sha256": source["sha256"], "extracted_sha256": "b" * 64},
+            "extraction": {"article_count": 1},
+            "preamble_lines": [{"line_number": 1, "text": "Preamble"}],
+            "articles": [{
+                "number": "1",
+                "source_line_range": {"start_inclusive": 2, "end_exclusive": 4},
+                "raw_lines": [
+                    {"line_number": 2, "text": "Статья 1. Заголовок"},
+                    {"line_number": 3, "text": "CHANGED"},
+                ],
+            }],
+            "trailing_lines": [
+                {"line_number": 4, "text": "Footer"},
+                {"line_number": 5, "text": ""},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "article-fragments.json"
+            path.write_text(json.dumps(candidate, ensure_ascii=False), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "source line mismatch"):
+                refresh_article_fragments_candidate(path, source, "advocacy_minjust_rtf.txt", "b" * 64, text)
 
     def test_structure_candidate_indexes_numeric_and_lettered_markers_without_copying_text(self):
         text = (
