@@ -274,6 +274,101 @@ def refresh_annotation_index(
         encoding="utf-8",
     )
 
+
+def build_structure_candidate(
+    source: dict,
+    extracted_file: str,
+    extracted_hash: str,
+    text: str,
+    articles: list[dict],
+) -> dict:
+    """Build a line-level review index of numbering markers; do not infer legal hierarchy."""
+    lines = text.splitlines()
+    article_entries = []
+    totals = {
+        "numeric_dot_candidate": 0,
+        "numeric_parenthesis_candidate": 0,
+        "cyrillic_letter_parenthesis_candidate": 0,
+    }
+
+    for article in articles:
+        start_line = text.count("\\n", 0, article["start_char"]) + 1
+        end_line = text.count("\\n", 0, article["end_char"]) + 1
+        segment = lines[start_line - 1:end_line - 1]
+        markers = []
+
+        for offset, line in enumerate(segment):
+            marker = None
+            kind = None
+            match = re.match(r"^\\s*(\\d+(?:\\.\\d+)*)\\.\\s+", line)
+            if match:
+                marker = match.group(1) + "."
+                kind = "numeric_dot_candidate"
+            else:
+                match = re.match(r"^\\s*(\\d+(?:\\.\\d+)*)\\)\\s+", line)
+                if match:
+                    marker = match.group(1) + ")"
+                    kind = "numeric_parenthesis_candidate"
+                else:
+                    match = re.match(r"^\\s*([а-яё])\\)\\s+", line, re.IGNORECASE)
+                    if match:
+                        marker = match.group(1) + ")"
+                        kind = "cyrillic_letter_parenthesis_candidate"
+
+            if kind:
+                markers.append({
+                    "ordinal": len(markers) + 1,
+                    "kind": kind,
+                    "marker": marker,
+                    "line_number": start_line + offset,
+                })
+                totals[kind] += 1
+
+        article_number = article["number_heading"].split(" ", 1)[1].strip()
+        article_entries.append({
+            "article_number": article_number,
+            "article_heading": article.get("heading_tail", ""),
+            "source_line_range": {"start": start_line, "end_exclusive": end_line},
+            "marker_counts": {
+                "numeric_dot": sum(1 for item in markers if item["kind"] == "numeric_dot_candidate"),
+                "numeric_parenthesis": sum(1 for item in markers if item["kind"] == "numeric_parenthesis_candidate"),
+                "cyrillic_letter_parenthesis": sum(1 for item in markers if item["kind"] == "cyrillic_letter_parenthesis_candidate"),
+            },
+            "markers": markers,
+        })
+
+    return {
+        "schema_version": 1,
+        "artifact_type": "review_only_structure_marker_index",
+        "status": "review_only_not_legal_record",
+        "document_id": "ru-advocacy-law",
+        "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+        "source": {
+            "source_key": source["key"],
+            "registry_id": source.get("registry_id"),
+            "official_url": source.get("official_url"),
+            "retrieved_at": source.get("retrieved_at"),
+            "byte_length": source.get("byte_length"),
+            "sha256": source.get("sha256"),
+            "extracted_file": extracted_file,
+            "extracted_sha256": extracted_hash,
+        },
+        "article_count": len(article_entries),
+        "totals": {
+            **totals,
+            "numeric_marker_total": totals["numeric_dot_candidate"] + totals["numeric_parenthesis_candidate"],
+        },
+        "articles": article_entries,
+        "review_notes": [
+            "Markers are line-level candidates only. Their legal role and parent-child hierarchy have not been manually approved.",
+            "Numeric dot markers may represent parts; numeric parenthesis markers may represent subitems. This index does not assert parent-child relationships.",
+            "A broad single-letter-plus-dot heuristic can mistake abbreviations such as «П.» in explanatory notes for list markers. The conservative Cyrillic-letter-plus-parenthesis detector is used here.",
+            "No normative text is copied into this index. Consult the exact source line in the extracted text.",
+            "Third-party annotations and editorial revision notes remain separate from the normative text and are not approved by this index.",
+        ],
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, default=INTAKE)
@@ -312,6 +407,9 @@ def main():
         refresh_review_index(review_index_path, source, target.name, extracted_hash, text, articles)
         annotation_index_path = args.output / f"{key}.annotation-index.json"
         refresh_annotation_index(annotation_index_path, source, target.name, extracted_hash, text)
+        structure_data = build_structure_candidate(source, target.name, extracted_hash, text, articles)
+        structure_path = args.output / f"{key}.structure-candidate.json"
+        structure_path.write_text(json.dumps(structure_data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
         source["legal_text_extraction_performed"] = True
         source["extracted_candidate_file"] = target.name
         source["extracted_candidate_sha256"] = extracted_hash
