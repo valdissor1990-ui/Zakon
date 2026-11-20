@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, docx_text, refresh_annotation_index, refresh_review_index, rtf_text
+from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_review_index, rtf_text
 
 
 class SourceExtractionTests(unittest.TestCase):
@@ -199,6 +199,47 @@ class SourceExtractionTests(unittest.TestCase):
             path.write_text(json.dumps(index_data), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "annotation text changed"):
                 refresh_annotation_index(path, source, "test_source.txt", "b" * 64, text)
+
+
+    def test_structure_candidate_indexes_numeric_and_lettered_markers_without_copying_text(self):
+        text = (
+            "Статья 1. Общие положения\\n"
+            "1. Первая часть\\n"
+            "1.1. Подчасть-кандидат\\n"
+            "1) Первый подпункт\\n"
+            "а) Буквенный подпункт\\n"
+            "П. 6 ст. 41 — пояснительное сокращение\\n"
+            "В.ПУТИН\\n"
+            "Статья 2. Заключительные положения\\n"
+            "2. Вторая часть\\n"
+            "2) Второй подпункт\\n"
+        )
+        articles = article_index(text)
+        source = {
+            "key": "test_source",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T08:00:00Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        result = build_structure_candidate(source, "test_source.txt", "b" * 64, text, articles)
+        self.assertEqual(result["article_count"], 2)
+        self.assertEqual(result["totals"]["numeric_dot_candidate"], 3)
+        self.assertEqual(result["totals"]["numeric_parenthesis_candidate"], 2)
+        self.assertEqual(result["totals"]["cyrillic_letter_parenthesis_candidate"], 1)
+        self.assertEqual(
+            [item["kind"] for item in result["articles"][0]["markers"]],
+            [
+                "numeric_dot_candidate",
+                "numeric_dot_candidate",
+                "numeric_parenthesis_candidate",
+                "cyrillic_letter_parenthesis_candidate",
+            ],
+        )
+        self.assertNotIn("П.", [item["marker"] for article in result["articles"] for item in article["markers"]])
+        self.assertNotIn("В.", [item["marker"] for article in result["articles"] for item in article["markers"]])
+        self.assertNotIn("Первая часть", json.dumps(result, ensure_ascii=False))
 
     def test_article_heading_candidates(self):
         text = "Статья 1. Общие положения\nТекст\nСтатья 2. Права\nТекст"
