@@ -292,25 +292,25 @@ def build_structure_candidate(
     }
 
     for article in articles:
-        start_line = text.count("\\n", 0, article["start_char"]) + 1
-        end_line = text.count("\\n", 0, article["end_char"]) + 1
+        start_line = text.count("\n", 0, article["start_char"]) + 1
+        end_line = text.count("\n", 0, article["end_char"]) + 1
         segment = lines[start_line - 1:end_line - 1]
         markers = []
 
         for offset, line in enumerate(segment):
             marker = None
             kind = None
-            match = re.match(r"^\\s*(\\d+(?:\\.\\d+)*)\\.\\s+", line)
+            match = re.match(r"^\s*(\d+(?:\.\d+)*)\.\s+", line)
             if match:
                 marker = match.group(1) + "."
                 kind = "numeric_dot_candidate"
             else:
-                match = re.match(r"^\\s*(\\d+(?:\\.\\d+)*)\\)\\s+", line)
+                match = re.match(r"^\s*(\d+(?:\.\d+)*)\)\s+", line)
                 if match:
                     marker = match.group(1) + ")"
                     kind = "numeric_parenthesis_candidate"
                 else:
-                    match = re.match(r"^\\s*([а-яё])\\)\\s+", line, re.IGNORECASE)
+                    match = re.match(r"^\s*([а-яё])\)\s+", line, re.IGNORECASE)
                     if match:
                         marker = match.group(1) + ")"
                         kind = "cyrillic_letter_parenthesis_candidate"
