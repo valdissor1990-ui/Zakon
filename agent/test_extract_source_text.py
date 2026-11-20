@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, docx_text, refresh_review_index, rtf_text
+from extract_source_text import article_index, docx_text, refresh_annotation_index, refresh_review_index, rtf_text
 
 
 class SourceExtractionTests(unittest.TestCase):
@@ -121,6 +121,84 @@ class SourceExtractionTests(unittest.TestCase):
             path.write_text(json.dumps(index_data), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "extracted text changed"):
                 refresh_review_index(path, source, "test_source.txt", "b" * 64, text, rows)
+
+
+    def test_annotation_index_refreshes_capture_provenance_without_changing_notes(self):
+        text = (
+            "Статья 2. Адвокат\n"
+            "\t\tКонсультантПлюс: примечание.\n"
+            "Справочный текст.\n"
+        )
+        extracted_hash = "b" * 64
+        source = {
+            "key": "test_source",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T08:00:00Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        annotations = [{
+            "ordinal": 1,
+            "marker_line": 2,
+            "annotation_line_start": 3,
+            "annotation_line_end": 3,
+            "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+            "annotation_text_raw": "Справочный текст.",
+        }]
+        index_data = {
+            "artifact_type": "review_only_third_party_annotation_index",
+            "status": "review_only_not_legal_record",
+            "source": {
+                "sha256": source["sha256"],
+                "extracted_sha256": extracted_hash,
+                "retrieved_at": "2026-11-19T08:00:00Z",
+            },
+            "annotation_count": 1,
+            "annotations": annotations,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "annotation-index.json"
+            path.write_text(json.dumps(index_data), encoding="utf-8")
+            refresh_annotation_index(path, source, "test_source.txt", extracted_hash, text)
+            updated = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(updated["source"]["retrieved_at"], source["retrieved_at"])
+        self.assertEqual(updated["source"]["byte_length"], 123)
+        self.assertEqual(updated["source"]["extracted_file"], "test_source.txt")
+        self.assertEqual(updated["annotations"], annotations)
+
+    def test_annotation_index_refuses_changed_note_text(self):
+        text = (
+            "Статья 2. Адвокат\n"
+            "\t\tКонсультантПлюс: примечание.\n"
+            "Changed note.\n"
+        )
+        source = {
+            "key": "test_source",
+            "registry_id": "minjust_official_documents",
+            "official_url": "https://minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T08:00:00Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        index_data = {
+            "artifact_type": "review_only_third_party_annotation_index",
+            "status": "review_only_not_legal_record",
+            "source": {"sha256": source["sha256"], "extracted_sha256": "b" * 64},
+            "annotation_count": 1,
+            "annotations": [{
+                "marker_line": 2,
+                "annotation_line_start": 3,
+                "annotation_line_end": 3,
+                "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+                "annotation_text_raw": "Original note.",
+            }],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "annotation-index.json"
+            path.write_text(json.dumps(index_data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "annotation text changed"):
+                refresh_annotation_index(path, source, "test_source.txt", "b" * 64, text)
 
     def test_article_heading_candidates(self):
         text = "Статья 1. Общие положения\nТекст\nСтатья 2. Права\nТекст"
