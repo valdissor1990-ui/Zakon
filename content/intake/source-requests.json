@@ -363,6 +363,26 @@
       "extracted_candidate_file": "advocacy_minjust_rtf_2017.txt",
       "extracted_candidate_sha256": "155a1ff41af3c7abbb367d4a3892a337a34c2079d20ca7aa1a31aabe0b764a23",
       "article_heading_candidates": 47
+    },
+    {
+      "key": "advocacy_minjust_npa_portal_probe",
+      "registry_id": "minjust_npa",
+      "name": "Проверочный захват портала Минюста «Нормативные правовые акты в Российской Федерации» для поиска 63-ФЗ",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://pravo.minjust.ru/",
+      "source_type": "official_npa_portal_landing_html",
+      "source_document_id": "Портал Минюста России «Нормативные правовые акты в Российской Федерации»",
+      "notes": "Технический probe доступности независимой государственной системы и способа поиска 63-ФЗ. Главная страница не является текстом закона и не может считаться документно-специфической сверкой или source_check до нахождения записи 63-ФЗ."
+    },
+    {
+      "key": "advocacy_minjust_83fz_effective_date_news",
+      "registry_id": "minjust_official_documents",
+      "name": "Официальная новость Минюста о вступлении в силу положений Федерального закона № 83-ФЗ",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "official_url": "https://minjust.gov.ru/ru/events/50360/",
+      "source_type": "official_ministry_announcement_html",
+      "source_document_id": "С 20 октября 2024 года начал действовать новый порядок выдачи адвокатских удостоверений",
+      "notes": "Дополнительное официальное разъяснение Минюста, подтверждающее вступление ряда положений № 83-ФЗ в силу с 20.10.2024. Не является текстом № 83-ФЗ и не заменяет официальную публикацию; не засчитывать как cross-check нормативного текста."
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
