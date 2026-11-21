@@ -306,6 +306,31 @@ class SourceExtractionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "source line mismatch"):
                 refresh_article_fragments_candidate(path, source, "advocacy_minjust_rtf.txt", "b" * 64, text)
 
+    def test_structure_candidate_uses_the_matching_document_identity(self):
+        text = "Статья 1. Основы конституционного строя\\nТекст нормы\\n"
+        source = {
+            "key": "constitution_minjust_rtf",
+            "name": "Конституция РФ — официальный RTF-текст Минюста",
+            "registry_id": "minjust_official_documents_www",
+            "official_url": "https://www.minjust.gov.ru/test.rtf",
+            "retrieved_at": "2026-11-20T10:04:22Z",
+            "byte_length": 123,
+            "sha256": "a" * 64,
+        }
+        result = build_structure_candidate(source, "constitution.txt", "b" * 64, text, article_index(text))
+        self.assertEqual(result["document_id"], "ru-constitution-1993")
+        self.assertEqual(result["document_title"], "Конституция Российской Федерации")
+
+    def test_structure_candidate_does_not_falsely_label_unmapped_documents_as_63fz(self):
+        text = "Статья 1. Общие положения\\nТекст нормы\\n"
+        source = {
+            "key": "kas_minjust_docx",
+            "name": "КАС РФ — официальный DOCX Минюста",
+        }
+        result = build_structure_candidate(source, "kas.txt", "b" * 64, text, article_index(text))
+        self.assertEqual(result["document_id"], "kas_minjust_docx")
+        self.assertEqual(result["document_title"], "Кодекс административного судопроизводства Российской Федерации")
+
     def test_structure_candidate_indexes_numeric_and_lettered_markers_without_copying_text(self):
         text = (
             "Статья 1. Общие положения\n"
