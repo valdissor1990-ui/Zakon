@@ -6,10 +6,27 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, build_structure_candidate, docx_text, refresh_annotation_index, refresh_article_fragments_candidate, refresh_review_index, rtf_text, write_json
+from extract_source_text import article_index, build_structure_candidate, docx_text, is_extractable_text_source, refresh_annotation_index, refresh_article_fragments_candidate, refresh_review_index, rtf_text, write_json
 
 
 class SourceExtractionTests(unittest.TestCase):
+    def test_captured_historical_rtf_is_eligible_for_review_extraction(self):
+        source = {
+            "capture_status": "captured",
+            "source_type": "official_historical_text_rtf",
+        }
+        self.assertTrue(is_extractable_text_source(source))
+
+    def test_uncaptured_and_html_sources_are_not_extracted_as_text_files(self):
+        self.assertFalse(is_extractable_text_source({
+            "capture_status": "failed",
+            "source_type": "official_historical_text_rtf",
+        }))
+        self.assertFalse(is_extractable_text_source({
+            "capture_status": "captured",
+            "source_type": "official_document_page_html",
+        }))
+
     def test_write_json_emits_parseable_json_with_real_newline(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "candidate.json"
