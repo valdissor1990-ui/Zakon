@@ -16,6 +16,20 @@ from xml.etree import ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 INTAKE = ROOT / "content" / "intake" / "source-requests.json"
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+
+EXTRACTABLE_TEXT_SOURCE_TYPES = frozenset({
+    "official_consolidated_text_docx",
+    "official_consolidated_text_rtf",
+    "official_historical_text_rtf",
+})
+
+
+def is_extractable_text_source(source: dict) -> bool:
+    """Return whether a captured official text source can produce a review-only extraction."""
+    return (
+        source.get("capture_status") == "captured"
+        and source.get("source_type") in EXTRACTABLE_TEXT_SOURCE_TYPES
+    )
 ARTICLE_RE = re.compile(
     r"(?m)^[ \t]*(Статья[ \t]+(?:\d+(?:\.\d+)*|[0-9]+(?:\s*[¹²³⁴⁵⁶⁷⁸⁹⁰])?))"
     r"(?:[ \t]*[.\u2014:\u2013-]?[ \t]*(.*))?$", re.IGNORECASE
@@ -462,11 +476,9 @@ def main():
     data = json.loads(args.intake.read_text(encoding="utf-8"))
     report = {"status": "review_only", "warning": "Extraction is not legal verification or approval.", "sources": []}
     for source in data.get("sources", []):
-        if source.get("capture_status") != "captured":
+        if not is_extractable_text_source(source):
             continue
         kind = source.get("source_type", "")
-        if kind not in ("official_consolidated_text_docx", "official_consolidated_text_rtf"):
-            continue
         key = source["key"]
         path = args.evidence / key / source["evidence_file"]
         payload = path.read_bytes()
@@ -507,7 +519,12 @@ def main():
             "characters": len(text), "article_heading_candidates": len(articles),
             "first_headings": [row["number_heading"] for row in articles[:5]],
             "last_headings": [row["number_heading"] for row in articles[-5:]],
-            "status": "extracted_candidate_not_verified"
+            "status": "extracted_candidate_not_verified",
+            "review_role": (
+                "historical_revision_candidate"
+                if kind == "official_historical_text_rtf"
+                else "consolidated_text_candidate"
+            )
         })
         print(f"EXTRACTED {key}: {len(text)} chars; {len(articles)} article heading candidates")
     if not report["sources"]:
