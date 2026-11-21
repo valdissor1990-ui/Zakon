@@ -23,6 +23,36 @@ EXTRACTABLE_TEXT_SOURCE_TYPES = frozenset({
     "official_historical_text_rtf",
 })
 
+REVIEW_DOCUMENT_METADATA = {
+    "advocacy_minjust_rtf": {
+        "document_id": "ru-advocacy-law",
+        "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+    },
+    "advocacy_minjust_rtf_2017": {
+        "document_id": "ru-advocacy-law",
+        "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+    },
+    "constitution_minjust_rtf": {
+        "document_id": "ru-constitution-1993",
+        "document_title": "Конституция Российской Федерации",
+    },
+    "uk_minjust_docx": {
+        "document_id": "ru-criminal-code",
+        "document_title": "Уголовный кодекс Российской Федерации",
+    },
+    "gpk_minjust_docx": {
+        "document_id": "ru-civil-procedure-code",
+        "document_title": "Гражданский процессуальный кодекс Российской Федерации",
+    },
+    "koap_minjust_docx": {
+        "document_id": "ru-code-of-administrative-offences",
+        "document_title": "Кодекс Российской Федерации об административных правонарушениях",
+    },
+    "kas_minjust_docx": {
+        "document_title": "Кодекс административного судопроизводства Российской Федерации",
+    },
+}
+
 
 def is_extractable_text_source(source: dict) -> bool:
     """Return whether a captured official text source can produce a review-only extraction."""
@@ -427,12 +457,21 @@ def build_structure_candidate(
             "markers": markers,
         })
 
+    identity = REVIEW_DOCUMENT_METADATA.get(source.get("key"), {})
+    document_id = source.get("document_id") or identity.get("document_id") or source.get("key")
+    document_title = (
+        source.get("document_title")
+        or identity.get("document_title")
+        or source.get("name")
+        or source.get("key")
+    )
+
     return {
         "schema_version": 1,
         "artifact_type": "review_only_structure_marker_index",
         "status": "review_only_not_legal_record",
-        "document_id": "ru-advocacy-law",
-        "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+        "document_id": document_id,
+        "document_title": document_title,
         "source": {
             "source_key": source["key"],
             "registry_id": source.get("registry_id"),
