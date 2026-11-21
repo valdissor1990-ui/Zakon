@@ -1,0 +1,12 @@
+{
+  "source_key": "koap_minjust_docx",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
+  "final_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
+  "retrieved_at": "2026-11-21T09:46:25Z",
+  "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "byte_length": 756735,
+  "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
+  "evidence_file": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38.source",
+  "legal_text_extraction_performed": false
+}

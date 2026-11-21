@@ -17,7 +17,8 @@
       ],
       "state_operated": true,
       "system_id": "official_publication_portal",
-      "operator_id": "gspi"
+      "operator_id": "gspi",
+      "access_url": "https://pravo.gov.ru/novye-postupleniya/"
     },
     {
       "id": "pravo_law_bank",
@@ -62,6 +63,21 @@
         "document_title",
         "document_number",
         "adoption_date",
+        "ministry_hosted_text",
+        "consolidated_text_cross_check"
+      ],
+      "state_operated": true,
+      "system_id": "minjust_official_documents",
+      "operator_id": "minjust"
+    },
+    {
+      "id": "minjust_official_documents_www",
+      "name": "Официальный сайт Минюста России — домен www",
+      "url": "https://www.minjust.gov.ru/ru/documents/",
+      "publisher": "Министерство юстиции Российской Федерации",
+      "role": "official_ministry_document_reference",
+      "authority": "official_ministry_documentation",
+      "use_for": [
         "ministry_hosted_text",
         "consolidated_text_cross_check"
       ],

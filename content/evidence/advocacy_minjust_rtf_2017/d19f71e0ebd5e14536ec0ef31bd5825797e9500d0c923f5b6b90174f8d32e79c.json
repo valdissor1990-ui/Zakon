@@ -1,0 +1,12 @@
+{
+  "source_key": "advocacy_minjust_rtf_2017",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
+  "final_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
+  "retrieved_at": "2026-11-21T09:49:42Z",
+  "content_type": "application/rtf",
+  "byte_length": 844460,
+  "sha256": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c",
+  "evidence_file": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c.source",
+  "legal_text_extraction_performed": false
+}

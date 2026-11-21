@@ -1,0 +1,991 @@
+{
+  "schema_version": 1,
+  "artifact_type": "review_only_article_boundary_index",
+  "document_id": "ru-advocacy-law",
+  "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+  "status": "review_only_not_legal_record",
+  "source": {
+    "source_key": "advocacy_minjust_rtf",
+    "registry_id": "minjust_official_documents",
+    "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+    "retrieved_at": "2026-11-21T09:39:43Z",
+    "byte_length": 1141873,
+    "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+    "extracted_file": "advocacy_minjust_rtf.txt",
+    "extracted_sha256": "67113c7326f58c493c3e835490c97b8d5643f47b2f1e1cd9dd50382fa92f59a4"
+  },
+  "extracted_text": {
+    "characters": 165528,
+    "article_heading_candidates": 54,
+    "annotation_marker_count": 10
+  },
+  "limitations": [
+    "This file records deterministic article boundaries only; it is not content/records/records.json and is not eligible for SQLite.",
+    "The Ministry of Justice hosted text contains third-party ConsultantPlus editorial notes and amendment annotations. These are identified for manual separation and have not been silently removed.",
+    "Article headings and numbered-item line counts are candidates; they do not certify that every part, paragraph, subparagraph, transitional provision or effective date has been legally verified.",
+    "The source revision list ends at Federal Law No. 83-FZ of 22.04.2024; amendments after that date remain unverified."
+  ],
+  "annotation_markers": [
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 44,
+      "article_number": "2"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 148,
+      "article_number": "7"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 166,
+      "article_number": "9"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 252,
+      "article_number": "14"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 259,
+      "article_number": "15"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 367,
+      "article_number": "18"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 398,
+      "article_number": "22"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 450,
+      "article_number": "23"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 572,
+      "article_number": "29"
+    },
+    {
+      "marker": "КонсультантПлюс: примечание",
+      "line": 952,
+      "article_number": "41"
+    }
+  ],
+  "articles": [
+    {
+      "ordinal": 1,
+      "number": "1",
+      "heading": "Адвокатская деятельность",
+      "start_char": 797,
+      "end_char": 1952,
+      "start_line": 32,
+      "end_line": 42,
+      "source_excerpt_characters": 1155,
+      "numbered_item_line_candidates": 4,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 2,
+      "number": "2",
+      "heading": "Адвокат",
+      "start_char": 1952,
+      "end_char": 6056,
+      "start_line": 42,
+      "end_line": 68,
+      "source_excerpt_characters": 4104,
+      "numbered_item_line_candidates": 16,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        44
+      ],
+      "amendment_editorial_marker_lines": [
+        48,
+        65
+      ]
+    },
+    {
+      "ordinal": 3,
+      "number": "3",
+      "heading": "Адвокатура и государство",
+      "start_char": 6056,
+      "end_char": 7016,
+      "start_line": 68,
+      "end_line": 75,
+      "source_excerpt_characters": 960,
+      "numbered_item_line_candidates": 4,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 4,
+      "number": "4",
+      "heading": "Законодательство об адвокатской деятельности и адвокатуре",
+      "start_char": 7016,
+      "end_char": 8025,
+      "start_line": 75,
+      "end_line": 82,
+      "source_excerpt_characters": 1009,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        78,
+        80
+      ]
+    },
+    {
+      "ordinal": 5,
+      "number": "5",
+      "heading": "Использование терминов, применяемых в настоящем Федеральном законе",
+      "start_char": 8025,
+      "end_char": 8567,
+      "start_line": 82,
+      "end_line": 89,
+      "source_excerpt_characters": 542,
+      "numbered_item_line_candidates": 0,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        83
+      ]
+    },
+    {
+      "ordinal": 6,
+      "number": "6",
+      "heading": "Полномочия адвоката",
+      "start_char": 8567,
+      "end_char": 12647,
+      "start_line": 89,
+      "end_line": 116,
+      "source_excerpt_characters": 4080,
+      "numbered_item_line_candidates": 18,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        93
+      ]
+    },
+    {
+      "ordinal": 7,
+      "number": "6.1",
+      "heading": "Адвокатский запрос",
+      "start_char": 12647,
+      "end_char": 15697,
+      "start_line": 116,
+      "end_line": 135,
+      "source_excerpt_characters": 3050,
+      "numbered_item_line_candidates": 11,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        131
+      ]
+    },
+    {
+      "ordinal": 8,
+      "number": "7",
+      "heading": "Обязанности адвоката",
+      "start_char": 15697,
+      "end_char": 18589,
+      "start_line": 135,
+      "end_line": 155,
+      "source_excerpt_characters": 2892,
+      "numbered_item_line_candidates": 9,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        148
+      ],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 9,
+      "number": "8",
+      "heading": "Адвокатская тайна",
+      "start_char": 18589,
+      "end_char": 19727,
+      "start_line": 155,
+      "end_line": 164,
+      "source_excerpt_characters": 1138,
+      "numbered_item_line_candidates": 3,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 10,
+      "number": "9",
+      "heading": "Приобретение статуса адвоката",
+      "start_char": 19727,
+      "end_char": 24065,
+      "start_line": 164,
+      "end_line": 197,
+      "source_excerpt_characters": 4338,
+      "numbered_item_line_candidates": 19,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        166
+      ],
+      "amendment_editorial_marker_lines": [
+        169,
+        178,
+        190
+      ]
+    },
+    {
+      "ordinal": 11,
+      "number": "10",
+      "heading": "Допуск к квалификационному экзамену",
+      "start_char": 24065,
+      "end_char": 26466,
+      "start_line": 197,
+      "end_line": 208,
+      "source_excerpt_characters": 2401,
+      "numbered_item_line_candidates": 5,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        200
+      ]
+    },
+    {
+      "ordinal": 12,
+      "number": "11",
+      "heading": "Квалификационный экзамен",
+      "start_char": 26466,
+      "end_char": 27835,
+      "start_line": 208,
+      "end_line": 222,
+      "source_excerpt_characters": 1369,
+      "numbered_item_line_candidates": 4,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        211,
+        218,
+        220
+      ]
+    },
+    {
+      "ordinal": 13,
+      "number": "12",
+      "heading": "Присвоение статуса адвоката",
+      "start_char": 27835,
+      "end_char": 28927,
+      "start_line": 222,
+      "end_line": 231,
+      "source_excerpt_characters": 1092,
+      "numbered_item_line_candidates": 3,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 14,
+      "number": "13",
+      "heading": "Присяга адвоката",
+      "start_char": 28927,
+      "end_char": 30097,
+      "start_line": 231,
+      "end_line": 241,
+      "source_excerpt_characters": 1170,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        234,
+        239
+      ]
+    },
+    {
+      "ordinal": 15,
+      "number": "14",
+      "heading": "Единый государственный реестр адвокатов",
+      "start_char": 30097,
+      "end_char": 32017,
+      "start_line": 241,
+      "end_line": 254,
+      "source_excerpt_characters": 1920,
+      "numbered_item_line_candidates": 7,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        252
+      ],
+      "amendment_editorial_marker_lines": [
+        242
+      ]
+    },
+    {
+      "ordinal": 16,
+      "number": "15",
+      "heading": "Внесение сведений в Единый государственный реестр адвокатов",
+      "start_char": 32017,
+      "end_char": 38691,
+      "start_line": 254,
+      "end_line": 280,
+      "source_excerpt_characters": 6674,
+      "numbered_item_line_candidates": 10,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        259
+      ],
+      "amendment_editorial_marker_lines": [
+        255
+      ]
+    },
+    {
+      "ordinal": 17,
+      "number": "16",
+      "heading": "Приостановление статуса адвоката",
+      "start_char": 38691,
+      "end_char": 42329,
+      "start_line": 280,
+      "end_line": 310,
+      "source_excerpt_characters": 3638,
+      "numbered_item_line_candidates": 13,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        283,
+        296,
+        298,
+        300,
+        304,
+        308
+      ]
+    },
+    {
+      "ordinal": 18,
+      "number": "17",
+      "heading": "Прекращение статуса адвоката",
+      "start_char": 42329,
+      "end_char": 48231,
+      "start_line": 310,
+      "end_line": 351,
+      "source_excerpt_characters": 5902,
+      "numbered_item_line_candidates": 21,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        311,
+        314,
+        324,
+        339,
+        343,
+        349
+      ]
+    },
+    {
+      "ordinal": 19,
+      "number": "17.1",
+      "heading": "Представления федерального органа юстиции или территориального органа юстиции",
+      "start_char": 48231,
+      "end_char": 49778,
+      "start_line": 351,
+      "end_line": 358,
+      "source_excerpt_characters": 1547,
+      "numbered_item_line_candidates": 3,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 20,
+      "number": "18",
+      "heading": "Гарантии независимости адвоката",
+      "start_char": 49778,
+      "end_char": 51367,
+      "start_line": 358,
+      "end_line": 369,
+      "source_excerpt_characters": 1589,
+      "numbered_item_line_candidates": 5,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        367
+      ],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 21,
+      "number": "19",
+      "heading": "Страхование риска ответственности адвоката",
+      "start_char": 51367,
+      "end_char": 51703,
+      "start_line": 369,
+      "end_line": 376,
+      "source_excerpt_characters": 336,
+      "numbered_item_line_candidates": 0,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 22,
+      "number": "20",
+      "heading": "Формы адвокатских образований",
+      "start_char": 51703,
+      "end_char": 52389,
+      "start_line": 376,
+      "end_line": 382,
+      "source_excerpt_characters": 686,
+      "numbered_item_line_candidates": 3,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 23,
+      "number": "21",
+      "heading": "Адвокатский кабинет",
+      "start_char": 52389,
+      "end_char": 53905,
+      "start_line": 382,
+      "end_line": 393,
+      "source_excerpt_characters": 1516,
+      "numbered_item_line_candidates": 7,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 24,
+      "number": "22",
+      "heading": "Коллегия адвокатов",
+      "start_char": 53905,
+      "end_char": 61090,
+      "start_line": 393,
+      "end_line": 446,
+      "source_excerpt_characters": 7185,
+      "numbered_item_line_candidates": 28,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        398
+      ],
+      "amendment_editorial_marker_lines": [
+        401,
+        405,
+        413,
+        417,
+        421,
+        430,
+        432,
+        433,
+        444
+      ]
+    },
+    {
+      "ordinal": 25,
+      "number": "23",
+      "heading": "Адвокатское бюро",
+      "start_char": 61090,
+      "end_char": 66795,
+      "start_line": 446,
+      "end_line": 491,
+      "source_excerpt_characters": 5705,
+      "numbered_item_line_candidates": 28,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        450
+      ],
+      "amendment_editorial_marker_lines": [
+        454,
+        457,
+        467,
+        469,
+        488
+      ]
+    },
+    {
+      "ordinal": 26,
+      "number": "24",
+      "heading": "Юридическая консультация",
+      "start_char": 66795,
+      "end_char": 69307,
+      "start_line": 491,
+      "end_line": 508,
+      "source_excerpt_characters": 2512,
+      "numbered_item_line_candidates": 9,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        494,
+        496,
+        502,
+        504,
+        506
+      ]
+    },
+    {
+      "ordinal": 27,
+      "number": "25",
+      "heading": "Соглашение об оказании юридической помощи",
+      "start_char": 69307,
+      "end_char": 74326,
+      "start_line": 508,
+      "end_line": 544,
+      "source_excerpt_characters": 5019,
+      "numbered_item_line_candidates": 20,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        515,
+        522,
+        525,
+        529,
+        535,
+        540
+      ]
+    },
+    {
+      "ordinal": 28,
+      "number": "26",
+      "heading": "Оказание юридической помощи гражданам Российской Федерации бесплатно",
+      "start_char": 74326,
+      "end_char": 74891,
+      "start_line": 544,
+      "end_line": 550,
+      "source_excerpt_characters": 565,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        545
+      ]
+    },
+    {
+      "ordinal": 29,
+      "number": "27",
+      "heading": "Помощник адвоката",
+      "start_char": 74891,
+      "end_char": 76082,
+      "start_line": 550,
+      "end_line": 559,
+      "source_excerpt_characters": 1191,
+      "numbered_item_line_candidates": 5,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        556
+      ]
+    },
+    {
+      "ordinal": 30,
+      "number": "28",
+      "heading": "Стажер адвоката",
+      "start_char": 76082,
+      "end_char": 77151,
+      "start_line": 559,
+      "end_line": 568,
+      "source_excerpt_characters": 1069,
+      "numbered_item_line_candidates": 5,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        565
+      ]
+    },
+    {
+      "ordinal": 31,
+      "number": "29",
+      "heading": "Адвокатская палата субъекта Российской Федерации",
+      "start_char": 77151,
+      "end_char": 80863,
+      "start_line": 568,
+      "end_line": 593,
+      "source_excerpt_characters": 3712,
+      "numbered_item_line_candidates": 15,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [
+        572
+      ],
+      "amendment_editorial_marker_lines": [
+        575,
+        583,
+        591
+      ]
+    },
+    {
+      "ordinal": 32,
+      "number": "30",
+      "heading": "Собрание (конференция) адвокатов",
+      "start_char": 80863,
+      "end_char": 83230,
+      "start_line": 593,
+      "end_line": 616,
+      "source_excerpt_characters": 2367,
+      "numbered_item_line_candidates": 15,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        596,
+        600,
+        613
+      ]
+    },
+    {
+      "ordinal": 33,
+      "number": "31",
+      "heading": "Совет адвокатской палаты",
+      "start_char": 83230,
+      "end_char": 96624,
+      "start_line": 616,
+      "end_line": 677,
+      "source_excerpt_characters": 13394,
+      "numbered_item_line_candidates": 34,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        620,
+        625,
+        654,
+        656,
+        658,
+        660,
+        662,
+        669,
+        674
+      ]
+    },
+    {
+      "ordinal": 34,
+      "number": "32",
+      "heading": "Ревизионная комиссия",
+      "start_char": 96624,
+      "end_char": 97387,
+      "start_line": 677,
+      "end_line": 685,
+      "source_excerpt_characters": 763,
+      "numbered_item_line_candidates": 3,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        680,
+        683
+      ]
+    },
+    {
+      "ordinal": 35,
+      "number": "33",
+      "heading": "Квалификационная комиссия",
+      "start_char": 97387,
+      "end_char": 101970,
+      "start_line": 685,
+      "end_line": 713,
+      "source_excerpt_characters": 4583,
+      "numbered_item_line_candidates": 14,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        689,
+        699,
+        702,
+        706,
+        709,
+        711
+      ]
+    },
+    {
+      "ordinal": 36,
+      "number": "34",
+      "heading": "Имущество адвокатской палаты",
+      "start_char": 101970,
+      "end_char": 103012,
+      "start_line": 713,
+      "end_line": 719,
+      "source_excerpt_characters": 1042,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 37,
+      "number": "35",
+      "heading": "Федеральная палата адвокатов Российской Федерации",
+      "start_char": 103012,
+      "end_char": 106528,
+      "start_line": 719,
+      "end_line": 740,
+      "source_excerpt_characters": 3516,
+      "numbered_item_line_candidates": 12,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        722,
+        724,
+        732,
+        738
+      ]
+    },
+    {
+      "ordinal": 38,
+      "number": "36",
+      "heading": "Всероссийский съезд адвокатов",
+      "start_char": 106528,
+      "end_char": 108783,
+      "start_line": 740,
+      "end_line": 760,
+      "source_excerpt_characters": 2255,
+      "numbered_item_line_candidates": 13,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        741,
+        751
+      ]
+    },
+    {
+      "ordinal": 39,
+      "number": "37",
+      "heading": "Совет Федеральной палаты адвокатов",
+      "start_char": 108783,
+      "end_char": 120882,
+      "start_line": 760,
+      "end_line": 818,
+      "source_excerpt_characters": 12099,
+      "numbered_item_line_candidates": 30,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        764,
+        769,
+        795,
+        797,
+        800,
+        803,
+        809,
+        811,
+        813,
+        815
+      ]
+    },
+    {
+      "ordinal": 40,
+      "number": "37.1",
+      "heading": "Комиссия по этике и стандартам",
+      "start_char": 120882,
+      "end_char": 123254,
+      "start_line": 818,
+      "end_line": 837,
+      "source_excerpt_characters": 2372,
+      "numbered_item_line_candidates": 13,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        822,
+        832
+      ]
+    },
+    {
+      "ordinal": 41,
+      "number": "37.2",
+      "heading": "Рассмотрение дисциплинарного дела в Федеральной палате адвокатов",
+      "start_char": 123254,
+      "end_char": 125067,
+      "start_line": 837,
+      "end_line": 849,
+      "source_excerpt_characters": 1813,
+      "numbered_item_line_candidates": 8,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 42,
+      "number": "38",
+      "heading": "Имущество Федеральной палаты адвокатов",
+      "start_char": 125067,
+      "end_char": 125968,
+      "start_line": 849,
+      "end_line": 855,
+      "source_excerpt_characters": 901,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        853
+      ]
+    },
+    {
+      "ordinal": 43,
+      "number": "39",
+      "heading": "Общественные объединения адвокатов",
+      "start_char": 125968,
+      "end_char": 126573,
+      "start_line": 855,
+      "end_line": 863,
+      "source_excerpt_characters": 605,
+      "numbered_item_line_candidates": 0,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 44,
+      "number": "39.1",
+      "heading": "Комплексная информационная система адвокатуры России",
+      "start_char": 126573,
+      "end_char": 131501,
+      "start_line": 863,
+      "end_line": 874,
+      "source_excerpt_characters": 4928,
+      "numbered_item_line_candidates": 6,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 45,
+      "number": "39.2",
+      "heading": "Состав комплексной информационной системы адвокатуры России",
+      "start_char": 131501,
+      "end_char": 134468,
+      "start_line": 874,
+      "end_line": 888,
+      "source_excerpt_characters": 2967,
+      "numbered_item_line_candidates": 10,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 46,
+      "number": "39.3",
+      "heading": "Состав и порядок предоставления сведений, содержащихся в комплексной информационной системе адвокатуры России",
+      "start_char": 134468,
+      "end_char": 139934,
+      "start_line": 888,
+      "end_line": 911,
+      "source_excerpt_characters": 5466,
+      "numbered_item_line_candidates": 18,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 47,
+      "number": "39.4",
+      "heading": "Информационное взаимодействие комплексной информационной системы адвокатуры России с иными информационными системами",
+      "start_char": 139934,
+      "end_char": 142252,
+      "start_line": 911,
+      "end_line": 919,
+      "source_excerpt_characters": 2318,
+      "numbered_item_line_candidates": 4,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 48,
+      "number": "39.5",
+      "heading": "Конфиденциальность и защита информации",
+      "start_char": 142252,
+      "end_char": 143011,
+      "start_line": 919,
+      "end_line": 927,
+      "source_excerpt_characters": 759,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 49,
+      "number": "40",
+      "heading": "Сохранение статуса адвоката",
+      "start_char": 143011,
+      "end_char": 146730,
+      "start_line": 927,
+      "end_line": 943,
+      "source_excerpt_characters": 3719,
+      "numbered_item_line_candidates": 12,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 50,
+      "number": "41",
+      "heading": "Проведение учредительных собраний (конференций) адвокатов",
+      "start_char": 146730,
+      "end_char": 149834,
+      "start_line": 943,
+      "end_line": 957,
+      "source_excerpt_characters": 3104,
+      "numbered_item_line_candidates": 7,
+      "lettered_item_line_candidates": 1,
+      "third_party_annotation_marker_lines": [
+        952
+      ],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 51,
+      "number": "42",
+      "heading": "Проведение первого Всероссийского съезда адвокатов",
+      "start_char": 149834,
+      "end_char": 150716,
+      "start_line": 957,
+      "end_line": 965,
+      "source_excerpt_characters": 882,
+      "numbered_item_line_candidates": 5,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 52,
+      "number": "43",
+      "heading": "Приведение организационно-правовых форм коллегий адвокатов, образованных до вступления в силу настоящего Федерального закона, в соответствие с настоящим Федеральным законом",
+      "start_char": 150716,
+      "end_char": 162424,
+      "start_line": 965,
+      "end_line": 996,
+      "source_excerpt_characters": 11708,
+      "numbered_item_line_candidates": 27,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    },
+    {
+      "ordinal": 53,
+      "number": "44",
+      "heading": "Обеспечение оказания гражданам Российской Федерации юридической помощи бесплатно, а также юридической помощи по назначению",
+      "start_char": 162424,
+      "end_char": 163403,
+      "start_line": 996,
+      "end_line": 1003,
+      "source_excerpt_characters": 979,
+      "numbered_item_line_candidates": 2,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": [
+        999,
+        1001
+      ]
+    },
+    {
+      "ordinal": 54,
+      "number": "45",
+      "heading": "Вступление в силу настоящего Федерального закона",
+      "start_char": 163403,
+      "end_char": 165528,
+      "start_line": 1003,
+      "end_line": 1023,
+      "source_excerpt_characters": 2125,
+      "numbered_item_line_candidates": 9,
+      "lettered_item_line_candidates": 0,
+      "third_party_annotation_marker_lines": [],
+      "amendment_editorial_marker_lines": []
+    }
+  ]
+}

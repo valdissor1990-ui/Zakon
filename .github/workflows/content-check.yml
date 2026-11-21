@@ -9,8 +9,105 @@ permissions:
   contents: read
 concurrency:
   group: content-check-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
+  capture-evidence:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout intake branch
+        uses: actions/checkout@v7
+        with:
+          ref: content/populate-core-acts
+          persist-credentials: true
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Capture allowlisted official source originals
+        run: |
+          set -euo pipefail
+          python agent/capture_sources.py --records content/intake/source-requests.json --output content/evidence
+      - name: Synchronize metadata from this capture run and verify exact originals
+        run: |
+          set -euo pipefail
+          python agent/sync_capture_metadata.py \
+            --records content/intake/source-requests.json \
+            --report content/evidence/capture-report.json \
+            --evidence content/evidence
+      - name: Commit captured originals to intake branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/evidence content/intake/source-requests.json
+          if git diff --cached --quiet; then
+            echo "No evidence changes to commit."
+            exit 0
+          fi
+          git commit -m "content: capture official source evidence for law 63-FZ"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin content/populate-core-acts
+            if ! git rebase FETCH_HEAD; then
+              git rebase --abort || true
+              echo "Concurrent branch changes conflict with captured evidence; refusing a non-fast-forward or force push."
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/content/populate-core-acts; then
+              exit 0
+            fi
+            echo "Branch moved during push attempt $attempt/5; retrying after fetch/rebase."
+            sleep "$((attempt * 2))"
+          done
+          echo "Unable to push captured evidence after five fetch/rebase attempts."
+          exit 1
+
+
+  extract-review-candidates:
+    needs: capture-evidence
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/content/populate-core-acts'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout intake branch
+        uses: actions/checkout@v7
+        with:
+          ref: content/populate-core-acts
+          persist-credentials: true
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Extract captured DOCX and RTF into review-only text
+        run: python agent/extract_source_text.py
+      - name: Commit extracted review candidates
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/extracted content/intake/source-requests.json
+          if git diff --cached --quiet; then
+            echo "No extraction changes."
+            exit 0
+          fi
+          git commit -m "content: extract captured official texts for review"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin content/populate-core-acts
+            if ! git rebase FETCH_HEAD; then
+              git rebase --abort || true
+              echo "Concurrent branch changes conflict with extracted review candidates; refusing a non-fast-forward or force push."
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/content/populate-core-acts; then
+              exit 0
+            fi
+            echo "Branch moved during push attempt $attempt/5; retrying after fetch/rebase."
+            sleep "$((attempt * 2))"
+          done
+          echo "Unable to push extracted review candidates after five fetch/rebase attempts."
+          exit 1
+
   validate:
     runs-on: ubuntu-latest
     steps:
