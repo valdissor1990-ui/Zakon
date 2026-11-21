@@ -358,7 +358,11 @@
       "final_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
       "content_type": "application/rtf",
       "byte_length": 844460,
-      "evidence_file": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c.source"
+      "evidence_file": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c.source",
+      "legal_text_extraction_performed": true,
+      "extracted_candidate_file": "advocacy_minjust_rtf_2017.txt",
+      "extracted_candidate_sha256": "155a1ff41af3c7abbb367d4a3892a337a34c2079d20ca7aa1a31aabe0b764a23",
+      "article_heading_candidates": 47
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
