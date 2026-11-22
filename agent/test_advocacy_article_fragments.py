@@ -65,7 +65,7 @@ def normalize_comparison_text(value):
         "«": '"', "»": '"', "„": '"', "“": '"', "”": '"',
         "–": "-", "—": "-", "−": "-",
     }))
-    return re.sub(r"\\s+", " ", value).strip()
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def visible_html_text(payload):
@@ -203,7 +203,7 @@ class AdvocacyLawArticleFragmentsTests(unittest.TestCase):
 
         page_text = visible_html_text(payload)
         heading_count = len(re.findall(
-            r"\\bСтатья\\s+\\d+(?:\\.\\d+)?\\.", page_text, re.IGNORECASE
+            r"\bСтатья\s+\d+(?:\.\d+)?\.", page_text, re.IGNORECASE
         ))
         self.assertEqual(heading_count, len(self.candidate["articles"]))
 
