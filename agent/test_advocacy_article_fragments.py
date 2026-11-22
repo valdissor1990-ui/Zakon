@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Regression tests for the review-only 63-FZ article-fragment candidate."""
+import hashlib
 import json
+import re
+import unicodedata
 import unittest
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,10 +15,64 @@ SOURCE_PATH = EXTRACTED / "advocacy_minjust_rtf.txt"
 ARTICLE_INDEX_PATH = EXTRACTED / "advocacy_minjust_rtf.article-index.json"
 STRUCTURE_PATH = EXTRACTED / "advocacy_minjust_rtf.structure-candidate.json"
 ANNOTATION_PATH = EXTRACTED / "advocacy_minjust_rtf.annotation-index.json"
+HTML_SOURCE_PATH = (ROOT / "content" / "evidence" / "advocacy_minjust_page" /
+                    "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea.source")
+HTML_SIDECAR_PATH = (ROOT / "content" / "evidence" / "advocacy_minjust_page" /
+                     "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea.json")
 
 
 def load_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+
+class _VisibleTextParser(HTMLParser):
+    """Collect page text while ignoring script/style payloads."""
+
+    BLOCK_TAGS = {
+        "address", "article", "aside", "blockquote", "br", "dd", "div", "dl", "dt",
+        "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3",
+        "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "ol", "p", "pre",
+        "section", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
+    }
+    SKIP_TAGS = {"script", "style", "noscript"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts = []
+        self.skip_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.SKIP_TAGS:
+            self.skip_depth += 1
+        elif not self.skip_depth and tag in self.BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_endtag(self, tag):
+        if tag in self.SKIP_TAGS and self.skip_depth:
+            self.skip_depth -= 1
+        elif not self.skip_depth and tag in self.BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_data(self, data):
+        if not self.skip_depth:
+            self.parts.append(data)
+
+
+def normalize_comparison_text(value):
+    value = unicodedata.normalize("NFKC", value).casefold().replace("ё", "е")
+    value = value.translate(str.maketrans({
+        "«": '"', "»": '"', "„": '"', "“": '"', "”": '"',
+        "–": "-", "—": "-", "−": "-",
+    }))
+    return re.sub(r"\\s+", " ", value).strip()
+
+
+def visible_html_text(payload):
+    parser = _VisibleTextParser()
+    parser.feed(payload.decode("utf-8"))
+    parser.close()
+    return " ".join(parser.parts)
 
 
 def source_lines():
@@ -130,6 +188,36 @@ class AdvocacyLawArticleFragmentsTests(unittest.TestCase):
             source = expected[article["number"]]
             self.assertEqual(article["numbered_marker_candidates"], source["markers"])
             self.assertEqual(article["marker_counts"], source["marker_counts"])
+
+
+    def test_all_article_fragments_match_the_captured_official_minjust_html_page(self):
+        payload = HTML_SOURCE_PATH.read_bytes()
+        sidecar = load_json(HTML_SIDECAR_PATH)
+        self.assertEqual(len(payload), sidecar["byte_length"])
+        self.assertEqual(hashlib.sha256(payload).hexdigest(), sidecar["sha256"])
+        self.assertEqual(sidecar["source_key"], "advocacy_minjust_page")
+        self.assertEqual(
+            sidecar["requested_url"],
+            "https://minjust.gov.ru/ru/documents/7885/",
+        )
+
+        page_text = visible_html_text(payload)
+        heading_count = len(re.findall(
+            r"\\bСтатья\\s+\\d+(?:\\.\\d+)?\\.", page_text, re.IGNORECASE
+        ))
+        self.assertEqual(heading_count, len(self.candidate["articles"]))
+
+        normalized_page = normalize_comparison_text(page_text)
+        for article in self.candidate["articles"]:
+            # Include all original lines, including separately indexed third-party
+            # annotations and editorial notes: this verifies extraction fidelity,
+            # not whether those lines are operative legal text.
+            article_text = " ".join(item["text"] for item in article["raw_lines"])
+            self.assertIn(
+                normalize_comparison_text(article_text),
+                normalized_page,
+                msg=f"Article {article['number']} fragment is absent from official HTML",
+            )
 
 
 if __name__ == "__main__":
