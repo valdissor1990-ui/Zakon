@@ -34,6 +34,43 @@ def validate_url(url: str, hosts: set[str]) -> None:
     if parsed.netloc.lower() not in hosts:
         raise ValueError(f"URL host is not allowlisted: {parsed.netloc}")
 
+
+def load_proxies(path: Path | None) -> list[str]:
+    """Read optional HTTP(S) proxy URLs without printing or storing credentials."""
+    if path is None:
+        return []
+    proxies = []
+    for line_number, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        value = raw_line.strip()
+        if not value or value.startswith("#"):
+            continue
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            raise ValueError(f"Proxy line {line_number} must be an HTTP(S) URL with a host")
+        try:
+            parsed.port
+        except ValueError as error:
+            raise ValueError(f"Proxy line {line_number} has an invalid port") from error
+        proxies.append(value)
+    return proxies
+
+
+def proxy_for_attempt(proxies: list[str], attempt: int) -> str | None:
+    """Use each configured proxy once, then fall back to a direct request."""
+    return proxies[attempt - 1] if 1 <= attempt <= len(proxies) else None
+
+
+def safe_error_message(error: Exception, proxies: list[str]) -> str:
+    """Remove proxy credentials and endpoints from messages written to logs/reports."""
+    message = str(error)
+    for proxy in proxies:
+        parsed = urlparse(proxy)
+        for secret_part in (proxy, parsed.netloc, parsed.hostname, parsed.username, parsed.password):
+            if secret_part:
+                message = message.replace(secret_part, "[redacted]")
+    return message
+
+
 class AllowlistedRedirectHandler(urllib.request.HTTPRedirectHandler):
     def __init__(self, hosts: set[str]):
         super().__init__()
@@ -43,35 +80,53 @@ class AllowlistedRedirectHandler(urllib.request.HTTPRedirectHandler):
         validate_url(new_url, self.hosts)
         return super().redirect_request(request, response, code, message, headers, new_url)
 
-def capture(url: str, hosts: set[str]) -> tuple[bytes, str, str]:
+def capture(url: str, hosts: set[str], proxies: list[str] | None = None) -> tuple[bytes, str, str]:
     request = urllib.request.Request(
         url,
         headers={"User-Agent": "Zakon-Legal-Source-Capture/1.0", "Accept": "*/*"},
     )
-    opener = urllib.request.build_opener(AllowlistedRedirectHandler(hosts))
+    proxies = proxies or []
+    # Try configured proxies once each, then retain bounded direct retries.
+    attempts = max(3, min(6, len(proxies) + 1))
     # Some hosted runners prefer IPv6 routes that are unavailable to selected
     # government hosts. Force IPv4 only for this bounded HTTPS request.
     original_getaddrinfo = socket.getaddrinfo
+
     def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
         return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
     socket.getaddrinfo = ipv4_getaddrinfo
     try:
         last_error = None
-        for attempt in range(1, 4):
+        for attempt in range(1, attempts + 1):
+            proxy = proxy_for_attempt(proxies, attempt)
+            handlers = [AllowlistedRedirectHandler(hosts)]
+            if proxy:
+                handlers.insert(
+                    0,
+                    urllib.request.ProxyHandler({"https": proxy, "http": proxy}),
+                )
+            opener = urllib.request.build_opener(*handlers)
             try:
-                with opener.open(request, timeout=30) as response:
+                with opener.open(request, timeout=45) as response:
                     final_url = response.geturl()
                     content_type = response.headers.get("Content-Type", "application/octet-stream")
                     payload = response.read(MAX_BYTES + 1)
                 break
             except (urllib.error.URLError, TimeoutError, OSError) as error:
                 last_error = error
-                if attempt == 3:
+                if attempt == attempts:
                     raise
-                print(f"Retry {attempt}/3 for {url}: {error}", flush=True)
-                time.sleep(attempt * 2)
+                print(
+                    f"Retry {attempt}/{attempts} for {url}: "
+                    f"{safe_error_message(error, proxies)}",
+                    flush=True,
+                )
+                time.sleep(min(attempt * 2, 10))
         else:
-            raise RuntimeError(f"Unable to capture {url}: {last_error}")
+            raise RuntimeError(
+                f"Unable to capture {url}: {safe_error_message(last_error, proxies)}"
+            )
     finally:
         socket.getaddrinfo = original_getaddrinfo
     # Do not rely solely on the redirect handler: validate the final response URL too,
@@ -85,7 +140,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, default=ROOT / "content" / "records" / "records.json")
     parser.add_argument("--output", type=Path, default=ROOT / "content" / "evidence")
+    parser.add_argument(
+        "--proxy-file",
+        type=Path,
+        default=None,
+        help="Optional file with one HTTP(S) proxy URL per line; credentials are never logged.",
+    )
     args = parser.parse_args()
+    proxies = load_proxies(args.proxy_file)
+    if proxies:
+        print(f"Optional proxy rotation configured: {len(proxies)} endpoint(s).", flush=True)
+    else:
+        print("No proxies configured; using direct HTTPS requests.", flush=True)
 
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     records = json.loads(args.records.read_text(encoding="utf-8"))
@@ -108,12 +174,13 @@ def main() -> int:
         validate_url(url, hosts)
         print(f"Capturing {key} from {url}", flush=True)
         try:
-            payload, final_url, content_type = capture(url, hosts)
+            payload, final_url, content_type = capture(url, hosts, proxies=proxies)
             validate_url(final_url, hosts)
         except Exception as error:
-            print(f"FAILED {key}: {type(error).__name__}: {error}", flush=True)
+            message = safe_error_message(error, proxies)
+            print(f"FAILED {key}: {type(error).__name__}: {message}", flush=True)
             captured.append({"source_key": key, "registry_id": registry_id, "requested_url": url,
-                             "capture_status": "failed", "error": f"{type(error).__name__}: {error}"})
+                             "capture_status": "failed", "error": f"{type(error).__name__}: {message}"})
             continue
         print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
         digest = hashlib.sha256(payload).hexdigest()
