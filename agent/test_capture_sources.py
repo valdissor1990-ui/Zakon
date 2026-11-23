@@ -99,8 +99,8 @@ class SourceCaptureSafetyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             proxy_file = Path(directory) / "proxies.txt"
             proxy_file.write_text(
-                "# optional proxy list\\n\\nhttp://proxy-one.example:8080\\n"
-                "https://user:secret@proxy-two.example:8443\\n",
+                "# optional proxy list\n\nhttp://proxy-one.example:8080\n"
+                "https://user:secret@proxy-two.example:8443\n",
                 encoding="utf-8",
             )
             self.assertEqual(
@@ -114,7 +114,7 @@ class SourceCaptureSafetyTests(unittest.TestCase):
     def test_load_proxies_rejects_non_http_schemes(self):
         with tempfile.TemporaryDirectory() as directory:
             proxy_file = Path(directory) / "proxies.txt"
-            proxy_file.write_text("socks5://proxy.example:1080\\n", encoding="utf-8")
+            proxy_file.write_text("socks5://proxy.example:1080\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "HTTP\\(S\\) URL"):
                 load_proxies(proxy_file)
 
