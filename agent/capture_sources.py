@@ -87,7 +87,7 @@ def capture(url: str, hosts: set[str], proxies: list[str] | None = None) -> tupl
     )
     proxies = proxies or []
     # Try configured proxies once each, then retain bounded direct retries.
-    attempts = max(3, min(6, len(proxies) + 1))
+    attempts = max(3, min(7, len(proxies) + 1))
     # Some hosted runners prefer IPv6 routes that are unavailable to selected
     # government hosts. Force IPv4 only for this bounded HTTPS request.
     original_getaddrinfo = socket.getaddrinfo
