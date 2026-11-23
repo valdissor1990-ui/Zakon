@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${LEGAL_PROXY_LIST:-}" ]; then
-            printf '%s\\n' "$LEGAL_PROXY_LIST" > "$RUNNER_TEMP/zakon-proxies.txt"
+            printf '%s\n' "$LEGAL_PROXY_LIST" > "$RUNNER_TEMP/zakon-proxies.txt"
             echo "ZAKON_PROXY_FILE=$RUNNER_TEMP/zakon-proxies.txt" >> "$GITHUB_ENV"
             echo "Optional proxy list configured."
           else
