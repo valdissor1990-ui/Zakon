@@ -25,10 +25,26 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Prepare optional proxy list
+        env:
+          LEGAL_PROXY_LIST: ${{ secrets.LEGAL_PROXY_LIST }}
+        run: |
+          set -euo pipefail
+          if [ -n "${LEGAL_PROXY_LIST:-}" ]; then
+            printf '%s\\n' "$LEGAL_PROXY_LIST" > "$RUNNER_TEMP/zakon-proxies.txt"
+            echo "ZAKON_PROXY_FILE=$RUNNER_TEMP/zakon-proxies.txt" >> "$GITHUB_ENV"
+            echo "Optional proxy list configured."
+          else
+            echo "No optional proxy list configured; using direct HTTPS."
+          fi
       - name: Capture allowlisted official source originals
         run: |
           set -euo pipefail
-          python agent/capture_sources.py --records content/intake/source-requests.json --output content/evidence
+          if [ -n "${ZAKON_PROXY_FILE:-}" ]; then
+            python agent/capture_sources.py --records content/intake/source-requests.json --output content/evidence --proxy-file "$ZAKON_PROXY_FILE"
+          else
+            python agent/capture_sources.py --records content/intake/source-requests.json --output content/evidence
+          fi
       - name: Synchronize metadata from this capture run and verify exact originals
         run: |
           set -euo pipefail
