@@ -269,3 +269,18 @@ Workflow проверки PR #9 завершился успешно, но job `c
 - Повторно проверена отдельная ветка `content/single-source-fill`: добавленный там ежедневный workflow запускает `auto_fill.py`, который выставляет `approved` на основании одного источника, подавляет ошибки конвейера и не соответствует release policy PR #9 (3 системы, 2 оператора, все source checks match). Эта ветка не объединялась и её записи не переносились. Подробности зафиксированы в `content/evidence/source-comparison/63fz-technical-status-2026-11-23.md`.
 - `content/records/records.json` в `content/populate-core-acts` отсутствует; 63-ФЗ остаётся `source_capture_pending` / `not_started`. Release SQLite и FTS по реальным статьям не собирались.
 - Следующий шаг: дождаться push-захвата с новой proxy-aware реализацией, проверить обновлённые оригиналы/sidecar/SHA-256 и повторить получение официальной публикации № 83-ФЗ и консолидированного текста. Затем продолжить постатейную и временную сверку; не создавать approved records до выполнения источниковой политики.
+
+
+## 2026-11-24 — quarantine для изменившегося ответа официального источника
+
+- Проверено текущее состояние PR #9: Draft, base feature/separate-content-database, HEAD до этого коммита 87de991b7d6e4dffef5bf57cd229cd3cf34d20ad; PR-run 45147310511 имеет action_required и пустой список jobs.
+- Push-run 45144853994: validate прошёл, capture-evidence завершился ошибкой. Для закреплённого RTF Минюста сервер вернул 1 047 964 байта вместо ранее сохранённых 1 141 873 байт; SHA-256 не совпал с закреплённым. В старой реализации скачанные байты отбрасывались до записи evidence. Старый оригинал в GitHub не заменён.
+- В agent/capture_sources.py добавлено сохранение байтов с несовпадающим SHA-256 в отдельную папку candidates/ с собственным sidecar. Путь release evidence остаётся неизменным; candidate помечается changed и требует ручной проверки.
+- В agent/sync_capture_metadata.py добавлена проверка candidate sidecar и запрет на автоматическую замену закреплённого SHA-256, времени и пути старого оригинала. Candidate не передаётся в извлечение текста.
+- В agent/test_capture_sources.py и agent/test_sync_capture_metadata.py добавлены регрессионные тесты сохранения изменившихся байтов и сохранения старого pinned evidence.
+- Проверен scheduled run 45175162379 на отдельной ветке content/single-source-fill: секрет LEGAL_PROXY_LIST был пустым; захвачено 14 источников, 2 тайм-аута; extraction получил unsupported review index artifact type; auto-fill сформировал 6 записей approved на одном источнике; SQLite builder упал на UNIQUE constraint failed: articles.id, но workflow показал success из-за || true. Эта ветка не соответствует release policy PR #9 и не переносилась.
+- Последний capture-report целевой ветки остаётся 17 captured / 4 failed. Для 63-ФЗ недоступны интегрированный банк, официальная публикация № 83-ФЗ, недельный индекс публикаций и pravo.minjust.ru.
+- Официальные страницы Минюста, проверенные 24.11.2026, продолжают ссылаться на 63-ФЗ; карточка № 7885 перечисляет изменения по № 83-ФЗ от 22.04.2024. Это не исчерпывающая проверка истории поправок.
+- content/records/records.json отсутствует; 63-ФЗ остаётся source_capture_pending / not_started; SQLite с реальным текстом и FTS по нему не собирались.
+- Подробный отчёт: content/evidence/source-comparison/63fz-capture-change-quarantine-2026-11-24.md.
+- Следующий шаг: проверить CI и новый candidate capture; не менять закреплённый SHA-256, пока candidate не проверен и не утверждён вручную.

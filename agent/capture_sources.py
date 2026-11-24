@@ -136,6 +136,52 @@ def capture(url: str, hosts: set[str], proxies: list[str] | None = None) -> tupl
         raise ValueError(f"Source exceeds the {MAX_BYTES} byte capture limit")
     return payload, final_url, content_type
 
+def store_capture_evidence(
+    payload: bytes,
+    output: Path,
+    key: str,
+    registry_id: str,
+    requested_url: str,
+    final_url: str,
+    content_type: str,
+    retrieved_at: str,
+    expected_sha256: str | None = None,
+) -> dict:
+    """Store exact captures normally and changed bytes in a review-only quarantine."""
+    digest = hashlib.sha256(payload).hexdigest()
+    expected = str(expected_sha256 or "").lower()
+    changed = bool(expected and digest != expected)
+    relative_file = Path("candidates") / f"{digest}.source" if changed else Path(f"{digest}.source")
+    source_dir = output / key
+    payload_path = source_dir / relative_file
+    metadata_path = payload_path.with_suffix(".json")
+    payload_path.parent.mkdir(parents=True, exist_ok=True)
+    payload_path.write_bytes(payload)
+
+    metadata = {
+        "source_key": key,
+        "registry_id": registry_id,
+        "requested_url": requested_url,
+        "final_url": final_url,
+        "retrieved_at": retrieved_at,
+        "content_type": content_type,
+        "byte_length": len(payload),
+        "sha256": digest,
+        "evidence_file": relative_file.as_posix(),
+        "legal_text_extraction_performed": False,
+        "capture_status": "changed" if changed else "captured",
+    }
+    if changed:
+        metadata["expected_sha256"] = expected
+        metadata["candidate_review_required"] = True
+
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return metadata
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, default=ROOT / "content" / "records" / "records.json")
@@ -183,45 +229,43 @@ def main() -> int:
                              "capture_status": "failed", "error": f"{type(error).__name__}: {message}"})
             continue
         print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
-        digest = hashlib.sha256(payload).hexdigest()
-        expected = source.get("sha256", "").lower()
-        if expected and digest != expected:
-            raise SystemExit(
-                f"{key}: captured bytes SHA-256 differs from records.json; "
-                "review the source revision and update its evidence metadata manually"
-            )
         retrieved_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-        directory = args.output / key
-        directory.mkdir(parents=True, exist_ok=True)
-        filename = f"{digest}.source"
-        (directory / filename).write_bytes(payload)
-        metadata = {
-            "source_key": key,
-            "registry_id": registry_id,
-            "requested_url": url,
-            "final_url": final_url,
-            "retrieved_at": retrieved_at,
-            "content_type": content_type,
-            "byte_length": len(payload),
-            "sha256": digest,
-            "evidence_file": filename,
-            "legal_text_extraction_performed": False,
-        }
-        (directory / f"{digest}.json").write_text(
-            json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
+        metadata = store_capture_evidence(
+            payload=payload,
+            output=args.output,
+            key=key,
+            registry_id=registry_id,
+            requested_url=url,
+            final_url=final_url,
+            content_type=content_type,
+            retrieved_at=retrieved_at,
+            expected_sha256=source.get("sha256"),
         )
         captured.append(metadata)
+        if metadata["capture_status"] == "changed":
+            print(
+                f"CHANGED {key}: {len(payload)} bytes saved to review candidate "
+                f"{metadata['evidence_file']}; pinned SHA-256 was not replaced.",
+                flush=True,
+            )
+        else:
+            print(f"Captured {key}: {len(payload)} bytes from {final_url}", flush=True)
 
-    report = {"captured": sum(1 for item in captured if item.get("sha256")),
-              "failed": [item for item in captured if item.get("capture_status") == "failed"],
-              "results": captured}
+    report = {
+        "captured": sum(1 for item in captured if item.get("capture_status") == "captured"),
+        "changed": [item for item in captured if item.get("capture_status") == "changed"],
+        "failed": [item for item in captured if item.get("capture_status") == "failed"],
+        "results": captured,
+    }
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "capture-report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Captured {report['captured']} raw source file(s); failed: {len(report['failed'])}.")
+    print(
+        f"Captured {report['captured']} exact source file(s); "
+        f"changed candidates: {len(report['changed'])}; failed: {len(report['failed'])}."
+    )
     print("No legal text was parsed, rewritten, or generated.")
-    return 0 if report["captured"] else 1
+    return 0 if report["captured"] or report["changed"] else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())

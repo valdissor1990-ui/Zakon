@@ -38,9 +38,9 @@ class SyncCaptureMetadataTests(unittest.TestCase):
     def test_uses_only_exact_current_run_capture(self):
         with tempfile.TemporaryDirectory() as tmp:
             records, report, evidence, digest = self.fixture(Path(tmp), old_capture=True)
-            captured, failed = sync(records, report, evidence)
+            captured, failed, changed = sync(records, report, evidence)
             data = json.loads(records.read_text(encoding="utf-8"))
-            self.assertEqual((captured, failed), (1, 0))
+            self.assertEqual((captured, failed, changed), (1, 0, 0))
             self.assertEqual(data["sources"][0]["sha256"], digest)
             self.assertEqual(data["sources"][0]["capture_status"], "captured")
             self.assertNotIn("legal_text_extraction_performed", data["sources"][0])
@@ -60,9 +60,9 @@ class SyncCaptureMetadataTests(unittest.TestCase):
                 "article_heading_candidates": 12,
             })
             records.write_text(json.dumps(data), encoding="utf-8")
-            captured, failed = sync(records, report, evidence)
+            captured, failed, changed = sync(records, report, evidence)
             source = json.loads(records.read_text(encoding="utf-8"))["sources"][0]
-            self.assertEqual((captured, failed), (1, 0))
+            self.assertEqual((captured, failed, changed), (1, 0, 0))
             self.assertEqual(source["sha256"], digest)
             self.assertTrue(source["legal_text_extraction_performed"])
             self.assertEqual(source["extracted_candidate_sha256"], "c" * 64)
@@ -73,9 +73,9 @@ class SyncCaptureMetadataTests(unittest.TestCase):
             report.write_text(json.dumps({"results": [{
                 "source_key": "source_one", "capture_status": "failed", "error": "timeout"
             }]}), encoding="utf-8")
-            captured, failed = sync(records, report, evidence)
+            captured, failed, changed = sync(records, report, evidence)
             source = json.loads(records.read_text(encoding="utf-8"))["sources"][0]
-            self.assertEqual((captured, failed), (0, 1))
+            self.assertEqual((captured, failed, changed), (0, 1, 0))
             self.assertEqual(source["capture_status"], "failed")
             self.assertNotIn("sha256", source)
             self.assertNotIn("evidence_file", source)
@@ -87,10 +87,50 @@ class SyncCaptureMetadataTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             records, report, evidence, _ = self.fixture(Path(tmp), old_capture=True)
             report.write_text(json.dumps({"results": []}), encoding="utf-8")
-            captured, failed = sync(records, report, evidence)
+            captured, failed, changed = sync(records, report, evidence)
             source = json.loads(records.read_text(encoding="utf-8"))["sources"][0]
-            self.assertEqual((captured, failed), (0, 1))
+            self.assertEqual((captured, failed, changed), (0, 1, 0))
             self.assertNotIn("sha256", source)
+
+    def test_changed_capture_is_quarantined_and_keeps_pinned_source_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            records, report, evidence, _ = self.fixture(root, old_capture=True)
+            payload = b"new bytes from the same official source"
+            digest = hashlib.sha256(payload).hexdigest()
+            candidate_dir = evidence / "source_one" / "candidates"
+            candidate_dir.mkdir(parents=True)
+            candidate_file = f"candidates/{digest}.source"
+            (candidate_dir / f"{digest}.source").write_bytes(payload)
+            metadata = {
+                "source_key": "source_one",
+                "registry_id": "minjust",
+                "requested_url": "https://minjust.gov.ru/source",
+                "final_url": "https://minjust.gov.ru/source",
+                "retrieved_at": "2026-11-24T08:00:00Z",
+                "content_type": "application/rtf",
+                "byte_length": len(payload),
+                "sha256": digest,
+                "expected_sha256": "a" * 64,
+                "evidence_file": candidate_file,
+                "legal_text_extraction_performed": False,
+                "capture_status": "changed",
+                "candidate_review_required": True,
+            }
+            (candidate_dir / f"{digest}.json").write_text(json.dumps(metadata), encoding="utf-8")
+            report.write_text(json.dumps({"results": [metadata]}), encoding="utf-8")
+
+            captured, failed, changed = sync(records, report, evidence)
+            source = json.loads(records.read_text(encoding="utf-8"))["sources"][0]
+            self.assertEqual((captured, failed, changed), (0, 0, 1))
+            self.assertEqual(source["capture_status"], "changed")
+            self.assertEqual(source["sha256"], "a" * 64)
+            self.assertEqual(source["retrieved_at"], "old")
+            self.assertEqual(source["evidence_file"], "old.source")
+            self.assertEqual(source["capture_candidate"]["sha256"], digest)
+            self.assertEqual(source["capture_candidate"]["expected_sha256"], "a" * 64)
+            self.assertIn("not replaced", source["capture_error"])
+            self.assertNotIn("legal_text_extraction_performed", source)
 
     def test_rejects_report_metadata_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:

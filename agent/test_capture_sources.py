@@ -13,6 +13,7 @@ from capture_sources import (
     load_proxies,
     proxy_for_attempt,
     safe_error_message,
+    store_capture_evidence,
     validate_url,
 )
 
@@ -144,6 +145,43 @@ class SourceCaptureSafetyTests(unittest.TestCase):
                 proxies=["http://proxy.example:8080"],
             )
         self.assertTrue(any(isinstance(handler, ProxyHandler) for handler in build_opener.call_args.args))
+
+    def test_changed_capture_is_quarantined_without_overwriting_pinned_original(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "evidence"
+            key = "advocacy_source"
+            original = b"previously pinned original"
+            original_sha = hashlib.sha256(original).hexdigest()
+            original_dir = output / key
+            original_dir.mkdir(parents=True)
+            original_path = original_dir / f"{original_sha}.source"
+            original_path.write_bytes(original)
+
+            changed_payload = b"new bytes returned by the same official URL"
+            changed_sha = hashlib.sha256(changed_payload).hexdigest()
+            metadata = store_capture_evidence(
+                payload=changed_payload,
+                output=output,
+                key=key,
+                registry_id="minjust_official_documents",
+                requested_url="https://minjust.gov.ru/document.rtf",
+                final_url="https://minjust.gov.ru/document.rtf",
+                content_type="application/rtf",
+                retrieved_at="2026-11-24T08:00:00Z",
+                expected_sha256=original_sha,
+            )
+
+            candidate_path = original_dir / "candidates" / f"{changed_sha}.source"
+            sidecar_path = candidate_path.with_suffix(".json")
+            self.assertEqual(metadata["capture_status"], "changed")
+            self.assertEqual(metadata["expected_sha256"], original_sha)
+            self.assertEqual(metadata["sha256"], changed_sha)
+            self.assertEqual(metadata["evidence_file"], f"candidates/{changed_sha}.source")
+            self.assertEqual(original_path.read_bytes(), original)
+            self.assertEqual(candidate_path.read_bytes(), changed_payload)
+            sidecar = __import__("json").loads(sidecar_path.read_text(encoding="utf-8"))
+            self.assertTrue(sidecar["candidate_review_required"])
+            self.assertEqual(sidecar["expected_sha256"], original_sha)
 
     def test_capture_rejects_payload_over_size_limit(self):
         payload = b"x" * (MAX_BYTES + 1)
