@@ -3,10 +3,11 @@
   "registry_id": "minjust_official_documents",
   "requested_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
   "final_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
-  "retrieved_at": "2026-11-23T09:19:57Z",
+  "retrieved_at": "2026-11-24T08:47:11Z",
   "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "byte_length": 336575,
   "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
   "evidence_file": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184.source",
-  "legal_text_extraction_performed": false
+  "legal_text_extraction_performed": false,
+  "capture_status": "captured"
 }
