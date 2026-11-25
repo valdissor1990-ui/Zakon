@@ -336,12 +336,11 @@
       "registry_id": "pravo_official_publication",
       "name": "Официальный недельный перечень опубликованных актов с записью о Федеральном законе № 83-ФЗ",
       "publisher": "Государственная система правовой информации",
-      "official_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
+      "official_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
       "source_type": "official_publication_index_html",
       "source_document_id": "Недельный перечень за 22.04.2024–28.04.2024",
-      "notes": "Только индекс/перечень официального портала, в котором поисковая выдача показывает Федеральный закон от 22.04.2024 № 83-ФЗ. Не является оригиналом публикации № 0001202404220011 и не заменяет текст закона или интегрированный банк. Захват нужен для сохранения официальной индексной записи и последующего перехода к карточке акта.",
-      "capture_status": "failed",
-      "capture_error": "URLError: <urlopen error timed out>"
+      "notes": "Только индекс/перечень официального портала, в котором поисковая выдача показывает Федеральный закон от 22.04.2024 № 83-ФЗ. Не является оригиналом публикации № 0001202404220011 и не заменяет текст закона или интегрированный банк. Захват нужен для сохранения официальной индексной записи и последующего перехода к карточке акта. 25.11.2026: corrected two misspelled URL path segments (\"Правительской\" → \"Правительства\") using the canonical official-portal search result URL, which lists Federal Law No. 83-FZ in the 22.04.2024–28.04.2024 weekly index. The corrected page has not yet been byte-captured; this remains an index source, not the original publication of No. 83-FZ.",
+      "capture_status": "pending"
     },
     {
       "key": "advocacy_minjust_rtf_2017",
