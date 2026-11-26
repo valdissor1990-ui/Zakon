@@ -1,0 +1,15 @@
+{
+  "source_key": "gpk_minjust_page",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/documents/7613/",
+  "final_url": "https://minjust.gov.ru/ru/documents/7613/",
+  "retrieved_at": "2026-11-26T08:40:01Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9513,
+  "sha256": "c82df86810da81b138452282f02ff2cdcf597cbc702d01a6fb33ab61db66e7a6",
+  "evidence_file": "candidates/c82df86810da81b138452282f02ff2cdcf597cbc702d01a6fb33ab61db66e7a6.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
+  "candidate_review_required": true
+}
