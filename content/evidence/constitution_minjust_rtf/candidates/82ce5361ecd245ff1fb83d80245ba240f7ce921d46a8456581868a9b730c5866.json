@@ -1,0 +1,15 @@
+{
+  "source_key": "constitution_minjust_rtf",
+  "registry_id": "minjust_official_documents_www",
+  "requested_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+  "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+  "retrieved_at": "2026-11-26T08:22:25Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9577,
+  "sha256": "82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866",
+  "evidence_file": "candidates/82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
+  "candidate_review_required": true
+}

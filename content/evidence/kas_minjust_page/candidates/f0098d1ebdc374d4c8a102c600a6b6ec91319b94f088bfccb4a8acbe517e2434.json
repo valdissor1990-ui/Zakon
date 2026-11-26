@@ -1,0 +1,15 @@
+{
+  "source_key": "kas_minjust_page",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/documents/7611/",
+  "final_url": "https://minjust.gov.ru/ru/documents/7611/",
+  "retrieved_at": "2026-11-26T08:22:22Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9513,
+  "sha256": "f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434",
+  "evidence_file": "candidates/f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
+  "candidate_review_required": true
+}

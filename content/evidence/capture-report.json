@@ -1,6 +1,142 @@
 {
-  "captured": 17,
-  "changed": [],
+  "captured": 0,
+  "changed": [
+    {
+      "source_key": "advocacy_minjust_rtf",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+      "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+      "retrieved_at": "2026-11-26T08:13:05Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9569,
+      "sha256": "5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a",
+      "evidence_file": "candidates/5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "constitution_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/8011/",
+      "final_url": "https://minjust.gov.ru/ru/documents/8011/",
+      "retrieved_at": "2026-11-26T08:22:19Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "15bf5c4bec27a2e6259c8adc5762f0ab7678e0974c174473cd306b44f3765442",
+      "evidence_file": "candidates/15bf5c4bec27a2e6259c8adc5762f0ab7678e0974c174473cd306b44f3765442.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "uk_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7612/",
+      "final_url": "https://minjust.gov.ru/ru/documents/7612/",
+      "retrieved_at": "2026-11-26T08:22:20Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "15badb52c77770200e8dda894e3b52a6a1d145d8f2e4d2c963767e16a0f23f12",
+      "evidence_file": "candidates/15badb52c77770200e8dda894e3b52a6a1d145d8f2e4d2c963767e16a0f23f12.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "gpk_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7613/",
+      "final_url": "https://minjust.gov.ru/ru/documents/7613/",
+      "retrieved_at": "2026-11-26T08:22:21Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "fc85240141f13f43ae67da250f67822cb575a6d470c4688214f22daf704b7bb2",
+      "evidence_file": "candidates/fc85240141f13f43ae67da250f67822cb575a6d470c4688214f22daf704b7bb2.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "koap_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7614/",
+      "final_url": "https://minjust.gov.ru/ru/documents/7614/",
+      "retrieved_at": "2026-11-26T08:22:21Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "8905f0a1e1c5a180b63e4314a3b921d24e85a1e7e1646f9fb3c39ff501653259",
+      "evidence_file": "candidates/8905f0a1e1c5a180b63e4314a3b921d24e85a1e7e1646f9fb3c39ff501653259.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "kas_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7611/",
+      "final_url": "https://minjust.gov.ru/ru/documents/7611/",
+      "retrieved_at": "2026-11-26T08:22:22Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434",
+      "evidence_file": "candidates/f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "labour_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7863/",
+      "final_url": "https://minjust.gov.ru/ru/documents/7863/",
+      "retrieved_at": "2026-11-26T08:22:22Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9513,
+      "sha256": "b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c",
+      "evidence_file": "candidates/b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "civil_code_minjust_index",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
+      "final_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
+      "retrieved_at": "2026-11-26T08:22:23Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9524,
+      "sha256": "49c82d9e6420e13c71a5dd35285934d0e6f98f0a28bdc0423feb621a9d489c0b",
+      "evidence_file": "candidates/49c82d9e6420e13c71a5dd35285934d0e6f98f0a28bdc0423feb621a9d489c0b.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
+      "candidate_review_required": true
+    },
+    {
+      "source_key": "constitution_minjust_rtf",
+      "registry_id": "minjust_official_documents_www",
+      "requested_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+      "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
+      "retrieved_at": "2026-11-26T08:22:25Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9577,
+      "sha256": "82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866",
+      "evidence_file": "candidates/82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866.source",
+      "legal_text_extraction_performed": false,
+      "capture_status": "changed",
+      "expected_sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
+      "candidate_review_required": true
+    }
+  ],
   "failed": [
     {
       "source_key": "advocacy_pravo_bank",
@@ -17,11 +153,53 @@
       "error": "URLError: <urlopen error timed out>"
     },
     {
+      "source_key": "uk_minjust_docx",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "source_key": "gpk_minjust_docx",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "source_key": "koap_minjust_docx",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "source_key": "kas_minjust_docx",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "source_key": "advocacy_minjust_page",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/documents/7885/",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
       "source_key": "advocacy_publication_weekly_index_83fz",
       "registry_id": "pravo_official_publication",
-      "requested_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
+      "requested_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
       "capture_status": "failed",
       "error": "URLError: <urlopen error timed out>"
+    },
+    {
+      "source_key": "advocacy_minjust_rtf_2017",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "advocacy_minjust_npa_portal_probe",
@@ -29,6 +207,20 @@
       "requested_url": "https://pravo.minjust.ru/",
       "capture_status": "failed",
       "error": "URLError: <urlopen error timed out>"
+    },
+    {
+      "source_key": "advocacy_minjust_83fz_effective_date_news",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/events/50360/",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "source_key": "advocacy_minjust_npa_list_2026",
+      "registry_id": "minjust_official_documents",
+      "requested_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     }
   ],
   "results": [
@@ -37,13 +229,15 @@
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
       "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
-      "retrieved_at": "2026-11-24T08:36:07Z",
-      "content_type": "application/rtf",
-      "byte_length": 1141873,
-      "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
-      "evidence_file": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.source",
+      "retrieved_at": "2026-11-26T08:13:05Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9569,
+      "sha256": "5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a",
+      "evidence_file": "candidates/5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+      "candidate_review_required": true
     },
     {
       "source_key": "advocacy_pravo_bank",
@@ -64,174 +258,160 @@
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/8011/",
       "final_url": "https://minjust.gov.ru/ru/documents/8011/",
-      "retrieved_at": "2026-11-24T08:45:25Z",
+      "retrieved_at": "2026-11-26T08:22:19Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 287783,
-      "sha256": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce",
-      "evidence_file": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce.source",
+      "byte_length": 9513,
+      "sha256": "15bf5c4bec27a2e6259c8adc5762f0ab7678e0974c174473cd306b44f3765442",
+      "evidence_file": "candidates/15bf5c4bec27a2e6259c8adc5762f0ab7678e0974c174473cd306b44f3765442.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce",
+      "candidate_review_required": true
     },
     {
       "source_key": "uk_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7612/",
       "final_url": "https://minjust.gov.ru/ru/documents/7612/",
-      "retrieved_at": "2026-11-24T08:45:55Z",
+      "retrieved_at": "2026-11-26T08:22:20Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 39300,
-      "sha256": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9",
-      "evidence_file": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9.source",
+      "byte_length": 9513,
+      "sha256": "15badb52c77770200e8dda894e3b52a6a1d145d8f2e4d2c963767e16a0f23f12",
+      "evidence_file": "candidates/15badb52c77770200e8dda894e3b52a6a1d145d8f2e4d2c963767e16a0f23f12.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9",
+      "candidate_review_required": true
     },
     {
       "source_key": "gpk_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7613/",
       "final_url": "https://minjust.gov.ru/ru/documents/7613/",
-      "retrieved_at": "2026-11-24T08:45:57Z",
+      "retrieved_at": "2026-11-26T08:22:21Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 39574,
-      "sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
-      "evidence_file": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579.source",
+      "byte_length": 9513,
+      "sha256": "fc85240141f13f43ae67da250f67822cb575a6d470c4688214f22daf704b7bb2",
+      "evidence_file": "candidates/fc85240141f13f43ae67da250f67822cb575a6d470c4688214f22daf704b7bb2.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
+      "candidate_review_required": true
     },
     {
       "source_key": "koap_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7614/",
       "final_url": "https://minjust.gov.ru/ru/documents/7614/",
-      "retrieved_at": "2026-11-24T08:46:46Z",
+      "retrieved_at": "2026-11-26T08:22:21Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 39690,
-      "sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
-      "evidence_file": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be.source",
+      "byte_length": 9513,
+      "sha256": "8905f0a1e1c5a180b63e4314a3b921d24e85a1e7e1646f9fb3c39ff501653259",
+      "evidence_file": "candidates/8905f0a1e1c5a180b63e4314a3b921d24e85a1e7e1646f9fb3c39ff501653259.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
+      "candidate_review_required": true
     },
     {
       "source_key": "kas_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7611/",
       "final_url": "https://minjust.gov.ru/ru/documents/7611/",
-      "retrieved_at": "2026-11-24T08:46:48Z",
+      "retrieved_at": "2026-11-26T08:22:22Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 39638,
-      "sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
-      "evidence_file": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a.source",
+      "byte_length": 9513,
+      "sha256": "f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434",
+      "evidence_file": "candidates/f0098d1ebdc374d4c8a102c600a6b6ec91319b94f088bfccb4a8acbe517e2434.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
+      "candidate_review_required": true
     },
     {
       "source_key": "labour_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7863/",
       "final_url": "https://minjust.gov.ru/ru/documents/7863/",
-      "retrieved_at": "2026-11-24T08:46:50Z",
+      "retrieved_at": "2026-11-26T08:22:22Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 41768,
-      "sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
-      "evidence_file": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381.source",
+      "byte_length": 9513,
+      "sha256": "b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c",
+      "evidence_file": "candidates/b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
+      "candidate_review_required": true
     },
     {
       "source_key": "civil_code_minjust_index",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
       "final_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
-      "retrieved_at": "2026-11-24T08:46:54Z",
+      "retrieved_at": "2026-11-26T08:22:23Z",
       "content_type": "text/html; charset=utf-8",
-      "byte_length": 40492,
-      "sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
-      "evidence_file": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b.source",
+      "byte_length": 9524,
+      "sha256": "49c82d9e6420e13c71a5dd35285934d0e6f98f0a28bdc0423feb621a9d489c0b",
+      "evidence_file": "candidates/49c82d9e6420e13c71a5dd35285934d0e6f98f0a28bdc0423feb621a9d489c0b.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
+      "candidate_review_required": true
     },
     {
       "source_key": "constitution_minjust_rtf",
       "registry_id": "minjust_official_documents_www",
       "requested_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
-      "retrieved_at": "2026-11-24T08:47:03Z",
-      "content_type": "application/rtf",
-      "byte_length": 953243,
-      "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
-      "evidence_file": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877.source",
+      "retrieved_at": "2026-11-26T08:22:25Z",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 9577,
+      "sha256": "82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866",
+      "evidence_file": "candidates/82ce5361ecd245ff1fb83d80245ba240f7ce921d46a8456581868a9b730c5866.source",
       "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "changed",
+      "expected_sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
+      "candidate_review_required": true
     },
     {
       "source_key": "uk_minjust_docx",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
-      "final_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
-      "retrieved_at": "2026-11-24T08:47:06Z",
-      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "byte_length": 333078,
-      "sha256": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb",
-      "evidence_file": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "gpk_minjust_docx",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
-      "final_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
-      "retrieved_at": "2026-11-24T08:47:11Z",
-      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "byte_length": 336575,
-      "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
-      "evidence_file": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "koap_minjust_docx",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
-      "final_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
-      "retrieved_at": "2026-11-24T08:47:17Z",
-      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "byte_length": 756735,
-      "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
-      "evidence_file": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "kas_minjust_docx",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
-      "final_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
-      "retrieved_at": "2026-11-24T08:47:21Z",
-      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "byte_length": 374252,
-      "sha256": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18",
-      "evidence_file": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "advocacy_minjust_page",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/documents/7885/",
-      "final_url": "https://minjust.gov.ru/ru/documents/7885/",
-      "retrieved_at": "2026-11-24T08:47:29Z",
-      "content_type": "text/html; charset=utf-8",
-      "byte_length": 354624,
-      "sha256": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea",
-      "evidence_file": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "advocacy_publication_weekly_index_83fz",
       "registry_id": "pravo_official_publication",
-      "requested_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
+      "requested_url": "https://pravo.gov.ru/novye-postupleniya/section/1137/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2006.05.2024%20%E2%84%96%201111-%D1%80section/1138/section/1136/%D0%A0%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%8F%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B9%20%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BE%D1%82%2021.06.2023%20%E2%84%96%201633-%D1%80?from=22.04.2024",
       "capture_status": "failed",
       "error": "URLError: <urlopen error timed out>"
     },
@@ -239,14 +419,8 @@
       "source_key": "advocacy_minjust_rtf_2017",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
-      "final_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
-      "retrieved_at": "2026-11-24T08:52:13Z",
-      "content_type": "application/rtf",
-      "byte_length": 844460,
-      "sha256": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c",
-      "evidence_file": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "advocacy_minjust_npa_portal_probe",
@@ -259,27 +433,15 @@
       "source_key": "advocacy_minjust_83fz_effective_date_news",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/events/50360/",
-      "final_url": "https://minjust.gov.ru/ru/events/50360/",
-      "retrieved_at": "2026-11-24T08:54:37Z",
-      "content_type": "text/html; charset=utf-8",
-      "byte_length": 42003,
-      "sha256": "d1948afba778e49cfe7d7a16b5b4bf5da397697b23d6ef7ea26955135d6f2ffc",
-      "evidence_file": "d1948afba778e49cfe7d7a16b5b4bf5da397697b23d6ef7ea26955135d6f2ffc.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     },
     {
       "source_key": "advocacy_minjust_npa_list_2026",
       "registry_id": "minjust_official_documents",
       "requested_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
-      "final_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
-      "retrieved_at": "2026-11-24T08:54:41Z",
-      "content_type": "text/html; charset=utf-8",
-      "byte_length": 104372,
-      "sha256": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a",
-      "evidence_file": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a.source",
-      "legal_text_extraction_performed": false,
-      "capture_status": "captured"
+      "capture_status": "failed",
+      "error": "HTTPError: HTTP Error 403: Forbidden"
     }
   ]
 }

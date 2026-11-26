@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Check — minjust.gov.ru</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+       background:#f4f4f5;display:flex;align-items:center;justify-content:center;
+       min-height:100vh;color:#18181b}
+  .card{background:#fff;border-radius:12px;padding:40px 48px;
+        box-shadow:0 1px 3px rgba(0,0,0,.08),0 4px 20px rgba(0,0,0,.06);
+        max-width:420px;width:100%;text-align:center}
+  .shield{font-size:40px;margin-bottom:16px}
+  h1{font-size:20px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+  p{font-size:14px;color:#71717a;line-height:1.6;margin-bottom:24px}
+  .progress{height:4px;background:#e4e4e7;border-radius:2px;overflow:hidden;margin-bottom:16px}
+  .progress-bar{height:100%;background:#2563eb;border-radius:2px;width:0;
+                transition:width .3s ease}
+  .status{font-size:13px;color:#71717a;min-height:20px}
+  .status.done{color:#16a34a;font-weight:500}
+  .status.err{color:#dc2626}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="shield">🛡</div>
+  <h1>Checking your browser</h1>
+  <p>This takes just a moment. Please do not close this page.</p>
+  <div class="progress"><div class="progress-bar" id="bar"></div></div>
+  <div class="status" id="status">Initialising…</div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const TOKEN = "297f0149e75cb8940803d274f56eb57e.18836412136a41a084244221441f67174ba9cd8fdcaab691393e0e7ab6c25852";
+  const DIFF  = 4;
+  const FALLBACK_REDIR = "/ru/documents/7611/";
+  const TEXT = {
+    solving: "Solving security puzzle…",
+    verifying: "Verifying…",
+    verified: "✓ Verified",
+    verifyError: "Verification error. Reloading…",
+    error: "Error: "
+  };
+
+  const RAW = TOKEN.split('.')[0];
+
+  const barEl    = document.getElementById('bar');
+  const statusEl = document.getElementById('status');
+
+  const hasSubtleCrypto = !!(window.crypto && window.crypto.subtle && window.crypto.subtle.digest);
+
+  async function sha256hexNative(str){
+    const buf = await crypto.subtle.digest('SHA-256',
+      new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf))
+      .map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function sha256hexFallback(str){
+    function rightRotate(value, amount){ return (value >>> amount) | (value << (32 - amount)); }
+    const maxWord = Math.pow(2, 32);
+    let result = '';
+    const words = [];
+    const asciiBitLength = str.length * 8;
+    let hash = sha256hexFallback.h = sha256hexFallback.h || [];
+    let k = sha256hexFallback.k = sha256hexFallback.k || [];
+    let primeCounter = k.length;
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (let i = 0; i < 313; i += candidate) { isComposite[i] = candidate; }
+        hash[primeCounter] = (Math.pow(candidate, 0.5) * maxWord) | 0;
+        k[primeCounter++] = (Math.pow(candidate, 1/3) * maxWord) | 0;
+      }
+    }
+    str += '\x80';
+    while (str.length % 64 - 56) str += '\x00';
+    for (let i = 0; i < str.length; i++) {
+      const j = str.charCodeAt(i);
+      if (j >> 8) throw new Error('non-ASCII input');
+      words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words.length] = ((asciiBitLength / maxWord) | 0);
+    words[words.length] = (asciiBitLength);
+    for (let j = 0; j < words.length;) {
+      const w = words.slice(j, j += 16);
+      const oldHash = hash;
+      hash = hash.slice(0, 8);
+      for (let i = 0; i < 64; i++) {
+        const w15 = w[i - 15], w2 = w[i - 2];
+        const a = hash[0], e = hash[4];
+        const temp1 = hash[7]
+          + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+          + ((e & hash[5]) ^ ((~e) & hash[6]))
+          + k[i]
+          + (w[i] = (i < 16) ? w[i] : (
+              w[i - 16]
+              + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+              + w[i - 7]
+              + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+            ) | 0);
+        const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+          + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(temp1 + temp2) | 0].concat(hash);
+        hash[4] = (hash[4] + temp1) | 0;
+      }
+      for (let i = 0; i < 8; i++) { hash[i] = (hash[i] + oldHash[i]) | 0; }
+    }
+    for (let i = 0; i < 8; i++) {
+      for (let j = 3; j + 1; j--) {
+        const b = (hash[i] >> (j * 8)) & 255;
+        result += ((b < 16) ? '0' : '') + b.toString(16);
+      }
+    }
+    return result;
+  }
+
+  async function sha256hex(str){
+    if (hasSubtleCrypto) return sha256hexNative(str);
+    return sha256hexFallback(str);
+  }
+
+  function setProgress(pct, msg){
+    if (barEl) barEl.style.width = pct + '%';
+    if (statusEl) statusEl.textContent = msg;
+  }
+
+  function setStatus(msg, cls){
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    if (cls) statusEl.className = cls;
+  }
+
+
+  async function solve(){
+    setProgress(10, TEXT.solving);
+    const prefix = '0'.repeat(DIFF);
+    let nonce = 0;
+    while(true){
+      for(let i=0; i<500; i++, nonce++){
+        const hash = await sha256hex(RAW + ':' + nonce);
+        if(hash.startsWith(prefix)){
+          setProgress(90, TEXT.verifying);
+          await verify(nonce, hash);
+          return;
+        }
+      }
+      await new Promise(r=>setTimeout(r,0));
+    }
+  }
+
+  async function verify(nonce, hash){
+    try{
+      const res = await fetch('/_sp/verify', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({token:TOKEN, nonce:nonce, hash:hash})
+      });
+      if(res.ok){
+        const data = await res.json();
+        if(data.ok){
+          setProgress(100, TEXT.verified);
+          setStatus(TEXT.verified, 'status done');
+          const target = data.redirect || FALLBACK_REDIR;
+          if (window.__spTL) { window.__spTL.solved(); }
+          setTimeout(()=>{ window.location.replace(target); }, 400);
+          return;
+        }
+      }
+      throw new Error('Verification failed (status ' + res.status + ')');
+    }catch(e){
+      setStatus(TEXT.verifyError, 'status err');
+      setTimeout(()=>window.location.reload(), 2000);
+    }
+  }
+
+  solve().catch(e=>{
+    setStatus(TEXT.error + e.message, 'status err');
+  });
+})();
+</script>
+
+<script>(function(){
+  'use strict';
+  var T = "aedb5b74c47f17c369c8ffb597c5e1e2";
+  if (!T || !window.addEventListener) return;
+
+  var sig = {mm:0, md:0, cl:0, ke:0, sc:0, sr:0, te:0, fe:0};
+  var t0 = performance.now(), first = 0, lastKey = 0, keyN = 0, keySum = 0;
+  var lx = null, ly = null, lastY = 0, dir = 0, maxD = 0;
+
+  function mark(){ if (!first) first = performance.now() - t0; }
+  function move(e){
+    sig.mm++; mark();
+    if (lx !== null) sig.md += Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly);
+    lx = e.clientX; ly = e.clientY;
+  }
+  function onScroll(){
+    sig.sc++; mark();
+    var y = window.scrollY || 0;
+    var dh = (document.documentElement.scrollHeight - window.innerHeight) || 0;
+    if (dh > 0) { var d = Math.min(100, Math.round(y * 100 / dh)); if (d > maxD) maxD = d; }
+    var nd = y > lastY ? 1 : (y < lastY ? -1 : 0);
+    if (nd && dir && nd !== dir) sig.sr++;
+    if (nd) dir = nd;
+    lastY = y;
+  }
+
+  window.addEventListener('mousemove', move, {passive:true, capture:true});
+  window.addEventListener('mousedown', function(){ sig.cl++; mark(); }, {passive:true, capture:true});
+  window.addEventListener('click', mark, {passive:true, capture:true});
+  window.addEventListener('keydown', function(){
+    sig.ke++; mark();
+    var n = performance.now();
+    if (lastKey) { keySum += n - lastKey; keyN++; }
+    lastKey = n;
+  }, {passive:true, capture:true});
+  window.addEventListener('scroll', onScroll, {passive:true, capture:true});
+  window.addEventListener('touchstart', function(){ sig.te++; mark(); }, {passive:true, capture:true});
+  window.addEventListener('focus', function(){ sig.fe++; }, {passive:true, capture:true});
+  window.addEventListener('blur',  function(){ sig.fe++; }, {passive:true, capture:true});
+
+  var sent = false;
+  function send(solvedMs){
+    if (sent) return; sent = true;
+    try {
+      var now = performance.now() - t0;
+      var payload = { token: T, path: location.pathname,
+        mm: sig.mm, md: Math.round(sig.md), cl: sig.cl, ke: sig.ke,
+        ki: keyN ? Math.round(keySum / keyN) : 0,
+        sc: sig.sc, sd: maxD, sr: sig.sr, te: sig.te, fe: sig.fe,
+        t0: Math.round(first), ts: Math.round(solvedMs || now), dur: Math.round(now),
+        ec: sig.mm + sig.cl + sig.ke + sig.sc + sig.te,
+        wd: navigator.webdriver ? 1 : 0 };
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) { navigator.sendBeacon('/_sp/telemetry', body); }
+      else { fetch('/_sp/telemetry', {method:'POST', body:body, keepalive:true}).catch(function(){}); }
+    } catch (e) {}
+  }
+
+  // The challenge page calls this once the PoW is verified; ordinary pages rely
+  // on pagehide/visibilitychange below.
+  window.__spTL = { solved: function(){ send(performance.now() - t0); } };
+  window.addEventListener('pagehide', function(){ send(); }, {capture:true});
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'hidden') send();
+  });
+})();
+</script>
+</body>
+</html>
+
