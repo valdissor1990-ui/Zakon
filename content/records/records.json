@@ -2,8 +2,8 @@
   "release": {
     "version": "0.2.0-auto",
     "version_code": 8,
-    "created_at": "2026-11-25T13:32:15Z",
-    "effective_as_of": "2026-11-25",
+    "created_at": "2026-11-26T12:27:28Z",
+    "effective_as_of": "2026-11-26",
     "notes": "Auto-filled from official Minjust captures (single-source policy). Some DOCX files may lag the current amendment state; pravo cross-check requires Russian proxy."
   },
   "sources": [
@@ -94,7 +94,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "advocacy_minjust_rtf",
       "source_revision": "red. per Minjust capture",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "1162e7b0c5fcd9c466728d1b78864131215864db430082ed56752c2879255688",
       "source_checks": [
@@ -665,7 +665,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "constitution_minjust_rtf",
       "source_revision": "per Minjust RTF capture",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "14fec930a1148fcc2185502ab1e83003eb84552a8f3a33a8de7d2e49d0f821ff",
       "source_checks": [
@@ -2116,7 +2116,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "uk_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "ea475ada1b715f1f8f09f4bc50f4ffb894d3ddd4f3c8298c3f56dce2566d3219",
       "source_checks": [
@@ -7067,7 +7067,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "gpk_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "8f6c8611c538ace2c41ea3b7fbf2d2cc414721e37c978332d6329c5c68f7ed22",
       "source_checks": [
@@ -11958,7 +11958,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "koap_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "d2c027f571e15c424fd143dd941246ec13c447499d9b84d71d2220f5b20242db",
       "source_checks": [
@@ -22029,7 +22029,7 @@
       "jurisdiction": "RU",
       "primary_source_key": "kas_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-25",
+      "verified_at": "2026-11-26",
       "verification_status": "approved",
       "text_sha256": "4a05e279c70d46368bc6b9828056d53f087cad164b463c0889a717207c56af3a",
       "source_checks": [
