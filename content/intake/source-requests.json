@@ -72,11 +72,10 @@
       "registry_id": "pravo_law_bank",
       "name": "Федеральный закон № 63-ФЗ — интегрированный банк «Законодательство России»",
       "publisher": "Государственная система правовой информации",
-      "official_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102076346",
+      "official_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102074279",
       "source_type": "official_consolidated_text_html",
-      "source_document_id": "102076346",
-      "capture_status": "failed",
-      "capture_error": "URLError: <urlopen error timed out>"
+      "source_document_id": "102074279",
+      "capture_status": "pending"
     },
     {
       "key": "advocacy_amendment_83fz",
