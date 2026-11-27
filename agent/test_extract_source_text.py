@@ -4,9 +4,10 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from xml.etree import ElementTree as ET
 
-from extract_source_text import article_index, build_structure_candidate, docx_text, is_extractable_text_source, refresh_annotation_index, refresh_article_fragments_candidate, refresh_review_index, rtf_text, write_json
+from extract_source_text import article_index, build_structure_candidate, docx_text, is_extractable_text_source, main, refresh_annotation_index, refresh_article_fragments_candidate, refresh_review_index, rtf_text, write_json
 
 
 class SourceExtractionTests(unittest.TestCase):
@@ -26,6 +27,44 @@ class SourceExtractionTests(unittest.TestCase):
             "capture_status": "captured",
             "source_type": "official_document_page_html",
         }))
+
+    def test_main_records_blocked_no_source_state_without_failing_or_mutating_intake(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            intake = root / "intake.json"
+            payload = {
+                "sources": [
+                    {
+                        "key": "changed-rtf",
+                        "capture_status": "changed",
+                        "source_type": "official_consolidated_text_rtf",
+                    },
+                    {
+                        "key": "failed-rtf",
+                        "capture_status": "failed",
+                        "source_type": "official_historical_text_rtf",
+                    },
+                ]
+            }
+            intake.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            original_intake = intake.read_bytes()
+            output = root / "extracted"
+            with patch("sys.argv", [
+                "extract_source_text.py",
+                "--intake", str(intake),
+                "--evidence", str(root / "evidence"),
+                "--output", str(output),
+            ]):
+                self.assertEqual(main(), 0)
+
+            report = json.loads((output / "extraction-report.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["status"], "blocked_no_extractable_sources")
+            self.assertEqual(report["sources"], [])
+            self.assertEqual(
+                {(item["key"], item["capture_status"]) for item in report["skipped_sources"]},
+                {("changed-rtf", "changed"), ("failed-rtf", "failed")},
+            )
+            self.assertEqual(intake.read_bytes(), original_intake)
 
     def test_write_json_emits_parseable_json_with_real_newline(self):
         with tempfile.TemporaryDirectory() as directory:
