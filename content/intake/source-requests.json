@@ -49,23 +49,13 @@
       "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
       "source_type": "official_consolidated_text_rtf",
       "source_document_id": "Федеральный закон от 31.05.2002 № 63-ФЗ; редакция по источнику до 22.04.2024",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
-      "retrieved_at": "2026-11-24T08:36:07Z",
+      "retrieved_at": "2026-11-27T08:29:04Z",
       "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
       "content_type": "application/rtf",
       "byte_length": 1141873,
-      "evidence_file": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.source",
-      "capture_candidate": {
-        "sha256": "591c8536d88a17b0cb5cf159fcff976081eb0a1d8901a9e1f3a49a314d2af8b8",
-        "expected_sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
-        "retrieved_at": "2026-11-26T08:30:46Z",
-        "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9569,
-        "evidence_file": "candidates/591c8536d88a17b0cb5cf159fcff976081eb0a1d8901a9e1f3a49a314d2af8b8.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7.source"
     },
     {
       "key": "advocacy_pravo_bank",
@@ -75,7 +65,8 @@
       "official_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102074279",
       "source_type": "official_consolidated_text_html",
       "source_document_id": "102074279",
-      "capture_status": "pending"
+      "capture_status": "failed",
+      "capture_error": "URLError: <urlopen error timed out>"
     },
     {
       "key": "advocacy_amendment_83fz",
@@ -96,24 +87,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/8011/",
       "source_type": "official_document_page_html",
       "source_document_id": "8011",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту.",
       "sha256": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce",
-      "retrieved_at": "2026-11-24T08:45:25Z",
+      "retrieved_at": "2026-11-27T08:38:18Z",
       "final_url": "https://minjust.gov.ru/ru/documents/8011/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 287783,
-      "evidence_file": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce.source",
-      "capture_candidate": {
-        "sha256": "a4de789a03fa742b9f0f0386decf249dea60d91c73f7ac655da26260d66be100",
-        "expected_sha256": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce",
-        "retrieved_at": "2026-11-26T08:40:00Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/8011/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/a4de789a03fa742b9f0f0386decf249dea60d91c73f7ac655da26260d66be100.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "5c61f8592cef86fc8dcbc6bfd9dff19003cf87bf7f6303a85ada6cbdf386f2ce.source"
     },
     {
       "key": "uk_minjust_page",
@@ -123,24 +104,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/7612/",
       "source_type": "official_document_page_html",
       "source_document_id": "7612",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту.",
       "sha256": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9",
-      "retrieved_at": "2026-11-24T08:45:55Z",
+      "retrieved_at": "2026-11-27T08:38:20Z",
       "final_url": "https://minjust.gov.ru/ru/documents/7612/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 39300,
-      "evidence_file": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9.source",
-      "capture_candidate": {
-        "sha256": "14d6159f6552ef7a60a741d475772ba6e83aec1f6ee6ddc60955870592dbc800",
-        "expected_sha256": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9",
-        "retrieved_at": "2026-11-26T08:40:01Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/7612/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/14d6159f6552ef7a60a741d475772ba6e83aec1f6ee6ddc60955870592dbc800.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "9ded9ddf18418957bef020b3d92da24738e2fcfadb8651d82482515709f62ef9.source"
     },
     {
       "key": "gpk_minjust_page",
@@ -150,24 +121,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/7613/",
       "source_type": "official_document_page_html",
       "source_document_id": "7613",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту.",
       "sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
-      "retrieved_at": "2026-11-24T08:45:57Z",
+      "retrieved_at": "2026-11-27T08:38:21Z",
       "final_url": "https://minjust.gov.ru/ru/documents/7613/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 39574,
-      "evidence_file": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579.source",
-      "capture_candidate": {
-        "sha256": "c82df86810da81b138452282f02ff2cdcf597cbc702d01a6fb33ab61db66e7a6",
-        "expected_sha256": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579",
-        "retrieved_at": "2026-11-26T08:40:01Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/7613/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/c82df86810da81b138452282f02ff2cdcf597cbc702d01a6fb33ab61db66e7a6.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "74615d2dade29b8450aecf249c012124d9b33747bdf691ec15408f9028a06579.source"
     },
     {
       "key": "koap_minjust_page",
@@ -177,24 +138,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/7614/",
       "source_type": "official_document_page_html",
       "source_document_id": "7614",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту.",
       "sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
-      "retrieved_at": "2026-11-24T08:46:46Z",
+      "retrieved_at": "2026-11-27T08:38:23Z",
       "final_url": "https://minjust.gov.ru/ru/documents/7614/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 39690,
-      "evidence_file": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be.source",
-      "capture_candidate": {
-        "sha256": "8e0edad4b3f3af3edafc93a9fce084e40536cc86fe0a6db56739dff6b9574dcf",
-        "expected_sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
-        "retrieved_at": "2026-11-26T08:40:02Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/7614/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/8e0edad4b3f3af3edafc93a9fce084e40536cc86fe0a6db56739dff6b9574dcf.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be.source"
     },
     {
       "key": "kas_minjust_page",
@@ -204,24 +155,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/7611/",
       "source_type": "official_document_page_html",
       "source_document_id": "7611",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Захватывается HTML-страница официального документа и её метаданные. Это не означает, что вложенный DOCX/RTF уже извлечён, актуальность редакции проверена или текст готов к импорту.",
       "sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
-      "retrieved_at": "2026-11-24T08:46:48Z",
+      "retrieved_at": "2026-11-27T08:38:24Z",
       "final_url": "https://minjust.gov.ru/ru/documents/7611/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 39638,
-      "evidence_file": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a.source",
-      "capture_candidate": {
-        "sha256": "1d37c172bad37b9dc1a733fc3429555e1127955108b35ec9746529c3e2c5e6b0",
-        "expected_sha256": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a",
-        "retrieved_at": "2026-11-26T08:40:02Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/7611/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/1d37c172bad37b9dc1a733fc3429555e1127955108b35ec9746529c3e2c5e6b0.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "6658a74ea9ae09bf8f2aa1b04c00dc83ece1916ffdbe576aa04d1ed1d3cc909a.source"
     },
     {
       "key": "labour_minjust_page",
@@ -231,24 +172,14 @@
       "official_url": "https://minjust.gov.ru/ru/documents/7863/",
       "source_type": "official_document_page_html",
       "source_document_id": "7863",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Официальная страница документа; вложенный текстовый файл требуется отдельно извлечь и проверить.",
       "sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
-      "retrieved_at": "2026-11-24T08:46:50Z",
+      "retrieved_at": "2026-11-27T08:38:30Z",
       "final_url": "https://minjust.gov.ru/ru/documents/7863/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 41768,
-      "evidence_file": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381.source",
-      "capture_candidate": {
-        "sha256": "2f2409ad99a3f613e3d312b85c5c5e78ccefe89cea7639e5f1012a0c3f3f7c02",
-        "expected_sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
-        "retrieved_at": "2026-11-26T08:40:03Z",
-        "final_url": "https://minjust.gov.ru/ru/documents/7863/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9513,
-        "evidence_file": "candidates/2f2409ad99a3f613e3d312b85c5c5e78ccefe89cea7639e5f1012a0c3f3f7c02.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381.source"
     },
     {
       "key": "civil_code_minjust_index",
@@ -258,24 +189,14 @@
       "official_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
       "source_type": "official_document_collection_page_html",
       "source_document_id": "grazhdanskij-kodeks",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Каталог перечисляет четыре части ГК РФ; отдельные страницы и файлы частей требуется идентифицировать.",
       "sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
-      "retrieved_at": "2026-11-24T08:46:54Z",
+      "retrieved_at": "2026-11-27T08:38:32Z",
       "final_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
       "content_type": "text/html; charset=utf-8",
       "byte_length": 40492,
-      "evidence_file": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b.source",
-      "capture_candidate": {
-        "sha256": "32fa1c8c1b76f3e26ae6bf8205af952907d95be710210c24dadea9de2e447bc5",
-        "expected_sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
-        "retrieved_at": "2026-11-26T08:40:03Z",
-        "final_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9524,
-        "evidence_file": "candidates/32fa1c8c1b76f3e26ae6bf8205af952907d95be710210c24dadea9de2e447bc5.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b.source"
     },
     {
       "key": "constitution_minjust_rtf",
@@ -285,24 +206,14 @@
       "official_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "source_type": "official_consolidated_text_rtf",
       "source_document_id": "8011",
-      "capture_status": "changed",
+      "capture_status": "captured",
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
       "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
-      "retrieved_at": "2026-11-24T08:47:03Z",
+      "retrieved_at": "2026-11-27T08:38:38Z",
       "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "content_type": "application/rtf",
       "byte_length": 953243,
-      "evidence_file": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877.source",
-      "capture_candidate": {
-        "sha256": "546c3dccfd2eec92b87cbdd0692a4b54e9545025724d44f8e8aebeac55cd223e",
-        "expected_sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
-        "retrieved_at": "2026-11-26T08:40:05Z",
-        "final_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
-        "content_type": "text/html; charset=utf-8",
-        "byte_length": 9577,
-        "evidence_file": "candidates/546c3dccfd2eec92b87cbdd0692a4b54e9545025724d44f8e8aebeac55cd223e.source"
-      },
-      "capture_error": "Latest retrieved bytes differ from the pinned original. The new bytes are quarantined for manual review; the pinned original was not replaced."
+      "evidence_file": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877.source"
     },
     {
       "key": "uk_minjust_docx",
@@ -312,9 +223,14 @@
       "official_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7612",
-      "capture_status": "failed",
+      "capture_status": "captured",
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "sha256": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb",
+      "retrieved_at": "2026-11-27T08:38:41Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
+      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "byte_length": 333078,
+      "evidence_file": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb.source"
     },
     {
       "key": "gpk_minjust_docx",
@@ -324,9 +240,14 @@
       "official_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7613",
-      "capture_status": "failed",
+      "capture_status": "captured",
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
+      "retrieved_at": "2026-11-27T08:38:45Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
+      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "byte_length": 336575,
+      "evidence_file": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184.source"
     },
     {
       "key": "koap_minjust_docx",
@@ -336,9 +257,14 @@
       "official_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7614",
-      "capture_status": "failed",
+      "capture_status": "captured",
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
+      "retrieved_at": "2026-11-27T08:38:49Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
+      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "byte_length": 756735,
+      "evidence_file": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38.source"
     },
     {
       "key": "kas_minjust_docx",
@@ -348,9 +274,14 @@
       "official_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
       "source_type": "official_consolidated_text_docx",
       "source_document_id": "7611",
-      "capture_status": "failed",
+      "capture_status": "captured",
       "notes": "Прямой URL файла найден по ссылке «Текстовая версия» на официальной странице Минюста. Дата редакции и полнота изменений на 16.11.2026 ещё требуют отдельной проверки.",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "sha256": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18",
+      "retrieved_at": "2026-11-27T08:38:52Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
+      "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "byte_length": 374252,
+      "evidence_file": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18.source"
     },
     {
       "key": "advocacy_minjust_page",
@@ -361,8 +292,13 @@
       "source_type": "official_document_page_html",
       "source_document_id": "7885",
       "notes": "Сохраняется как первичный снимок официальной карточки документа: заголовок, ссылки на текст и перечень изменяющих актов. Это тот же оператор и система Минюста, что и RTF; источник не считается независимой третьей системой и не заменяет официальный портал опубликования или интегрированный банк.",
-      "capture_status": "failed",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "capture_status": "captured",
+      "sha256": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea",
+      "retrieved_at": "2026-11-27T08:38:56Z",
+      "final_url": "https://minjust.gov.ru/ru/documents/7885/",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 354624,
+      "evidence_file": "93b5b284b48bdb33445506b8b3a0353596eea26855250ae7c64316feabb193ea.source"
     },
     {
       "key": "advocacy_publication_weekly_index_83fz",
@@ -385,8 +321,13 @@
       "source_type": "official_historical_text_rtf",
       "source_document_id": "Федеральный закон № 63-ФЗ; текстовая версия по карточке Минюста № 7647",
       "notes": "Исторический кандидат, не текущая редакция. URL содержит фрагмент redot290720171, предположительно указывающий на редакцию от 29.07.2017; дату и реквизиты редакции необходимо подтвердить по самому сохранённому RTF. Источник относится к тому же оператору Минюста и не считается независимой государственной системой или source_check=match.",
-      "capture_status": "failed",
-      "capture_error": "RemoteDisconnected: Remote end closed connection without response"
+      "capture_status": "captured",
+      "sha256": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c",
+      "retrieved_at": "2026-11-27T08:43:37Z",
+      "final_url": "https://minjust.gov.ru/uploaded/files/federalnyyzakonot31052002n63-fzredot290720171.rtf",
+      "content_type": "application/rtf",
+      "byte_length": 844460,
+      "evidence_file": "d19f71e0ebd5e14536ec0ef31bd5825797e9500d0c923f5b6b90174f8d32e79c.source"
     },
     {
       "key": "advocacy_minjust_npa_portal_probe",
@@ -409,8 +350,13 @@
       "source_type": "official_ministry_announcement_html",
       "source_document_id": "С 20 октября 2024 года начал действовать новый порядок выдачи адвокатских удостоверений",
       "notes": "Дополнительное официальное разъяснение Минюста, подтверждающее вступление ряда положений № 83-ФЗ в силу с 20.10.2024. Не является текстом № 83-ФЗ и не заменяет официальную публикацию; не засчитывать как cross-check нормативного текста.",
-      "capture_status": "failed",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "capture_status": "captured",
+      "sha256": "d1948afba778e49cfe7d7a16b5b4bf5da397697b23d6ef7ea26955135d6f2ffc",
+      "retrieved_at": "2026-11-27T08:46:00Z",
+      "final_url": "https://minjust.gov.ru/ru/events/50360/",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 42003,
+      "evidence_file": "d1948afba778e49cfe7d7a16b5b4bf5da397697b23d6ef7ea26955135d6f2ffc.source"
     },
     {
       "key": "advocacy_minjust_npa_list_2026",
@@ -421,8 +367,13 @@
       "source_type": "official_currentness_reference_html",
       "source_document_id": "Страница «Нормативные правовые акты»; дата обновления на странице — 15.09.2026",
       "notes": "Дополнительный официальный текущий перечень, в котором 63-ФЗ присутствует среди федеральных актов. Использовать только как подтверждение того, что акт включён в актуализируемый перечень Минюста; страница не содержит полной истории редакций и не заменяет интегрированный банк, официальные публикации поправок или постатейную сверку.",
-      "capture_status": "failed",
-      "capture_error": "HTTPError: HTTP Error 403: Forbidden"
+      "capture_status": "captured",
+      "sha256": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a",
+      "retrieved_at": "2026-11-27T08:46:02Z",
+      "final_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
+      "content_type": "text/html; charset=utf-8",
+      "byte_length": 104372,
+      "evidence_file": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a.source"
     }
   ],
   "coverage_plan": "content/intake/coverage-plan.json"
