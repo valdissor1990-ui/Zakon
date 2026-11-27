@@ -506,16 +506,26 @@ def write_json(path: Path, value: dict) -> None:
     )
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, default=INTAKE)
     parser.add_argument("--evidence", type=Path, default=ROOT / "content" / "evidence")
     parser.add_argument("--output", type=Path, default=ROOT / "content" / "extracted")
     args = parser.parse_args()
     data = json.loads(args.intake.read_text(encoding="utf-8"))
-    report = {"status": "review_only", "warning": "Extraction is not legal verification or approval.", "sources": []}
+    report = {
+        "status": "review_only",
+        "warning": "Extraction is not legal verification or approval.",
+        "sources": [],
+        "skipped_sources": [],
+    }
     for source in data.get("sources", []):
         if not is_extractable_text_source(source):
+            report["skipped_sources"].append({
+                "key": source.get("key"),
+                "capture_status": source.get("capture_status"),
+                "source_type": source.get("source_type"),
+            })
             continue
         kind = source.get("source_type", "")
         key = source["key"]
@@ -566,12 +576,23 @@ def main():
             )
         })
         print(f"EXTRACTED {key}: {len(text)} chars; {len(articles)} article heading candidates")
+    args.output.mkdir(parents=True, exist_ok=True)
     if not report["sources"]:
-        raise SystemExit("No captured DOCX/RTF sources available for extraction")
-    (args.output / "extraction-report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    args.intake.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        report["status"] = "blocked_no_extractable_sources"
+        report["blocked_reason"] = (
+            "No exact captured DOCX/RTF originals are available. Changed candidates and failed "
+            "captures remain review-only; no text extraction or legal-record update was performed."
+        )
+        write_json(args.output / "extraction-report.json", report)
+        print(
+            "No captured DOCX/RTF sources available; extraction skipped and recorded. "
+            "Capture failures remain visible in capture-report.json."
+        )
+        return 0
+    write_json(args.output / "extraction-report.json", report)
+    write_json(args.intake, data)
     print("Extraction complete. No legal records or SQLite database were changed.")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
