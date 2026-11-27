@@ -2,8 +2,8 @@
   "release": {
     "version": "0.2.0-auto",
     "version_code": 8,
-    "created_at": "2026-11-26T12:27:28Z",
-    "effective_as_of": "2026-11-26",
+    "created_at": "2026-11-27T12:51:40Z",
+    "effective_as_of": "2026-11-27",
     "notes": "Auto-filled from official Minjust captures (single-source policy). Some DOCX files may lag the current amendment state; pravo cross-check requires Russian proxy."
   },
   "sources": [
@@ -14,7 +14,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
       "source_type": "official_consolidated_text_rtf",
-      "retrieved_at": "2026-11-25T12:49:42Z",
+      "retrieved_at": "2026-11-27T12:13:03Z",
       "source_document_id": "ru-advocacy-law",
       "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -26,7 +26,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://www.minjust.gov.ru/uploaded/files/konstitutsiya-rossijskoj-federatsii-prinyata-vsenarodnyim-golos.rtf",
       "source_type": "official_consolidated_text_rtf",
-      "retrieved_at": "2026-11-25T13:31:52Z",
+      "retrieved_at": "2026-11-27T12:51:26Z",
       "source_document_id": "ru-constitution",
       "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -38,7 +38,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/ugolovnyykodeks04112019.docx",
       "source_type": "official_consolidated_text_docx",
-      "retrieved_at": "2026-11-25T13:31:54Z",
+      "retrieved_at": "2026-11-27T12:51:28Z",
       "source_document_id": "ru-criminal-code",
       "sha256": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -50,7 +50,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/grazhdanskogoprocessualnogokodeksarossiyskoyfederacii17102019.docx",
       "source_type": "official_consolidated_text_docx",
-      "retrieved_at": "2026-11-25T13:31:56Z",
+      "retrieved_at": "2026-11-27T12:51:30Z",
       "source_document_id": "ru-civil-procedure-code",
       "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -62,7 +62,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/kodeksrossiyskoyfederaciiobadministrativnyhpravonarusheniyah12112019.docx",
       "source_type": "official_consolidated_text_docx",
-      "retrieved_at": "2026-11-25T13:32:05Z",
+      "retrieved_at": "2026-11-27T12:51:34Z",
       "source_document_id": "ru-administrative-offences-code",
       "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -74,7 +74,7 @@
       "publisher": "Министерство юстиции Российской Федерации",
       "official_url": "https://minjust.gov.ru/uploaded/files/kodeksadministrativnogosudoproizvodstvarossiyskoyfederacii01102019.docx",
       "source_type": "official_consolidated_text_docx",
-      "retrieved_at": "2026-11-25T13:32:08Z",
+      "retrieved_at": "2026-11-27T12:51:37Z",
       "source_document_id": "ru-code-of-administrative-judicial-procedure",
       "sha256": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18",
       "notes": "Auto-captured official original; used under single-source policy"
@@ -94,14 +94,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "advocacy_minjust_rtf",
       "source_revision": "red. per Minjust capture",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "1162e7b0c5fcd9c466728d1b78864131215864db430082ed56752c2879255688",
       "source_checks": [
         {
           "source_key": "advocacy_minjust_rtf",
           "status": "match",
-          "retrieved_at": "2026-11-25T12:49:42Z",
+          "retrieved_at": "2026-11-27T12:13:03Z",
           "source_document_id": "ru-advocacy-law",
           "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
@@ -665,14 +665,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "constitution_minjust_rtf",
       "source_revision": "per Minjust RTF capture",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "14fec930a1148fcc2185502ab1e83003eb84552a8f3a33a8de7d2e49d0f821ff",
       "source_checks": [
         {
           "source_key": "constitution_minjust_rtf",
           "status": "match",
-          "retrieved_at": "2026-11-25T13:31:52Z",
+          "retrieved_at": "2026-11-27T12:51:26Z",
           "source_document_id": "ru-constitution",
           "sha256": "7b934209373257d1aff4fe02a75c70b40e0f81a63680379874a25f544e4ac877",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
@@ -2116,14 +2116,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "uk_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "ea475ada1b715f1f8f09f4bc50f4ffb894d3ddd4f3c8298c3f56dce2566d3219",
       "source_checks": [
         {
           "source_key": "uk_minjust_docx",
           "status": "match",
-          "retrieved_at": "2026-11-25T13:31:54Z",
+          "retrieved_at": "2026-11-27T12:51:28Z",
           "source_document_id": "ru-criminal-code",
           "sha256": "36cb66b8e10d8f0b9f19129f0bff28df310239668a9a57338df4a0bbf76631bb",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
@@ -7067,14 +7067,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "gpk_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "8f6c8611c538ace2c41ea3b7fbf2d2cc414721e37c978332d6329c5c68f7ed22",
       "source_checks": [
         {
           "source_key": "gpk_minjust_docx",
           "status": "match",
-          "retrieved_at": "2026-11-25T13:31:56Z",
+          "retrieved_at": "2026-11-27T12:51:30Z",
           "source_document_id": "ru-civil-procedure-code",
           "sha256": "e89992dfba94dd2042539947fb335951c5c391eec680410b0947ca816bc36184",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
@@ -11958,14 +11958,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "koap_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "d2c027f571e15c424fd143dd941246ec13c447499d9b84d71d2220f5b20242db",
       "source_checks": [
         {
           "source_key": "koap_minjust_docx",
           "status": "match",
-          "retrieved_at": "2026-11-25T13:32:05Z",
+          "retrieved_at": "2026-11-27T12:51:34Z",
           "source_document_id": "ru-administrative-offences-code",
           "sha256": "fde220ac0e6f44612ebfd9a103f86555905e70b7831d7a03f3726aa9efe63a38",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
@@ -22029,14 +22029,14 @@
       "jurisdiction": "RU",
       "primary_source_key": "kas_minjust_docx",
       "source_revision": "Minjust DOCX (file date may lag current law)",
-      "verified_at": "2026-11-26",
+      "verified_at": "2026-11-27",
       "verification_status": "approved",
       "text_sha256": "4a05e279c70d46368bc6b9828056d53f087cad164b463c0889a717207c56af3a",
       "source_checks": [
         {
           "source_key": "kas_minjust_docx",
           "status": "match",
-          "retrieved_at": "2026-11-25T13:32:08Z",
+          "retrieved_at": "2026-11-27T12:51:37Z",
           "source_document_id": "ru-code-of-administrative-judicial-procedure",
           "sha256": "bf66faaaf95cb13d30ab700de06091f631d2f4e115de7f146f25140f96200e18",
           "comparison_notes": "Auto-filled from single official Minjust capture (single-source policy). Revision currency not independently verified."
