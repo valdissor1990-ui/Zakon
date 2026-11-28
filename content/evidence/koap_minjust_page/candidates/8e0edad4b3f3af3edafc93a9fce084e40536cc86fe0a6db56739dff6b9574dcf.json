@@ -1,0 +1,15 @@
+{
+  "source_key": "koap_minjust_page",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/documents/7614/",
+  "final_url": "https://minjust.gov.ru/ru/documents/7614/",
+  "retrieved_at": "2026-11-26T08:40:02Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9513,
+  "sha256": "8e0edad4b3f3af3edafc93a9fce084e40536cc86fe0a6db56739dff6b9574dcf",
+  "evidence_file": "candidates/8e0edad4b3f3af3edafc93a9fce084e40536cc86fe0a6db56739dff6b9574dcf.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "7f8055733f1611148c75c357419acf0ee669518c517f8d7ba8f7f2f09a9450be",
+  "candidate_review_required": true
+}

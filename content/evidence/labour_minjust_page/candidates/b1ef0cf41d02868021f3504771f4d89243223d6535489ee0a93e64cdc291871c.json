@@ -1,0 +1,15 @@
+{
+  "source_key": "labour_minjust_page",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/documents/7863/",
+  "final_url": "https://minjust.gov.ru/ru/documents/7863/",
+  "retrieved_at": "2026-11-26T08:22:22Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9513,
+  "sha256": "b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c",
+  "evidence_file": "candidates/b1ef0cf41d02868021f3504771f4d89243223d6535489ee0a93e64cdc291871c.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "c1eaef20cb8689f478b41e3cd30a7728421702140568ce65789c1bdc6e650381",
+  "candidate_review_required": true
+}

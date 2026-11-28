@@ -1,0 +1,15 @@
+{
+  "source_key": "advocacy_minjust_rtf",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+  "final_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+  "retrieved_at": "2026-11-26T08:13:05Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9569,
+  "sha256": "5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a",
+  "evidence_file": "candidates/5823a9eba41be6595da6c21db5700e45ed3fecffb19ecddfdb142bd5aaae6c7a.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+  "candidate_review_required": true
+}

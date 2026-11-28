@@ -1,0 +1,13 @@
+{
+  "source_key": "advocacy_minjust_npa_list_2026",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
+  "final_url": "https://minjust.gov.ru/ru/pages/normativnye-pravovye-akty/",
+  "retrieved_at": "2026-11-28T09:08:52Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 104372,
+  "sha256": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a",
+  "evidence_file": "9b52ddc94ac33be3a10b4fc6763b5744beba025b00a81082a08a90227463a53a.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "captured"
+}

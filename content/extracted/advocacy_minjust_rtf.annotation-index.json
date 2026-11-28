@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "artifact_type": "review_only_third_party_annotation_index",
+  "status": "review_only_not_legal_record",
+  "document_id": "ru-advocacy-law",
+  "document_title": "Федеральный закон от 31.05.2002 № 63-ФЗ «Об адвокатской деятельности и адвокатуре в Российской Федерации»",
+  "source": {
+    "source_key": "advocacy_minjust_rtf",
+    "registry_id": "minjust_official_documents",
+    "official_url": "https://minjust.gov.ru/uploaded/files/federalnyij-zakon-ot-31052002-n-63-fz-red-ot-22042024-2.rtf",
+    "retrieved_at": "2026-11-28T08:52:20Z",
+    "byte_length": 1141873,
+    "sha256": "27d5d533ebc3a71c087e8b667adb8baf900e443c1fa7fe6a839804060ea359c7",
+    "extracted_file": "advocacy_minjust_rtf.txt",
+    "extracted_sha256": "67113c7326f58c493c3e835490c97b8d5643f47b2f1e1cd9dd50382fa92f59a4"
+  },
+  "annotation_count": 10,
+  "annotations": [
+    {
+      "ordinal": 1,
+      "article_number": "2",
+      "article_heading": "Адвокат",
+      "marker_line": 44,
+      "annotation_line_start": 45,
+      "annotation_line_end": 45,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "О выявлении конституционно-правового смысла абз. 1 п. 1 ст. 2 см. Постановление КС РФ от 18.07.2019 N 29-П."
+    },
+    {
+      "ordinal": 2,
+      "article_number": "7",
+      "article_heading": "Обязанности адвоката",
+      "marker_line": 148,
+      "annotation_line_start": 149,
+      "annotation_line_end": 149,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Действие пп. 6 п. 1 ст. 7 приостановлено до дня вступления в силу федерального закона, регулирующего вопросы обязательного страхования профессиональной ответственности адвокатов (ФЗ от 03.12.2007 N 320-ФЗ)."
+    },
+    {
+      "ordinal": 3,
+      "article_number": "9",
+      "article_heading": "Приобретение статуса адвоката",
+      "marker_line": 166,
+      "annotation_line_start": 167,
+      "annotation_line_end": 167,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Абз. 1 п. 1 ст. 9 (в ред. ФЗ от 22.04.2024 N 83-ФЗ) не распространяется на лиц, получивших до 01.07.2024 высшее юридическое образование либо ученую степень по юридической специальности, а также на стажеров адвокатов, заключивших срочный трудовой договор до 01.07.2024."
+    },
+    {
+      "ordinal": 4,
+      "article_number": "14",
+      "article_heading": "Единый государственный реестр адвокатов",
+      "marker_line": 252,
+      "annotation_line_start": 253,
+      "annotation_line_end": 253,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Удостоверения адвокатов, выданные до 22.04.2024, срок действия которых более 15 лет со дня выдачи, подлежат замене в течение 3 лет с указанной даты, а срок действия которых не превышает 15 лет - по истечении этого срока (ФЗ от 22.04.2024 N 83-ФЗ)."
+    },
+    {
+      "ordinal": 5,
+      "article_number": "15",
+      "article_heading": "Внесение сведений в Единый государственный реестр адвокатов",
+      "marker_line": 259,
+      "annotation_line_start": 260,
+      "annotation_line_end": 260,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Удостоверения адвокатов, выданные до 22.04.2024, если срок их действия превышает пятнадцать лет со дня их выдачи - подлежат замене в течение трех лет с указанной даты, если не превышает пятнадцать лет - подлежат замене по истечении этого срока."
+    },
+    {
+      "ordinal": 6,
+      "article_number": "18",
+      "article_heading": "Гарантии независимости адвоката",
+      "marker_line": 367,
+      "annotation_line_start": 368,
+      "annotation_line_end": 368,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Норма, обязывающая адвоката страховать риск профессиональной имущественной ответственности, приостановлена до дня вступления в силу федерального закона, регулирующего вопросы обязательного страхования ответственности адвокатов (ФЗ от 03.12.2007 N 320-ФЗ)."
+    },
+    {
+      "ordinal": 7,
+      "article_number": "22",
+      "article_heading": "Коллегия адвокатов",
+      "marker_line": 398,
+      "annotation_line_start": 399,
+      "annotation_line_end": 399,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Учредительные договоры коллегий адвокатов, созданных до 01.03.2020, признаются неотъемлемой частью их уставов (ФЗ от 02.12.2019 N 400-ФЗ)."
+    },
+    {
+      "ordinal": 8,
+      "article_number": "23",
+      "article_heading": "Адвокатское бюро",
+      "marker_line": 450,
+      "annotation_line_start": 451,
+      "annotation_line_end": 451,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "Учредительные договоры коллегий адвокатов, созданных до 01.03.2020, признаются неотъемлемой частью их уставов (ФЗ от 02.12.2019 N 400-ФЗ)."
+    },
+    {
+      "ordinal": 9,
+      "article_number": "29",
+      "article_heading": "Адвокатская палата субъекта Российской Федерации",
+      "marker_line": 572,
+      "annotation_line_start": 573,
+      "annotation_line_end": 573,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "До 20.10.2024 адвокатские палаты субъектов РФ обязаны утвердить на собрании (конференции) адвокатов адвокатской палаты соответствующего субъекта РФ свои уставы или привести их в соответствие с законодательством РФ (ФЗ от 22.04.2024 N 83-ФЗ)."
+    },
+    {
+      "ordinal": 10,
+      "article_number": "41",
+      "article_heading": "Проведение учредительных собраний (конференций) адвокатов",
+      "marker_line": 952,
+      "annotation_line_start": 953,
+      "annotation_line_end": 953,
+      "marker_text_raw": "\t\tКонсультантПлюс: примечание.",
+      "annotation_text_raw": "П. 6 ст. 41 не применяется при избрании Совета адвокатской палаты собранием (конференцией) адвокатов (ст. 31 данного документа)."
+    }
+  ],
+  "limitations": [
+    "These lines are attributed to ConsultantPlus in the Minjust-hosted RTF extraction; they are not treated as normative text.",
+    "Raw source lines are preserved exactly as extracted, including original whitespace.",
+    "The full extracted source remains unchanged in content/extracted/advocacy_minjust_rtf.txt.",
+    "This index does not certify the legal accuracy of the notes or the currentness of the underlying law.",
+    "No article text is approved or imported into content/records."
+  ]
+}

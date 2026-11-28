@@ -1,0 +1,15 @@
+{
+  "source_key": "civil_code_minjust_index",
+  "registry_id": "minjust_official_documents",
+  "requested_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
+  "final_url": "https://minjust.gov.ru/ru/pages/grazhdanskij-kodeks/",
+  "retrieved_at": "2026-11-26T08:40:03Z",
+  "content_type": "text/html; charset=utf-8",
+  "byte_length": 9524,
+  "sha256": "32fa1c8c1b76f3e26ae6bf8205af952907d95be710210c24dadea9de2e447bc5",
+  "evidence_file": "candidates/32fa1c8c1b76f3e26ae6bf8205af952907d95be710210c24dadea9de2e447bc5.source",
+  "legal_text_extraction_performed": false,
+  "capture_status": "changed",
+  "expected_sha256": "5d42a9e224371aaf067507509baad0d9e9c704bb1548a7a0df358b75f1e1b19b",
+  "candidate_review_required": true
+}
